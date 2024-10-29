@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Cart</title>
+    <link rel="stylesheet" href="/styles/cart.css">
+</head>
+<body>
+    <h1>Your Cart</h1>
+
+    <div class="cart-items">
+        <% user.cart.items.forEach(item => { %>
+            <div class="cart-item">
+                <img src="<%= item.product.image %>" alt="<%= item.product.name %>">
+                <p>Product: <%= item.product.name %></p>
+                <p>Price: $<%= item.product.price %></p>
+                <p>Quantity: <%= item.quantity %></p>
+                <p>Total: $<%= item.quantity * item.product.price %></p>
+                <button onclick="removeFromCart('<%= item.product._id %>')">Remove</button>
+            </div>
+        <% }); %>
+    </div>
+
+    <h2>Total Amount: $<%= user.cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0) %></h2>
+
+    <button onclick="checkout()">Checkout</button>
+
+    <script>
+        function removeFromCart(productId) {
+            fetch(`/cart/remove/${productId}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove item from cart');
+                    }
+                });
+        }
+
+         function checkout() {
+            fetch('/cart/checkout', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Checkout successful!');
+                        location.reload();
+                    } else {
+                        alert('Checkout failed');
+                    }
+                });
+        } 
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account Page</title>
+    <link rel="stylesheet" href="styles/create-account.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="#">HOME</a>
+            <a href="#">ARTISTS</a>
+            <a href="#">SHOP</a>
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class="logo" src="resources/logo.jpg" alt="Logo">
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
+            <a href="#">
+                <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+            </a>
+            <a href="#">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart 
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Create Account Section -->
+    <div class="create-account-container">
+        <h1>Create Account</h1>
+        
+        <form id="createAccountForm" class="account-form">
+            <input type="text" id="firstName" placeholder="First Name" required>
+            <input type="text" id="lastName" placeholder="Last Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <div class="form-options">
+                <a href="#" class="forgot-password">Forgot Password?</a>
+            </div>
+            <div class="form-buttons">
+                <button type="button" class="sign-in-btn" onclick="window.location.href= '/login' ">Back to Login</button>
+
+                <button type="submit" class="create-account-btn">Create Account</button>
+            </div>
+        </form>
+        <a href="#" class="return-to-store">Return to Store</a>
+    </div>
+
+    <script src="scripts/Create-Account.js"></script> 
+</body>
+</html>

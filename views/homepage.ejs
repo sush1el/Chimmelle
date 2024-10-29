@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Chimelle Homepage</title>
+    <link rel="stylesheet" href="styles/homepage.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/">HOME</a>
+            <a href="#">ARTISTS</a>
+            <a href="#">SHOP</a>
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class="logo" src="resources/logo.jpg" alt="Logo">
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Search for..." aria-label="Search">
+            </div>
+            <% if (user) { %>
+                <a href="/account">
+                    <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+                </a>
+                <a href="/api/auth/logout">
+                    <button class="cart-button">
+                        Logout
+                    </button>
+                </a>
+            <% } else { %>   
+                <a href="/login-page">
+                    <button class="cart-button">
+                        Login
+                    </button>
+                </a>
+            <% } %>
+            <a href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <section class="announcement">
+        <div class="album-cover"></div>
+        <div class="announcement-text">
+            <h2>ROSÉ First Studio Album</h2>
+            <a href="#" class="pre-order-btn">Pre-order →</a>
+        </div>
+    </section>
+
+    <section class="product-grid" id="product-grid">
+        <% products.forEach(product => { %>
+            <div class="product-card">
+                <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                <h3 class="product-name"><%= product.name %></h3>
+                <p class="product-price">$<%= product.price.toFixed(2) %></p>
+                <p class="product-quantity">Stock: <%= product.quantity %></p>
+                <button class="choose-options-btn">Add to Cart</button>
+            </div>
+        <% }) %>
+    </section>
+</body>
+</html> 
