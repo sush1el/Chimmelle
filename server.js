@@ -1,8 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const homepageRoutes = require('./routes/homeRoutes')
 const authRoutes = require('./routes/api/auth')
 const accountRoutes = require('./routes/addressRoutes')
+const loginRoutes = require('./routes/loginRoutes')
 const {connectDB} = require('./connection/db')
 const cookieParser = require('cookie-parser');
 
@@ -18,6 +20,7 @@ app.use(cookieParser());
 
 //Routes
 app.use('/api/auth', authRoutes)
+app.use('/', loginRoutes);
 app.use('/', homepageRoutes);
 app.use('/', accountRoutes);
 

@@ -1,13 +1,15 @@
-const exress = require('express');
-const {register, login} = require('../../controllers/authController')
-const router = exress.Router();
+// auth.js
+const express = require('express');
+const { register, login, verifyUser } = require('../../controllers/authController');
+const router = express.Router();
 
-router.post('/register', register)
-router.post('/login', login)
+// API routes
+router.post('/register', register);
+router.post('/login', login);
 router.get('/logout', (req, res) => {
-  res.clearCookie('token'); // Clear the JWT cookie
-  res.redirect('/'); // Redirect to the homepage after logout
+  res.clearCookie('token');
+  res.redirect('/');
 });
-
+router.get('/verify/:userId/:uniqueString', verifyUser);
 
 module.exports = router;

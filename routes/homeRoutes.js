@@ -13,12 +13,4 @@ router.get('/cart', authenticateUser, (req, res) => {
   res.render('cart', { user: req.user });
 });
 
-router.get('/login-page', (req, res) => {
-  res.render('login'); 
-});
-
-router.get('/create-account', (req, res) => {
-  res.render('create-account'); 
-});
-
 module.exports = router;
