@@ -250,3 +250,161 @@ exports.login = async (req, res) => {
     res.status(500).json({ msg: 'Server error during login' });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'No account found with that email' });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Save hashed token to user
+    user.resetPasswordToken = await bcrypt.hash(resetToken, 10);
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `http://localhost:5000/reset-password/${resetToken}`;
+
+    // Send email
+    const mailOptions = {
+      from: process.env.MAILTRAP_USER,
+      to: user.email,
+      subject: 'Password Reset Request',
+      html: `
+        <h2>Password Reset</h2>
+        <p>You requested a password reset. Click the link below to reset your password:</p>
+        <a href="${resetUrl}">Reset Password</a>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you didn't request this reset, please ignore this email.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ msg: 'Password reset email sent' });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ msg: 'Error sending password reset email' });
+  }
+};
+
+// Reset password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid reset token' });
+    }
+
+    if (!user.resetPasswordExpires || Date.now() > user.resetPasswordExpires) {
+      return res.status(400).json({ msg: 'Reset token has expired' });
+    }
+
+    // Validate new password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        msg: 'Password does not meet requirements',
+        errors: passwordValidation.errors
+      });
+    }
+
+    // Update password and clear reset token
+    user.password = password; // Password will be hashed by pre-save middleware
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ msg: 'Password successfully reset' });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ msg: 'Error resetting password' });
+  }
+};
+
+exports.getResetPasswordPage = async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    // Verify token before rendering the page
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user || !user.resetPasswordToken) {
+      return res.redirect('/forgot-password?error=Invalid or expired reset link');
+    }
+
+    if (!user.resetPasswordExpires || Date.now() > user.resetPasswordExpires) {
+      return res.redirect('/forgot-password?error=Reset link has expired');
+    }
+
+    // If token is valid, render the reset password page with the token
+    res.render('reset-password', { 
+      token,
+      error: req.query.error,
+      success: req.query.success
+    });
+
+  } catch (error) {
+    console.error('Get reset password page error:', error);
+    res.redirect('/forgot-password?error=Invalid reset link');
+  }
+};
+
+// Update the existing resetPassword method
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user || !user.resetPasswordToken) {
+      return res.status(400).json({ msg: 'Invalid reset token' });
+    }
+
+    if (!user.resetPasswordExpires || Date.now() > user.resetPasswordExpires) {
+      return res.status(400).json({ msg: 'Reset token has expired' });
+    }
+
+    // Validate new password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        msg: 'Password does not meet requirements',
+        errors: passwordValidation.errors
+      });
+    }
+
+    // Update password and clear reset token
+    user.password = password; // Password will be hashed by pre-save middleware
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ msg: 'Password successfully reset' });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ msg: 'Error resetting password' });
+  }
+};

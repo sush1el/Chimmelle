@@ -26,7 +26,9 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true, select: false },
   verified: { type: Boolean, default: false },
   addresses: [AddressSchema],
-  defaultAddress: { type: mongoose.Schema.Types.ObjectId }, // Reference to the default address
+  defaultAddress: { type: mongoose.Schema.Types.ObjectId },
+  resetPasswordToken: {type: String},
+  resetPasswordExpires: {type: Date}, 
   cart: [CartItemSchema], 
   lastActive: {
       type: Date,
