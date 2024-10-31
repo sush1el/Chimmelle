@@ -29,6 +29,7 @@ router.get('/forgot-password', (req, res) => {
     success: req.query.success 
   });
 });
+
 router.get('/reset-password/:token', getResetPasswordPage);
 
 module.exports = router;

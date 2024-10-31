@@ -41,6 +41,7 @@ const cartController = {
         message: 'Item added to cart successfully',
         cart: updatedUser.cart
       });
+      
     } catch (error) {
       console.error('Add to cart error:', error);
       res.status(500).json({ message: 'Error adding item to cart', error: error.message });

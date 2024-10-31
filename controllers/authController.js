@@ -152,7 +152,7 @@ exports.verifyUser = async (req, res) => {
     console.log('Verification attempt:', { userId, uniqueStringLength: uniqueString?.length });
 
     if (!userId || !uniqueString) {
-      throw new Error('Missing verification parameters');
+      return res.redirect('/verified?error=true&message=Missing verification parameters');
     }
 
     const [user, verificationRecord] = await Promise.all([
@@ -168,11 +168,11 @@ exports.verifyUser = async (req, res) => {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      return res.redirect('/verified?error=true&message=User not found');
     }
 
     if (!verificationRecord) {
-      throw new Error('Verification record not found');
+      return res.redirect('/verified?error=true&message=Verification record not found');
     }
 
     if (new Date() > new Date(verificationRecord.expiresAt)) {
@@ -187,7 +187,7 @@ exports.verifyUser = async (req, res) => {
     console.log('String verification:', { isValid });
 
     if (!isValid) {
-      throw new Error('Invalid verification code');
+      return res.redirect('/verified?error=true&message=Invalid verification code');
     }
 
     const [updatedUser] = await Promise.all([
@@ -205,14 +205,14 @@ exports.verifyUser = async (req, res) => {
     });
 
     if (!updatedUser.verified) {
-      throw new Error('Failed to update user verification status');
+      return res.redirect('/verified?error=true&message=Failed to update user verification status');
     }
 
     return res.redirect('/verified?success=true');
 
   } catch (error) {
     console.error('Verification error:', error);
-    return res.redirect(`/verified?error=true&message=${encodeURIComponent(error.message)}`);
+    return res.redirect('/verified?error=true&message=Verification failed');
   }
 };
 
@@ -406,5 +406,21 @@ exports.resetPassword = async (req, res) => {
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ msg: 'Error resetting password' });
+  }
+};
+
+exports.checkVerification = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ verified: false });
+    }
+    
+    return res.json({ verified: user.verified });
+  } catch (error) {
+    console.error('Check verification error:', error);
+    return res.status(500).json({ verified: false });
   }
 };

@@ -1,4 +1,3 @@
-// public/scripts/Cart-Manager.js
 class CartManager {
   static async handleResponse(response, errorMessage) {
     if (response.redirected) {
@@ -33,10 +32,28 @@ class CartManager {
         body: JSON.stringify({ productId }),
         credentials: 'include'
       });
+
+      const result = await this.handleResponse(response, 'Failed to add item to cart');
       
-      return await this.handleResponse(response, 'Failed to add item to cart');
+      // Show success message using SweetAlert2
+      await Swal.fire({
+        title: 'Success!',
+        text: 'Item added to cart successfully',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
+
+      return result;
+
     } catch (error) {
       console.error('Error adding to cart:', error);
+      // Show error message using SweetAlert2
+      await Swal.fire({
+        title: 'Error!',
+        text: error.message,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
       throw error;
     }
   }
@@ -110,29 +127,61 @@ class CartManager {
 
   static async deleteFromCart(productId) {
     try {
-      const response = await fetch('/api/cart/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ productId }),
-        credentials: 'include'
+      // First show confirmation dialog
+      const confirmation = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete item from cart');
-      }
+      // If user confirms deletion
+      if (confirmation.isConfirmed) {
+        const response = await fetch('/api/cart/delete', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ productId }),
+          credentials: 'include'
+        });
 
-      const result = await response.json();
-      await this.updateCartDisplay();
-      return result;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to delete item from cart');
+        }
+
+        const result = await response.json();
+        
+        // Show success message
+        await Swal.fire({
+          title: 'Deleted!',
+          text: 'Item has been removed from your cart.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+
+        await this.updateCartDisplay();
+        return result;
+      }
     } catch (error) {
       console.error('Error deleting from cart:', error);
       if (error.message === 'Authentication required') {
         window.location.href = '/login';
         return;
       }
+      
+      // Show error message
+      await Swal.fire({
+        title: 'Error!',
+        text: error.message,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      
       throw error;
     }
   }
@@ -227,10 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Handle delete button click
         if (e.target.closest('.delete-btn')) {
-          if (confirm('Are you sure you want to remove this item from your cart?')) {
-            await CartManager.deleteFromCart(productId);
-            return;
-          }
+          await CartManager.deleteFromCart(productId);
+          return;
         }
         
         // Handle quantity buttons
@@ -251,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (error.message === 'Authentication required') {
           return;
         }
-        alert('Failed to update cart: ' + error.message);
+        console.error('Failed to update cart:', error);
       }
     });
     
