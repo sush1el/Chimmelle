@@ -1,60 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome and Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <title>Cart</title>
-    <link rel="stylesheet" href="/styles/cart.css">
+
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="styles/cart.css">
 </head>
+
 <body>
-    <h1>Your Cart</h1>
 
-    <div class="cart-items">
-        <% user.cart.items.forEach(item => { %>
-            <div class="cart-item">
-                <img src="<%= item.product.image %>" alt="<%= item.product.name %>">
-                <p>Product: <%= item.product.name %></p>
-                <p>Price: $<%= item.product.price %></p>
-                <p>Quantity: <%= item.quantity %></p>
-                <p>Total: $<%= item.quantity * item.product.price %></p>
-                <button onclick="removeFromCart('<%= item.product._id %>')">Remove</button>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/">HOME</a>
+            <a href="#">ARTISTS</a>
+            <a href="#">SHOP</a>
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class="logo" src="resources/logo.jpg" alt="Logo">
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Search for..." aria-label="Search">
             </div>
-        <% }); %>
-    </div>
+            <a href="/account">
+                <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+            </a>
+            <a href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                </button>
+            </a>
+        </div>
+    </nav>
 
-    <h2>Total Amount: $<%= user.cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0) %></h2>
+     <!-- Cart Section -->
+     <section class="cart-page">
+        <h1>Your Cart</h1>
+        <a href="/">
+            <button class="continue-shopping-btn">
+                <span>&larr; Continue shopping</span>
+            </button>
+        </a>
+    
+        <div class="cart-container">
+            <!-- Cart Items -->
+            <div class="cart-items">
+                <!-- Items will be populated by JavaScript -->
+            </div>
 
-    <button onclick="checkout()">Checkout</button>
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <h2>Subtotal</h2>
+                <p class="number-of-items">Selected Products: 0</p>
+                <p class="total-price">Total Price: P 0.00</p>
 
-    <script>
-        function removeFromCart(productId) {
-            fetch(`/cart/remove/${productId}`, { method: 'DELETE' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Failed to remove item from cart');
-                    }
-                });
-        }
+                <div class="note-box">
+                    <label for="order-note">Add a note to your order</label>
+                    <textarea id="order-note" placeholder="Write your message here..."></textarea>
+                </div>
 
-         function checkout() {
-            fetch('/cart/checkout', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Checkout successful!');
-                        location.reload();
-                    } else {
-                        alert('Checkout failed');
-                    }
-                });
-        } 
-    </script>
+                <button class="checkout-btn">Check out</button>
+            </div>
+        </div>
+    </section>
+    <script src="scripts/Cart.js"></script>
 </body>
 </html>

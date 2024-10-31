@@ -14,9 +14,9 @@
     <nav class="navbar">
         <div class="nav-left">
             <a href="/">HOME</a>
-            <a href="/artists">ARTISTS</a>
-            <a href="/shop">SHOP</a>
-            <a href="/support">SUPPORT</a>
+            <a href="#">ARTISTS</a>
+            <a href="#">SHOP</a>
+            <a href="#">SUPPORT</a>
         </div>
         <img src="resources/logo.jpg" alt="Logo" class="logo">
         <div class="nav-right">
@@ -25,10 +25,12 @@
                 <input type="text" placeholder="Search for ...">
             </div>
             <img src="resources/profile.jpg" alt="Profile" class="profile-user">
-            <button class="cart-button">
-                <i class="fas fa-shopping-cart"></i>
-
-            </button>
+            <a href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                </button>
+        </a>
+            
         </div>
     </nav>
 
@@ -38,6 +40,8 @@
             <h1>Welcome, <%= user.firstName %> <%= user.lastName %>!</h1>
             <div class="account-details">
                 <h2>Account details</h2>
+                <p>First Name: <%= user.firstName %></p>
+                <p>Last Name: <%= user.lastName %></p>
                 <p>Email: <%= user.email %></p>
                 <% if (user.defaultAddress) { %>
                     <% const defaultAddress = user.addresses.find(addr => addr._id.toString() === user.defaultAddress.toString()); %>

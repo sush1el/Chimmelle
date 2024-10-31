@@ -36,6 +36,11 @@
                         Logout
                     </button>
                 </a>
+                <a href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
             <% } else { %>   
                 <a href="/login-page">
                     <button class="cart-button">
@@ -43,11 +48,6 @@
                     </button>
                 </a>
             <% } %>
-            <a href="/cart">
-                <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                </button>
-            </a>
         </div>
     </nav>
 
@@ -61,7 +61,7 @@
 
     <section class="product-grid" id="product-grid">
         <% products.forEach(product => { %>
-            <div class="product-card">
+            <div class="product-card" data-product-id="<%= product._id %>">
                 <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
                 <h3 class="product-name"><%= product.name %></h3>
                 <p class="product-price">$<%= product.price.toFixed(2) %></p>
@@ -70,5 +70,7 @@
             </div>
         <% }) %>
     </section>
+    <script src="scripts/Homepage.js"></script>
+    <script src="scripts/Cart.js"></script>
 </body>
 </html> 
