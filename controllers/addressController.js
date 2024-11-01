@@ -3,14 +3,14 @@ const User = require('../models/User');
 class AddressController {
     // Validate address data
     static validateAddress(address) {
-        const requiredFields = ['street', 'city', 'state', 'zipCode', 'country'];
+        const requiredFields = ['street', 'city', 'zipCode', 'country', 'barangay', 'phone'];
         const missingFields = requiredFields.filter(field => !address[field]);
         
         if (missingFields.length > 0) {
             throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
         }
         
-        if (!/^\d{5}(-\d{4})?$/.test(address.zipCode)) {
+        if (address.zipCode.length < 3 || address.zipCode.length > 10) {
             throw new Error('Invalid zip code format');
         }
     }

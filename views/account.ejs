@@ -29,8 +29,7 @@
                 <button class="cart-button">
                     <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
                 </button>
-        </a>
-            
+            </a>
         </div>
     </nav>
 
@@ -76,115 +75,53 @@
             <div class="address-grid">
                 <% user.addresses.forEach((address, index) => { %>
                     <div class="address-card" data-index="<%= index %>">
-                        <p>Street: <%= address.street %></p>
-                        <p>Barangay: <%= address.barangay %></p>
-                        <p>City: <%= address.city %></p>
-                        <p>Zip Code: <%= address.zipCode %></p>
-                        <p>Country: <%= address.country %></p>
-                        <p>Phone: <%= address.phone %></p>
+                        <p data-field="street">Street: <%= address.street %></p>
+                        <p data-field="barangay">Barangay: <%= address.barangay %></p>
+                        <p data-field="city">City: <%= address.city %></p>
+                        <p data-field="zipCode">Zip Code: <%= address.zipCode %></p>
+                        <p data-field="country">Country: <%= address.country %></p>
+                        <p data-field="phone">Phone: <%= address.phone %></p>
                         <div class="address-actions">
                             <button class="btn-edit" onclick="showEditAddress(<%= index %>)">Edit</button>
                             <button class="btn-delete" onclick="deleteAddress(<%= index %>)">Delete</button>
-                            <button class="btn-default" onclick="setDefaultAddress(<%= index %>)">Set as Default</button>
+                            <button class="btn-default" onclick="setDefaultAddress(<%= index %>)">
+                                <%= user.defaultAddress && user.defaultAddress.toString() === address._id.toString() ? 'Default Address' : 'Set as Default' %>
+                            </button>
                         </div>
                     </div>
                 <% }); %>
             </div>
         </div>
+    </div>
 
-        <!-- Edit Address Form -->
-<div id="edit-address-view" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Edit Address</h1>
-        <button class="btn btn-outline" onclick="showAddresses()">View Addresses</button>
-    </div>
-    <div style="background-color: #fce7e7; padding: 2rem; border-radius: 5px;">
-        <form id="edit-address-form" onsubmit="return saveAddress(event)">
-            <div class="form-group">
-                <label for="street">Street*</label>
-                <input type="text" id="street" name="street" required>
-            </div>
-            <div class="form-group">
-                <label for="barangay">Barangay</label>
-                <input type="text" id="barangay" name="barangay">
-            </div>
-            <div class="form-group">
-                <label for="city">City*</label>
-                <input type="text" id="city" name="city" required>
-            </div>
-            <div class="form-group">
-                <label for="state">State/Province*</label>
-                <input type="text" id="state" name="state" required>
-            </div>
-            <div class="form-group">
-                <label for="zipCode">Zip Code*</label>
-                <input type="text" id="zipCode" name="zipCode" required 
-                       pattern="\d{5}(-\d{4})?" 
-                       title="Five digit zip code, optionally followed by dash and four digits">
-            </div>
-            <div class="form-group">
-                <label for="country">Country*</label>
-                <input type="text" id="country" name="country" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone</label>
-                <input type="tel" id="phone" name="phone">
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline" onclick="showAddresses()">Cancel</button>
-                <button type="submit" class="btn">Update address</button>
-            </div>
-        </form>
-    </div>
-</div>
+    <script type="module" src="scripts/Account.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Add New Address Form -->
-<div id="add-address-view" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Add new address</h1>
-        <button class="btn btn-outline" onclick="showAddresses()">View Addresses</button>
-    </div>
-    <div style="background-color: #fce7e7; padding: 2rem; border-radius: 5px;">
-        <form id="add-address-form" onsubmit="return saveNewAddress(event)">
-            <div class="form-group">
-                <label for="new-street">Street*</label>
-                <input type="text" id="new-street" name="street" required>
-            </div>
-            <div class="form-group">
-                <label for="new-barangay">Barangay</label>
-                <input type="text" id="new-barangay" name="barangay">
-            </div>
-            <div class="form-group">
-                <label for="new-city">City*</label>
-                <input type="text" id="new-city" name="city" required>
-            </div>
-            <div class="form-group">
-                <label for="new-state">State/Province*</label>
-                <input type="text" id="new-state" name="state" required>
-            </div>
-            <div class="form-group">
-                <label for="new-zipCode">Zip Code*</label>
-                <input type="text" id="new-zipCode" name="zipCode" required
-                       pattern="\d{5}(-\d{4})?"
-                       title="Five digit zip code, optionally followed by dash and four digits">
-            </div>
-            <div class="form-group">
-                <label for="new-country">Country*</label>
-                <input type="text" id="new-country" name="country" required>
-            </div>
-            <div class="form-group">
-                <label for="new-phone">Phone</label>
-                <input type="tel" id="new-phone" name="phone">
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline" onclick="showAddresses()">Cancel</button>
-                <button type="submit" class="btn">Add address</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script src="scripts/Account.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        
+        .swal2-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .swal2-input {
+            margin: 0 !important;
+        }
+        
+        .swal2-title {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* Optional: Style the SweetAlert buttons to match your theme */
+        .swal2-confirm {
+            background-color: #fce7e7 !important;
+            color: #000 !important;
+        }
+        
+        .swal2-cancel {
+            background-color: #6c757d !important;
+        }
+    </style>
 </body>
 </html>

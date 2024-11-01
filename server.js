@@ -6,6 +6,7 @@ const authRoutes = require('./routes/api/auth');
 const accountRoutes = require('./routes/addressRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 const {connectDB} = require('./connection/db');
 const cookieParser = require('cookie-parser');
 
@@ -25,6 +26,7 @@ app.use('/', loginRoutes);
 app.use('/', homepageRoutes);
 app.use('/', accountRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/', checkoutRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

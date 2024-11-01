@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your One-Stop Kpop Shop - Checkout</title>
+    <link rel="stylesheet" href="styles/checkout.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <header>
+        <h1>your one-stop kpop shop</h1>
+        <span>chimelleshop</span>
+    </header>
+    <div class="container">
+        <div class="checkout-form">
+            <div class="form-section">
+                <h2>Account</h2>
+                <p><%= user.email %></p>
+            </div>
+            <div class="form-section">
+                <h2>Ship to</h2>
+                <div class="radio-group" id="address-container">
+                    <p class="loading-message">Loading addresses...</p>
+                </div>
+            </div>
+            <div class="form-section">
+                <h2>Delivery</h2>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="delivery" value="standard" checked>
+                        Standard Delivery (GOX & J&T)<br>
+                        <small>Metro Manila: 2-7 business days | Provincial: 3-12 business days | Pre-order items: 30 days</small>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="delivery" value="same-day">
+                        Same-Day Delivery (within Metro Manila Only)
+                    </label>
+                </div>
+            </div>
+            <div class="form-section">
+                <h2>Payment</h2>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="payment" value="gcash" checked>
+                        GCASH
+                    </label>
+                </div>
+            </div>
+            <button class="pay-button" id="checkout-button">Pay now</button>
+        </div>
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <div id="order-items">
+                <p class="loading-message">Loading order items...</p>
+            </div>
+            <div class="order-total">
+                <div class="total-row">
+                    <span>Subtotal - <span id="items-count">0</span> items</span>
+                    <span id="subtotal">₱ 0.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Shipping</span>
+                    <span id="shipping-cost">TBD</span>
+                </div>
+                <div class="total-row" style="font-weight: bold; font-size: 1.2em;">
+                    <span>Total</span>
+                    <span id="total-amount">₱ 0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="scripts/checkout.js"></script>
+</body>
+</html>

@@ -6,17 +6,25 @@ class CartManager {
     }
 
     if (!response.ok) {
-      try {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
         const errorData = await response.json();
+        if (errorData.redirect) {
+          window.location.href = errorData.redirect;
+        }
         throw new Error(errorData.message || errorMessage);
-      } catch (e) {
-        throw new Error(errorMessage);
       }
+      throw new Error(errorMessage);
     }
 
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
-      return response.json();
+      const data = await response.json();
+      if (data.redirect) {
+        window.location.href = data.redirect;
+        throw new Error('Redirect required');
+      }
+      return data;
     }
     
     throw new Error('Invalid response format');
@@ -170,7 +178,7 @@ class CartManager {
     } catch (error) {
       console.error('Error deleting from cart:', error);
       if (error.message === 'Authentication required') {
-        window.location.href = '/login';
+        window.location.href = '/login-page';
         return;
       }
       
@@ -256,6 +264,58 @@ class CartManager {
       }
     }
   }
+   static async proceedToCheckout() {
+    try {
+      // First check if user is authenticated by trying to get cart
+      const cart = await this.getCart();
+      if (!cart) {
+        throw new Error('Unable to access cart');
+      }
+
+      const selectedItems = cart.items.filter(item => item.selected);
+      
+      if (selectedItems.length === 0) {
+        await Swal.fire({
+          title: 'No items selected',
+          text: 'Please select at least one item to checkout',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      // Calculate total price and items count
+      const subtotal = selectedItems.reduce((total, item) => {
+        return total + (item.product.price * item.quantity);
+      }, 0);
+
+      // Store checkout data in sessionStorage
+      const checkoutData = {
+        items: selectedItems,
+        subtotal: subtotal,
+        itemCount: selectedItems.length
+      };
+      
+      sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+      
+      // Redirect to checkout page
+      window.location.href = '/checkout';
+    } catch (error) {
+      console.error('Error proceeding to checkout:', error);
+      
+      if (error.message === 'Authentication required') {
+        window.location.href = '/login-page';
+        return;
+      }
+      
+      await Swal.fire({
+        title: 'Error!',
+        text: error.message || 'Failed to proceed to checkout',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  }
 }
 
 // Event Listeners
@@ -316,6 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         alert('Failed to update selection: ' + error.message);
       }
+    });
+  }
+  const checkoutBtn = document.querySelector('.checkout-btn');
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', () => {
+      CartManager.proceedToCheckout();
     });
   }
 });
