@@ -13,23 +13,22 @@ class CheckoutHandler {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch addresses');
       }
-
+  
       const data = await response.json();
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch addresses');
       }
-
+  
       const addressContainer = document.getElementById('address-container');
       
       if (addressContainer && data.addresses && data.addresses.length > 0) {
-        // Sort addresses to put default address first
         const sortedAddresses = [...data.addresses].sort((a, b) => {
           if (a.isDefault) return -1;
           if (b.isDefault) return 1;
           return 0;
         });
-
+  
         addressContainer.innerHTML = sortedAddresses.map((address, index) => `
           <label class="radio-option ${address.isDefault ? 'default-address' : ''}">
             <input type="radio" 
@@ -38,11 +37,11 @@ class CheckoutHandler {
                    ${address.isDefault ? 'checked' : ''}>
             <div class="address-details">
               ${address.isDefault ? '<span class="default-badge">Default</span>' : ''}
-              <p class="recipient">${address.firstName} ${address.lastName}</p>
+              <p class="recipient">${address.firstName || ''} ${address.lastName || ''}</p>
               <p class="address-line">${address.street}</p>
-              <p class="address-line">${address.barangay}</p>
-              <p class="address-line">${address.city}, ${address.zipCode}</p>
-              <p class="address-line">${address.country}</p>
+              <p class="address-line">${address.barangay?.name || ''}</p>
+              <p class="address-line">${address.city?.name || ''}, ${address.zipCode}</p>
+              <p class="address-line">${address.province?.name || ''}, ${address.region?.name || ''}</p>
               <p class="phone">Phone: ${address.phone}</p>
               <div class="address-actions">
                 <button type="button" class="edit-btn" onclick="CheckoutHandler.showEditAddress(${index})">
@@ -60,8 +59,7 @@ class CheckoutHandler {
             </div>
           </label>
         `).join('');
-
-        // Add event listeners for address selection
+  
         const addressRadios = addressContainer.querySelectorAll('input[type="radio"]');
         addressRadios.forEach(radio => {
           radio.addEventListener('change', () => {
@@ -102,93 +100,103 @@ class CheckoutHandler {
   }
 
   static async showEditAddress(index) {
-    try {
-      // Get current address data
-      const addressElement = document.querySelectorAll('.radio-option')[index];
-      const currentValues = {
-        street: addressElement.querySelector('.address-line:nth-child(3)').textContent,
-        barangay: addressElement.querySelector('.address-line:nth-child(4)').textContent,
-        city: addressElement.querySelector('.address-line:nth-child(5)').textContent.split(',')[0].trim(),
-        zipCode: addressElement.querySelector('.address-line:nth-child(5)').textContent.split(',')[1].trim(),
-        country: addressElement.querySelector('.address-line:nth-child(6)').textContent,
-        phone: addressElement.querySelector('.phone').textContent.replace('Phone: ', '')
-      };
-
-      const result = await Swal.fire({
-        title: 'Edit Address',
-        html: `
-          <form id="edit-address-form">
-            <div class="swal2-input-group">
-              <input type="text" id="swal-street" class="swal2-input" placeholder="Street*" value="${currentValues.street}" required>
-              <input type="text" id="swal-barangay" class="swal2-input" placeholder="Barangay" value="${currentValues.barangay}">
-              <input type="text" id="swal-city" class="swal2-input" placeholder="City*" value="${currentValues.city}" required>
-              <input type="text" id="swal-zipCode" class="swal2-input" placeholder="Zip Code*" value="${currentValues.zipCode}" 
-                     pattern="\\d{5}(-\\d{4})?" title="Five digit zip code" required>
-              <input type="text" id="swal-country" class="swal2-input" placeholder="Country*" value="${currentValues.country}" required>
-              <input type="tel" id="swal-phone" class="swal2-input" placeholder="Phone" value="${currentValues.phone}">
-            </div>
-          </form>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Update',
-        cancelButtonText: 'Cancel',
-        preConfirm: () => {
-          const formData = {
-            street: document.getElementById('swal-street').value,
-            barangay: document.getElementById('swal-barangay').value,
-            city: document.getElementById('swal-city').value,
-            zipCode: document.getElementById('swal-zipCode').value,
-            country: document.getElementById('swal-country').value,
-            phone: document.getElementById('swal-phone').value
-          };
-
-          // Validate required fields
-          const requiredFields = ['street', 'city', 'zipCode', 'country'];
-          const missingFields = requiredFields.filter(field => !formData[field]);
-          
-          if (missingFields.length > 0) {
-            Swal.showValidationMessage(`Please fill in required fields: ${missingFields.join(', ')}`);
-            return false;
-          }
-
-          // Validate zip code format
-          if (!/^\d{5}(-\d{4})?$/.test(formData.zipCode)) {
-            Swal.showValidationMessage('Invalid zip code format');
-            return false;
-          }
-
-          return formData;
+    // Similar structure as showAddNewAddress with 'edit' prefixes for IDs
+    const addressElement = document.querySelectorAll('.radio-option')[index];
+    const currentValues = {
+      street: addressElement.querySelector('.address-line:nth-child(3)').textContent,
+      region: JSON.parse(addressElement.getAttribute('data-region') || '{}'),
+      province: JSON.parse(addressElement.getAttribute('data-province') || '{}'),
+      city: JSON.parse(addressElement.getAttribute('data-city') || '{}'),
+      barangay: JSON.parse(addressElement.getAttribute('data-barangay') || '{}'),
+      zipCode: addressElement.querySelector('.address-line:nth-child(5)').textContent.split(',')[1].trim(),
+      phone: addressElement.querySelector('.phone').textContent.replace('Phone: ', '')
+    };
+  
+    const result = await Swal.fire({
+      title: 'Edit Address',
+      html: `
+         <form id="edit-address-swal-form">
+                <div class="swal2-input-group">
+                    <input type="text" id="swal-edit-street" class="swal2-input" 
+                           placeholder="Street*" value="${currentValues.street}" required>
+                    
+                    <select id="swal-edit-region" class="swal2-input" required>
+                        <option value="">Select Region</option>
+                    </select>
+                    
+                    <select id="swal-edit-province" class="swal2-input" required disabled>
+                        <option value="">Select Province</option>
+                    </select>
+                    
+                    <select id="swal-edit-city" class="swal2-input" required disabled>
+                        <option value="">Select City/Municipality</option>
+                    </select>
+                    
+                    <select id="swal-edit-barangay" class="swal2-input" required disabled>
+                        <option value="">Select Barangay</option>
+                    </select>
+                    
+                    <input type="text" id="swal-edit-zipCode" class="swal2-input" 
+                           placeholder="Zip Code*" pattern="\\d{4}" 
+                           value="${currentValues.zipCode}" required>
+                           
+                    <input type="tel" id="swal-edit-phone" class="swal2-input" 
+                           placeholder="Phone Number*" value="${currentValues.phone}" required>
+                </div>
+            </form>
+      `,
+      didOpen: async () => {
+        await populateLocationDropdowns('swal-edit', currentValues);
+        setupLocationDropdownListeners('swal-edit');
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Update',
+      cancelButtonText: 'Cancel',
+      preConfirm: () => {
+        const formData = {
+          street: document.getElementById('swal-edit-street').value,
+          region: JSON.parse(document.getElementById('swal-edit-region').value || '{}'),
+          province: JSON.parse(document.getElementById('swal-edit-province').value || '{}'),
+          city: JSON.parse(document.getElementById('swal-edit-city').value || '{}'),
+          barangay: JSON.parse(document.getElementById('swal-edit-barangay').value || '{}'),
+          zipCode: document.getElementById('swal-edit-zipCode').value,
+          phone: document.getElementById('swal-edit-phone').value
+        };
+  
+        const validation = validateAddressData(formData);
+        if (!validation.valid) {
+          Swal.showValidationMessage(validation.error);
+          return false;
         }
-      });
-
-      if (result.isConfirmed) {
-        const response = await fetch(`/account/addresses/${index}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(result.value)
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          await Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Address updated successfully'
-          });
-          await this.loadUserAddresses();
-          this.updateShippingCost();
-        } else {
-          throw new Error(data.error || 'Failed to update address');
-        }
+        return formData;
       }
-    } catch (error) {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: error.message
+    });
+  
+    if (result.isConfirmed) {
+      const response = await fetch(`/account/addresses/${index}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(result.value)
       });
+  
+      const data = await response.json();
+      if (data.success) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Address updated successfully'
+        });
+        await this.loadUserAddresses();
+        this.updateShippingCost();
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: data.error || 'Failed to update address'
+        });
+      }
     }
   }
 
@@ -196,50 +204,63 @@ class CheckoutHandler {
     const result = await Swal.fire({
       title: 'Add New Address',
       html: `
-        <form id="add-address-form">
-          <div class="swal2-input-group">
-            <input type="text" id="swal-new-street" class="swal2-input" placeholder="Street*" required>
-            <input type="text" id="swal-new-barangay" class="swal2-input" placeholder="Barangay">
-            <input type="text" id="swal-new-city" class="swal2-input" placeholder="City*" required>
-            <input type="text" id="swal-new-zipCode" class="swal2-input" placeholder="Zip Code*" 
-                   pattern="\\d{5}(-\\d{4})?" title="Five digit zip code" required>
-            <input type="text" id="swal-new-country" class="swal2-input" placeholder="Country*" required>
-            <input type="tel" id="swal-new-phone" class="swal2-input" placeholder="Phone">
-          </div>
-        </form>
+         <form id="edit-address-swal-form">
+                <div class="swal2-input-group">
+                    <input type="text" id="swal-edit-street" class="swal2-input" 
+                           placeholder="Street*" value="${currentValues.street}" required>
+                    
+                    <select id="swal-edit-region" class="swal2-input" required>
+                        <option value="">Select Region</option>
+                    </select>
+                    
+                    <select id="swal-edit-province" class="swal2-input" required disabled>
+                        <option value="">Select Province</option>
+                    </select>
+                    
+                    <select id="swal-edit-city" class="swal2-input" required disabled>
+                        <option value="">Select City/Municipality</option>
+                    </select>
+                    
+                    <select id="swal-edit-barangay" class="swal2-input" required disabled>
+                        <option value="">Select Barangay</option>
+                    </select>
+                    
+                    <input type="text" id="swal-edit-zipCode" class="swal2-input" 
+                           placeholder="Zip Code*" pattern="\\d{4}" 
+                           value="${currentValues.zipCode}" required>
+                           
+                    <input type="tel" id="swal-edit-phone" class="swal2-input" 
+                           placeholder="Phone Number*" value="${currentValues.phone}" required>
+                </div>
+            </form>
       `,
+      didOpen: () => {
+        populateLocationDropdowns('swal-new');
+        setupLocationDropdownListeners('swal-new');
+      },
       showCancelButton: true,
       confirmButtonText: 'Add',
       cancelButtonText: 'Cancel',
       preConfirm: () => {
         const formData = {
           street: document.getElementById('swal-new-street').value,
-          barangay: document.getElementById('swal-new-barangay').value,
-          city: document.getElementById('swal-new-city').value,
+          region: JSON.parse(document.getElementById('swal-new-region').value || '{}'),
+          province: JSON.parse(document.getElementById('swal-new-province').value || '{}'),
+          city: JSON.parse(document.getElementById('swal-new-city').value || '{}'),
+          barangay: JSON.parse(document.getElementById('swal-new-barangay').value || '{}'),
           zipCode: document.getElementById('swal-new-zipCode').value,
-          country: document.getElementById('swal-new-country').value,
           phone: document.getElementById('swal-new-phone').value
         };
-
-        // Validate required fields
-        const requiredFields = ['street', 'city', 'zipCode', 'country'];
-        const missingFields = requiredFields.filter(field => !formData[field]);
-        
-        if (missingFields.length > 0) {
-          Swal.showValidationMessage(`Please fill in required fields: ${missingFields.join(', ')}`);
+  
+        const validation = validateAddressData(formData);
+        if (!validation.valid) {
+          Swal.showValidationMessage(validation.error);
           return false;
         }
-
-        // Validate zip code format
-        if (!/^\d{5}(-\d{4})?$/.test(formData.zipCode)) {
-          Swal.showValidationMessage('Invalid zip code format');
-          return false;
-        }
-
         return formData;
       }
     });
-
+  
     if (result.isConfirmed) {
       try {
         const response = await fetch('/account/addresses', {
@@ -249,7 +270,7 @@ class CheckoutHandler {
           },
           body: JSON.stringify(result.value)
         });
-
+  
         const data = await response.json();
         if (data.success) {
           await Swal.fire({
@@ -442,7 +463,7 @@ class CheckoutHandler {
             throw new Error('Please select a delivery method');
           }
 
-          if (!selectedPayment) {
+          if (!selectedPayment) {``
             throw new Error('Please select a payment method');
           }
 
@@ -470,6 +491,170 @@ class CheckoutHandler {
     }
   }
 }
+
+async function fetchLocations(type, parentCode = '') {
+  // This function fetches location data by type (region, province, city, barangay)
+  let url = 'https://psgc.gitlab.io/api/';
+  switch (type) {
+    case 'regions':
+      url += 'regions/';
+      break;
+    case 'provinces':
+      url += `regions/${parentCode}/provinces/`;
+      break;
+    case 'cities':
+      url += `provinces/${parentCode}/cities-municipalities/`;
+      break;
+    case 'barangays':
+      url += `cities-municipalities/${parentCode}/barangays/`;
+      break;
+  }
+  const response = await fetch(url);
+  return await response.json();
+}
+
+async function populateLocationDropdowns(formPrefix, selectedLocation = {}) {
+  const dropdowns = {
+    region: document.getElementById(`${formPrefix}-region`),
+    province: document.getElementById(`${formPrefix}-province`),
+    city: document.getElementById(`${formPrefix}-city`),
+    barangay: document.getElementById(`${formPrefix}-barangay`)
+  };
+
+  // Reset and disable dropdowns
+  dropdowns.province.innerHTML = '<option value="">Select Province</option>';
+  dropdowns.city.innerHTML = '<option value="">Select City/Municipality</option>';
+  dropdowns.barangay.innerHTML = '<option value="">Select Barangay</option>';
+  dropdowns.province.disabled = true;
+  dropdowns.city.disabled = true;
+  dropdowns.barangay.disabled = true;
+
+  // Populate regions
+  const regions = await fetchLocations('regions');
+  dropdowns.region.innerHTML = '<option value="">Select Region</option>';
+  regions.forEach(region => {
+    const option = new Option(region.name, JSON.stringify({ code: region.code, name: region.name }));
+    if (selectedLocation.region && selectedLocation.region.code === region.code) option.selected = true;
+    dropdowns.region.add(option);
+  });
+
+  // Populate additional dropdowns if editing
+  if (selectedLocation.region) {
+    const provinces = await fetchLocations('provinces', selectedLocation.region.code);
+    provinces.forEach(province => {
+      const option = new Option(province.name, JSON.stringify({ code: province.code, name: province.name }));
+      if (selectedLocation.province && selectedLocation.province.code === province.code) option.selected = true;
+      dropdowns.province.add(option);
+    });
+    dropdowns.province.disabled = false;
+
+    if (selectedLocation.province) {
+      const cities = await fetchLocations('cities', selectedLocation.province.code);
+      cities.forEach(city => {
+        const option = new Option(city.name, JSON.stringify({ code: city.code, name: city.name }));
+        if (selectedLocation.city && selectedLocation.city.code === city.code) option.selected = true;
+        dropdowns.city.add(option);
+      });
+      dropdowns.city.disabled = false;
+
+      if (selectedLocation.city) {
+        const barangays = await fetchLocations('barangays', selectedLocation.city.code);
+        barangays.forEach(barangay => {
+          const option = new Option(barangay.name, JSON.stringify({ code: barangay.code, name: barangay.name }));
+          if (selectedLocation.barangay && selectedLocation.barangay.code === barangay.code) option.selected = true;
+          dropdowns.barangay.add(option);
+        });
+        dropdowns.barangay.disabled = false;
+      }
+    }
+  }
+}
+
+function setupLocationDropdownListeners(formPrefix) {
+  const dropdowns = {
+    region: document.getElementById(`${formPrefix}-region`),
+    province: document.getElementById(`${formPrefix}-province`),
+    city: document.getElementById(`${formPrefix}-city`),
+    barangay: document.getElementById(`${formPrefix}-barangay`)
+  };
+
+  dropdowns.region.addEventListener('change', async () => {
+    const selectedRegion = JSON.parse(dropdowns.region.value || '{}');
+    dropdowns.province.innerHTML = '<option value="">Select Province</option>';
+    dropdowns.city.innerHTML = '<option value="">Select City/Municipality</option>';
+    dropdowns.barangay.innerHTML = '<option value="">Select Barangay</option>';
+    dropdowns.province.disabled = dropdowns.city.disabled = dropdowns.barangay.disabled = true;
+
+    if (selectedRegion.code) {
+      const provinces = await fetchLocations('provinces', selectedRegion.code);
+      provinces.forEach(province => dropdowns.province.add(new Option(province.name, JSON.stringify(province))));
+      dropdowns.province.disabled = false;
+    }
+  });
+
+  dropdowns.province.addEventListener('change', async () => {
+    const selectedProvince = JSON.parse(dropdowns.province.value || '{}');
+    dropdowns.city.innerHTML = '<option value="">Select City/Municipality</option>';
+    dropdowns.barangay.innerHTML = '<option value="">Select Barangay</option>';
+    dropdowns.city.disabled = dropdowns.barangay.disabled = true;
+
+    if (selectedProvince.code) {
+      const cities = await fetchLocations('cities', selectedProvince.code);
+      cities.forEach(city => dropdowns.city.add(new Option(city.name, JSON.stringify(city))));
+      dropdowns.city.disabled = false;
+    }
+  });
+
+  dropdowns.city.addEventListener('change', async () => {
+    const selectedCity = JSON.parse(dropdowns.city.value || '{}');
+    dropdowns.barangay.innerHTML = '<option value="">Select Barangay</option>';
+    dropdowns.barangay.disabled = true;
+
+    if (selectedCity.code) {
+      const barangays = await fetchLocations('barangays', selectedCity.code);
+      barangays.forEach(barangay => dropdowns.barangay.add(new Option(barangay.name, JSON.stringify(barangay))));
+      dropdowns.barangay.disabled = false;
+    }
+  });
+}
+function validateAddressData(formData) {
+  const requiredFields = ['street', 'region', 'province', 'city', 'barangay', 'zipCode', 'phone'];
+  
+  const missingFields = requiredFields.filter(field => {
+    if (!formData[field]) return true;
+    if (typeof formData[field] === 'object') {
+      // For location fields, check if either code or name is missing
+      return !formData[field].code || !formData[field].name;
+    }
+    return false;
+  });
+  
+  if (missingFields.length > 0) {
+    return {
+      valid: false,
+      error: `Missing required fields: ${missingFields.join(', ')}`
+    };
+  }
+
+  // Validate zip code format (Philippines has 4-digit ZIP codes)
+  if (!/^\d{4}$/.test(formData.zipCode)) {
+    return {
+      valid: false,
+      error: 'Invalid zip code format (must be 4 digits)'
+    };
+  }
+
+  // Validate phone number format (Philippines format: +63 or 0 followed by 10 digits)
+  if (!/^(\+63|0)[\d]{10}$/.test(formData.phone)) {
+    return {
+      valid: false,
+      error: 'Invalid phone number format (must start with +63 or 0 followed by 10 digits)'
+    };
+  }
+
+  return { valid: true };
+}
+
 // Initialize the checkout handler when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   CheckoutHandler.init();

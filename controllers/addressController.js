@@ -1,17 +1,24 @@
 const User = require('../models/User');
 
 class AddressController {
-    // Validate address data
+    // Updated validation
     static validateAddress(address) {
-        const requiredFields = ['street', 'city', 'zipCode', 'country', 'barangay', 'phone'];
+        const requiredFields = ['street', 'region', 'province', 'city', 'barangay', 'zipCode', 'phone'];
         const missingFields = requiredFields.filter(field => !address[field]);
         
         if (missingFields.length > 0) {
             throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
         }
         
-        if (address.zipCode.length < 3 || address.zipCode.length > 10) {
-            throw new Error('Invalid zip code format');
+        // Validate location fields have both code and name
+        ['region', 'province', 'city', 'barangay'].forEach(field => {
+            if (!address[field].code || !address[field].name) {
+                throw new Error(`Invalid ${field} data: requires both code and name`);
+            }
+        });
+        
+        if (!/^\d{4}$/.test(address.zipCode)) {
+            throw new Error('Invalid zip code format (must be 4 digits)');
         }
     }
 

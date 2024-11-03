@@ -1,27 +1,41 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// Cart Item Schema (now embedded in User)
+// Cart Item Schema (unchanged)
 const CartItemSchema = new mongoose.Schema({
   product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
   selected: { type: Boolean, default: true }
 });
 
-// Address Schema
+// Updated Address Schema with structured Philippine location fields
 const AddressSchema = new mongoose.Schema({
   street: { type: String, required: true },
-  city: { type: String, required: true },
+  // Philippine location fields
+  region: { 
+    code: { type: String, required: true },
+    name: { type: String, required: true }
+  },
+  province: { 
+    code: { type: String, required: true },
+    name: { type: String, required: true }
+  },
+  city: { 
+    code: { type: String, required: true },
+    name: { type: String, required: true }
+  },
+  barangay: { 
+    code: { type: String, required: true },
+    name: { type: String, required: true }
+  },
   zipCode: { type: String, required: true },
-  country: { type: String, required: true },
-  barangay: { type: String, required: true },
   phone: { type: String, required: true },
   isDefault: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
 
-// User Schema
+// Rest of User Schema remains the same
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -31,12 +45,11 @@ const UserSchema = new mongoose.Schema({
   addresses: [AddressSchema],
   defaultAddress: { type: mongoose.Schema.Types.ObjectId },
   resetPasswordToken: { type: String },
-  resetPasswordExpires: { type: Date }, 
+  resetPasswordExpires: { type: Date },
   lastActive: {
     type: Date,
     default: Date.now
   },
-  // Embedded cart
   cart: {
     items: [CartItemSchema],
     updatedAt: { type: Date, default: Date.now }
@@ -45,7 +58,7 @@ const UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Password hashing middleware
+// Existing middleware and methods remain the same
 UserSchema.pre('save', async function(next) {
     if (!this.isModified('password')) {
         return next();
@@ -56,11 +69,9 @@ UserSchema.pre('save', async function(next) {
     next();
 });
 
-// Update lastActive timestamp
 UserSchema.pre('save', function(next) {
   this.lastActive = Date.now();
   
-  // Update cart timestamp if cart items were modified
   if (this.isModified('cart.items')) {
     this.cart.updatedAt = Date.now();
   }
@@ -68,7 +79,7 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-// Cart helper methods
+// Existing cart methods remain the same
 UserSchema.methods.addToCart = async function(productId) {
   const existingItemIndex = this.cart.items.findIndex(
     item => item.product.toString() === productId.toString()

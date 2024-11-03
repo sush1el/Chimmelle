@@ -74,12 +74,18 @@
             <button class="btn" onclick="showAddNewAddress()">Add a new Address</button>
             <div class="address-grid">
                 <% user.addresses.forEach((address, index) => { %>
-                    <div class="address-card" data-index="<%= index %>">
+                    <div class="address-card" 
+                         data-index="<%= index %>"
+                         data-region="<%= JSON.stringify(address.region) %>"
+                         data-province="<%= JSON.stringify(address.province) %>"
+                         data-city="<%= JSON.stringify(address.city) %>"
+                         data-barangay="<%= JSON.stringify(address.barangay) %>">
                         <p data-field="street">Street: <%= address.street %></p>
-                        <p data-field="barangay">Barangay: <%= address.barangay %></p>
-                        <p data-field="city">City: <%= address.city %></p>
+                        <p data-field="region">Region: <%= address.region.name %></p>
+                        <p data-field="province">Province: <%= address.province.name %></p>
+                        <p data-field="city">City/Municipality: <%= address.city.name %></p>
+                        <p data-field="barangay">Barangay: <%= address.barangay.name %></p>
                         <p data-field="zipCode">Zip Code: <%= address.zipCode %></p>
-                        <p data-field="country">Country: <%= address.country %></p>
                         <p data-field="phone">Phone: <%= address.phone %></p>
                         <div class="address-actions">
                             <button class="btn-edit" onclick="showEditAddress(<%= index %>)">Edit</button>
@@ -98,7 +104,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        
         .swal2-input-group {
             display: flex;
             flex-direction: column;

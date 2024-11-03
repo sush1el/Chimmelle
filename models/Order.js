@@ -38,10 +38,9 @@ const orderSchema = new mongoose.Schema({
     required: true,
     enum: ['Standard', 'Express'] // Example delivery options
   },
-  paymentMethod: {
+  gcashNumber: {
     type: String,
     required: true,
-    enum: ['GCash', 'PayMongo'] // Supported payment methods
   },
   totalAmount: {
     type: Number,
