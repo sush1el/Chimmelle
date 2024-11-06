@@ -96,6 +96,14 @@ body {
   font-size: 20px;
 }
 
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  margin-top: 2rem;
+  color: #333;
+}
+
+
 .cart-button:hover {
   opacity: 0.7;
 }
@@ -164,8 +172,8 @@ a {
 
 .login-container {
   max-width: 500px;
-  margin: 50px auto;
-  padding: 20px;
+  margin: 120px auto;
+  padding: 35px;
   text-align: center;
   background-color: #fff;
   border-radius: 10px;

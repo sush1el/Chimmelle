@@ -3,7 +3,8 @@ let editingIndex = null;
 // View management functions
 const views = {
     account: document.getElementById('account-view'),
-    addresses: document.getElementById('addresses-view')
+    addresses: document.getElementById('addresses-view'),
+    welcome: document.querySelector('.welcome')
 };
 
 function showView(viewName) {
@@ -16,11 +17,14 @@ function showView(viewName) {
 // Navigation functions
 function showAccount() {
     showView('account');
+    views.welcome.classList.remove('hidden');
 }
 
 function showAddresses() {
     showView('addresses');
+    views.welcome.classList.add('hidden');
 }
+
 async function fetchLocations(type, parentCode = '') {
     try {
         let url = 'https://psgc.gitlab.io/api/';

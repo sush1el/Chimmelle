@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chimelle Shop</title>
     <link rel="stylesheet" href="styles/login.css">
+    <link rel="stylesheet" href="styles/Footer.css"> 
 </head>
 <body>
     <!-- Navbar -->
@@ -17,16 +18,14 @@
             <a href="#">HOME</a>
             <a href="#">ARTISTS</a>
             <a href="#">SHOP</a>
-            <a href="#">SUPPORT </a>
+            <a href="#">SUPPORT</a>
         </div>
         <div class="nav-center">
             <img class= "logo" src="resources/logo.jpg" alt="Logo" class="logo">
         </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" placeholder="Search for..." aria-label="Search">
-            </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
             <a href="#">
                 <img class="profile-user" src="resources/profile.jpg" alt="Profile">
             </a>
@@ -57,6 +56,47 @@
           Return to Store 
         </a>
     </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h2>Support</h2>
+                <ul class="footer-links">
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faqs">FAQs</a></li>
+                    <li><a href="TC.html" >Terms and Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/return">Return & Exchange</a></li>
+                    <li><a href="/payment">Shipping & Payment </a></li>
+                    
+                </ul>
+            </div>
+    
+            <div class="footer-section">
+                <h2>Quick Links</h2>
+                <ul class="footer-links">
+                    <li><a href="/products">Products</a></li>
+                    <li><a href="/artists">Artists</a></li>
+                </ul>
+                <div class="social-links">
+                    <a href="https://facebook.com" aria-label="Visit our Facebook page">
+                        <i class="fa-brands fa-facebook social-icon"></i>
+                    </a>
+                    <a href="https://twitter.com" aria-label="Visit our Twitter page">
+                        <i class="fa-brands fa-twitter social-icon"></i>
+                    </a>
+                </div>
+            </div>
+    
+            <div class="footer-section">
+                <!-- Replace /placeholder.svg with your mascot image URL -->
+                <img src="resources/chimmy-footer.jpg" alt="Cute mascot character" class="mascot">
+         
+            </div>
+        </div>
+        <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
+    </footer>
+
     <script src="scripts/Login.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

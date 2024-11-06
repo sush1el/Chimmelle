@@ -233,14 +233,13 @@ class CartManager {
         
         cartItems.innerHTML += `
           <div class="cart-item" data-product-id="${product._id}">
-            <input type="checkbox" class="item-checkbox" 
-              ${item.selected ? 'checked' : ''}>
+            <input type="checkbox" class="item-checkbox" ${item.selected ? 'checked' : ''}>
             <img src="${product.image}" alt="${product.name}">
             <div class="item-details">
               <h3>${product.name}</h3>
               <p>Price: P ${product.price.toFixed(2)}</p>
             </div>
-            <div class="item-quantity">
+            <div class="quantity-control">
               <button class="quantity-btn decrease" ${!item.selected ? 'disabled' : ''}>-</button>
               <input type="number" value="${item.quantity}" min="1" 
                 class="quantity-input" ${!item.selected ? 'disabled' : ''}>
@@ -250,7 +249,7 @@ class CartManager {
               P ${(product.price * item.quantity).toFixed(2)}
             </span>
             <button class="delete-btn" aria-label="Delete item">
-              <i class="fas fa-trash"></i>
+              <button class="delete-btn">🗑</button>
             </button>
           </div>
         `;

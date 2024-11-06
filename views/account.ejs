@@ -25,53 +25,73 @@
                 <input type="text" placeholder="Search for ...">
             </div>
             <img src="resources/profile.jpg" alt="Profile" class="profile-user">
-            <a href="/cart">
+            <a href="/cart" class="cart-link">
                 <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
                 </button>
             </a>
         </div>
     </nav>
 
     <div class="container">
-        <!-- Account View -->
-        <div id="account-view">
-            <h1>Welcome, <%= user.firstName %> <%= user.lastName %>!</h1>
-            <div class="account-details">
-                <h2>Account details</h2>
-                <p>First Name: <%= user.firstName %></p>
-                <p>Last Name: <%= user.lastName %></p>
-                <p>Email: <%= user.email %></p>
+        <h1 class="welcome">Welcome, <%= user.firstName %> <%= user.lastName %>!</h1>
+        <div id="account-view" class="account-grid">
+            <div class="account-details-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Account Details</h2>
+                    </div>
+                    <div class="card-content">
+                        <p> <b>Name:</b> <%= user.firstName %> <%= user.lastName %></p>
+                        <p><b>Email:</b> <%= user.email %></p>
+                        <a href="#" class="btn" onclick="showAddresses()">View Addresses (<%= user.addresses.length %>)</a>
+                    </div>
+                </div>
+
                 <% if (user.defaultAddress) { %>
                     <% const defaultAddress = user.addresses.find(addr => addr._id.toString() === user.defaultAddress.toString()); %>
                     <% if (defaultAddress) { %>
-                        <h3>Default Address</h3>
-                        <p>Street: <%= defaultAddress.street %></p>
-                        <p>Barangay: <%= defaultAddress.barangay %></p>
-                        <p>City: <%= defaultAddress.city %></p>
-                        <p>State/Province: <%= defaultAddress.state %></p>
-                        <p>Zip Code: <%= defaultAddress.zipCode %></p>
-                        <p>Country: <%= defaultAddress.country %></p>
-                        <p>Phone: <%= defaultAddress.phone %></p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Default Address</h2>
+                            </div>
+                            <div class="card-content">
+                                <p><%= defaultAddress.street %></p>
+                                <p><%= defaultAddress.region.name %></p>
+                                <p><%= defaultAddress.province.name %></p>
+                                <p><%= defaultAddress.city.name %></p>
+                                <p><%= defaultAddress.barangay.name %></p>
+                                <p><%= defaultAddress.zipCode %></p>
+                                <p><%= defaultAddress.phone %></p>
+                            </div>
+                        </div>
                     <% } %>
                 <% } else { %>
                     <p>No default address set</p>
                 <% } %>
-                <a href="#" class="btn" onclick="showAddresses()">View Addresses (<%= user.addresses.length %>)</a>
-            </div>
-            <a href="api/auth/logout" class="btn btn-outline">Logout</a>
 
-            <h1>Order History</h1>
-            <p>You haven't placed any orders yet.</p>
+                <a href="/api/auth/logout" class="logout-btn">Logout</a>
+            </div>
+
+            <div class="order-history-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Order History</h2>
+                    </div>
+                    <div class="card-content">
+                        <p>You haven't placed any orders yet.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Addresses View -->
         <div id="addresses-view" class="hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h1>Addresses</h1>
+            <div class="addresses-header">
+                <h4>Addresses</h4>
                 <button class="btn btn-outline" onclick="showAccount()">Return to Account</button>
             </div>
-            <button class="btn" onclick="showAddNewAddress()">Add a new Address</button>
+            <button class="btn-add" onclick="showAddNewAddress()">Add a new Address</button>
             <div class="address-grid">
                 <% user.addresses.forEach((address, index) => { %>
                     <div class="address-card" 
@@ -99,10 +119,7 @@
             </div>
         </div>
     </div>
-
-    <script type="module" src="scripts/Account.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    
     <style>
         .swal2-input-group {
             display: flex;
@@ -112,6 +129,7 @@
         
         .swal2-input {
             margin: 0 !important;
+            font-size: 18px;
         }
         
         .swal2-title {
@@ -120,13 +138,17 @@
         
         /* Optional: Style the SweetAlert buttons to match your theme */
         .swal2-confirm {
-            background-color: #fce7e7 !important;
-            color: #000 !important;
+            background-color: #da9e9f !important;
+            color: white !important;
         }
         
         .swal2-cancel {
-            background-color: #6c757d !important;
+            background-color: #EDE9E9 !important;
+            color: #da9e9f;
         }
     </style>
+
+    <script type="module" src="scripts/Account.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
