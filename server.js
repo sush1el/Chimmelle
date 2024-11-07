@@ -7,6 +7,8 @@ const accountRoutes = require('./routes/addressRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
+const footerRoutes = require('./routes/footerRoutes');
+const productRoutes = require('./routes/productRoutes');
 const {connectDB} = require('./connection/db');
 const cookieParser = require('cookie-parser');
 
@@ -17,6 +19,7 @@ app.set('view engine', 'ejs')
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use('/public/scripts', express.static('public/scripts'));
 app.use(cookieParser());
 
 
@@ -27,6 +30,9 @@ app.use('/', homepageRoutes);
 app.use('/', accountRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/', checkoutRoutes);
+app.use('/', footerRoutes);
+app.use('/', productRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -342,7 +342,7 @@ async function showEditAddress(index) {
             <form id="edit-address-swal-form">
                 <div class="swal2-input-group">
                     <input type="text" id="swal-edit-street" class="swal2-input" 
-                           placeholder="Street*" value="${currentValues.street}" required>
+                           placeholder="Address*" value="${currentValues.street}" required>
                     
                     <select id="swal-edit-region" class="swal2-input" required>
                         <option value="">Select Region</option>
@@ -445,7 +445,7 @@ async function showAddNewAddress() {
         html: `
             <form id="add-address-swal-form">
                 <div class="swal2-input-group">
-                    <input type="text" id="swal-new-street" class="swal2-input" placeholder="Street*" required>
+                    <input type="text" id="swal-new-street" class="swal2-input" placeholder="Address*" required>
                     
                     <select id="swal-new-region" class="swal2-input" required>
                         <option value="">Select Region</option>

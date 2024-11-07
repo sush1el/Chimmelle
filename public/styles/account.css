@@ -79,22 +79,20 @@ body {
   color: #333;
 }
 
-.cart-link {
-  text-decoration: none;
-}
 
 .cart-button {
   background-color: #da9e9f;
   color: #fbfbf5;
+  margin-left: 5px;
   border: none;
-  padding: 10px 15px;
+  padding: 10px 10px;
   font-size: 15px;
   font-weight: bold;
   display: flex;
   align-items: center;
   border-radius: 5px;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .cart-button i {
@@ -107,15 +105,13 @@ body {
 }
 
 .profile-user {
-  width: 50px;
+  width: 60px;
   height: 50px;
-  border-radius: 50%;
   transition: transform 0.3s ease;
-  margin-right: 15px;
 }
 
 .profile-user:hover {
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 .container {

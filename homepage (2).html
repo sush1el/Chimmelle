@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Home 1</title>
+
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <title>Chimelle Homepage</title>
-    <link rel="stylesheet" href="styles/homepage.css">
-    <link rel="stylesheet" href="styles/Footer.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/styles.css/homepage 1.css"> <!-- Account page CSS -->
+    <link rel="stylesheet" href="/styles.css/Footer.css"> <!-- Footer CSS --> 
 </head>
 <body>
-    <div class="welcome-message">
-        <p>Welcome to our website</p>
-      </div>
     <nav class="navbar">
         <div class="nav-left">
-            <a href="/">HOME</a>
+            <a href="#">HOME</a>
             <a href="#">ARTISTS</a>
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle">SHOP</a>
@@ -33,36 +35,24 @@
             <a href="#">SUPPORT</a>
         </div>
         <div class="nav-center">
-            <img class= "logo" src="resources/logo.jpg" alt="Logo" class="logo">
+            <img class="logo" src="/logo/chimelle-logo.png" alt="Logo"> <!-- Replace with actual logo image -->
         </div>
-        <div class="search-container">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" placeholder="Search for...">
-            <% if (user) { %>
-                <div class="dropdown">
-                    <a href="#">
-                        <img class="profile-user" src="resources/profile.jpg" alt="Profile">
-                    </a>
-                    <div class="dropdown-menu">
-                        <a style="font-weight: bold;" href="/account">Account</a>
-                        <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
-                    </div>
-                </div>
-                <a href="/cart">
-                    <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                    </button>
-                </a>
-            <% } else { %>   
-                <a href="/login-page">
-                    <button class="cart-button">
-                        Login
-                    </button>
-                </a>
-            <% } %>
+        <div class="nav-right">
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" placeholder="Search for..." aria-label="Search">
+            </div>
+            <a href="#">
+                <img class="profile-user" src="/logo/profile.png" alt="Profile">
+            </a>
+            <a href="#">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart 
+                </button>
+            </a>
         </div>
     </nav>
-    
+
     <section class="announcement">
         <div class="album-cover"></div>
         <div class="announcement-text">
@@ -70,26 +60,43 @@
             <a href="#" class="pre-order-btn">Pre-order →</a>
         </div>
     </section>
-<div style ="background-color: #e9aeae;">
-    <section class="product-grid" id="product-grid">
-        <% products.forEach(product => { %>
-            <div class="product-card" data-product-id="<%= product._id %>">
-                <a href="/product-page/<%= product._id %>">
-                <div class="product-image">
-                    <img src="<%= product.image[0] %>" class="product-image">
-                </div>
-                <div class="product-info">
-                <h3 class="product-name"><%= product.name %></h3>
-                <p class="product-price">$<%= product.price.toFixed(2) %></p>
-                </a>
-                <button class="choose-options-btn">Add to Cart</button>
+
+    <section class="product-grid">
+        <div class="product-card">
+            <div class="product-image"></div>
+            <div class="product-info">
+                <h3>CHANYEOL - THE 1ST MINI ALBUM 'BLACK OUT'</h3>
+                <p>P 500.00</p>
+                <a href="#" class="choose-options-btn">Choose options</a>
             </div>
+        </div>
+        <div class="product-card">
+            <div class="product-image"></div>
+            <div class="product-info">
+                <h3>ITZY - GOLD MINI ALBUM</h3>
+                <p>P 1000.00</p>
+                <a href="#" class="choose-options-btn">Choose options</a>
             </div>
-        <% }) %>
+        </div>
+        <div class="product-card">
+            <div class="product-image"></div>
+            <div class="product-info">
+                <h3>BABYMONSTER - 1ST FULL ALBUM DRIP</h3>
+                <p>P 3000.00</p>
+                <a href="#" class="choose-options-btn">Choose options</a>
+            </div>
+        </div>
+        <div class="product-card">
+            <div class="product-image"></div>
+            <div class="product-info">
+                <h3>KATSEYE - SIS (SOFT IS STRONG) ALBUM</h3>
+                <p>P 2500.00</p>
+                <a href="#" class="choose-options-btn">Choose options</a>
+            </div>
+        </div>
     </section>
-</div>
-   
- 
+
+    <!-- Footer Section -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-section">
@@ -97,14 +104,13 @@
                 <ul class="footer-links">
                     <li><a href="/contact">Contact Us</a></li>
                     <li><a href="/faqs">FAQs</a></li>
-                    <li><a href="/tc" >Terms and Conditions</a></li>
+                    <li><a href="TC.html" >Terms and Conditions</a></li>
                     <li><a href="/privacy">Privacy Policy</a></li>
                     <li><a href="/return">Return & Exchange</a></li>
                     <li><a href="/payment">Shipping & Payment </a></li>
-                    
                 </ul>
             </div>
-    
+
             <div class="footer-section">
                 <h2>Quick Links</h2>
                 <ul class="footer-links">
@@ -120,18 +126,13 @@
                     </a>
                 </div>
             </div>
-    
+
             <div class="footer-section">
                 <!-- Replace /placeholder.svg with your mascot image URL -->
-                <img src="resources/chimmy-footer.jpg" alt="Cute mascot character" class="mascot">
-         
+                <img src="/logo/chimmy-footer.png" alt="Cute mascot character" class="mascot">
             </div>
         </div>
-        <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
+        <p class="copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
     </footer>
-    <script src="scripts/Homepage.js"></script>
-    <script src="scripts/Cart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
 </body>
-</html> 
+</html>

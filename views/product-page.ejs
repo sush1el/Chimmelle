@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BABYMONSTER Album Pre-order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/product-page.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-left">
+          <a href="/">HOME</a>
+          <a href="#">ARTISTS</a>
+          <a href="#">SHOP</a>
+          <a href="#">SUPPORT</a>
+      </div>
+      <div class="nav-center">
+          <img class= "logo" src="/resources/logo.jpg" alt="Logo" class="logo">
+      </div>
+      <div class="search-container">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" placeholder="Search for...">
+          <% if (user) { %>
+            <a href="/account">
+              <img class="profile-user" src="/resources/profile.jpg" alt="Profile">
+            </a>
+            <a href="/api/auth/logout">
+              <button class="cart-button">
+                Logout
+              </button>
+            </a>
+            <a href="/cart">
+              <button class="cart-button">
+                <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+              </button>
+            </a>
+          <% } else { %>
+            <a href="/login-page">
+              <button class="cart-button">
+                Login
+              </button>
+            </a>
+          <% } %>
+      </div>
+  </nav>
+
+    <div class="main-content">
+        <div class="product-images">
+            <img src="<%= product.image[0] %>" alt="Main Product Image" class="main-image" id="mainImage">
+            <div class="thumbnail-container">
+                <% product.image.forEach((image, index) => { %>
+                    <img src="<%= image %>" alt="Thumbnail <%= index + 1 %>" class="thumbnail">
+                <% }) %>
+            </div>
+        </div>
+        <div class="product-info">
+            <p class="product-price"><%= product.artist %></p>
+            <h1 class="product-title"><%= product.name %></h1>
+            <p class="product-price">$<%= product.price.toFixed(2) %></p>
+            <select class="version-select">
+                <% product.version.forEach(version => { %>
+                    <option><%= version %></option>
+                <% }) %>
+            </select>
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <span>Product Information</span>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="expandable-content">
+                    <p><%= product.description %></p>
+                </div>
+            </div>
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <span>Inclusion</span>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="expandable-content">
+                    <ul class="product-inclusions-list">
+                        <% product.inclusions.forEach(inclusion => { %>
+                            <li><%= inclusion %></li>
+                        <% }) %>
+                    </ul>
+                </div>
+            </div>
+            <p class="stock-info"> <%= product.quantity %> items left in stock</p>
+            <button class="add-to-cart-btn" data-product-id="<%= product._id %>">
+                Add to Cart
+              </button>
+        </div>
+    </div>
+    <script src="/public/scripts/Cart.js"></script>
+    <script src="/public/scripts/Product-page.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

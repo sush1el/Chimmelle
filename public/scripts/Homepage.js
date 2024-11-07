@@ -52,3 +52,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+const footer = document.querySelector('.footer');
+let lastScroll = 0;
+
+window.addEventListener('scroll', () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const fullHeight = document.documentElement.scrollHeight;
+
+    // Show footer when scrolled to the bottom
+    if (scrollTop + windowHeight >= fullHeight - 10) {
+        footer.classList.add('visible');
+        footer.classList.remove('hidden');
+    } else if (scrollTop < lastScroll) {
+        // Hide footer when scrolling up
+        footer.classList.remove('visible');
+        footer.classList.add('hidden');
+    }
+
+    lastScroll = scrollTop;
+});
+
+const welcomeMessage = document.querySelector('.welcome-message');
+const navbar = document.querySelector('.navbar');
+let lastScrollTop = 0;
+
+// Show the welcome message by default
+welcomeMessage.classList.add('visible');
+navbar.style.top = '40px'; // Adjust navbar position
+
+window.addEventListener('scroll', () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+  if (scrollTop === 0) {
+    welcomeMessage.classList.remove('hidden');
+    welcomeMessage.classList.add('visible');
+    navbar.style.top = '40px'; // Adjust the navbar position when the welcome message is visible
+  } else if (scrollTop > lastScrollTop) {
+    // Scrolling down
+    welcomeMessage.classList.remove('visible');
+    welcomeMessage.classList.add('hidden');
+    navbar.style.top = '0'; // Reset the navbar position when the welcome message is hidden
+  }
+
+  lastScrollTop = scrollTop;
+});

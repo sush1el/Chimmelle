@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles/account.css">
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-left">
             <a href="/">HOME</a>
@@ -18,16 +19,18 @@
             <a href="#">SHOP</a>
             <a href="#">SUPPORT</a>
         </div>
-        <img src="resources/logo.jpg" alt="Logo" class="logo">
-        <div class="nav-right">
-            <div class="search-container">
-                <i class="search-icon fas fa-search"></i>
-                <input type="text" placeholder="Search for ...">
-            </div>
-            <img src="resources/profile.jpg" alt="Profile" class="profile-user">
-            <a href="/cart" class="cart-link">
+        <div class="nav-center">
+            <img class= "logo" src="resources/logo.jpg" alt="Logo" class="logo">
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
+            <a href="/account">
+                <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+            </a>
+            <a href="/cart">
                 <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
                 </button>
             </a>
         </div>
@@ -136,7 +139,6 @@
             font-family: 'Montserrat', sans-serif;
         }
         
-        /* Optional: Style the SweetAlert buttons to match your theme */
         .swal2-confirm {
             background-color: #da9e9f !important;
             color: white !important;
