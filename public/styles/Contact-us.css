@@ -19,7 +19,10 @@ body {
     padding: 10px 30px;
     background-color: #fff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-}
+    position: sticky; /* Add this line */
+    top: 0; /* Add this line */
+    z-index: 100; /* Add this line */
+  }
 
 .nav-left {
     display: flex;
@@ -269,4 +272,5 @@ a:hover, a:focus {
         font-size: 1.1rem;
     }
 }
+
 

@@ -55,8 +55,11 @@
                 </a>
             <% } else { %>   
                 <a href="/login-page">
+                    <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+                </a>
+                <a class ="hidden" href="/cart">
                     <button class="cart-button">
-                        Login
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
                     </button>
                 </a>
             <% } %>
@@ -76,7 +79,7 @@
             <div class="product-card" data-product-id="<%= product._id %>">
                 <a href="/product-page/<%= product._id %>">
                 <div class="product-image">
-                    <img src="<%= product.image[0] %>" class="product-image">
+                    <img src="<%= product.imageH %>" class="product-image">
                 </div>
                 <div class="product-info">
                 <h3 class="product-name"><%= product.name %></h3>
@@ -131,6 +134,7 @@
     </footer>
     <script src="scripts/Homepage.js"></script>
     <script src="scripts/Cart.js"></script>
+    <script src="scripts/Footer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 </body>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page - Product Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #fff7f7;
+            color: #333;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #da9e9f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .version-container, .description-container, .inclusion-container {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .version-header, .description-header, .inclusion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .add-version-btn,
+        .add-description-btn,
+        .add-inclusion-btn,
+        .submit-btn {
+            background-color: #da9e9f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-version-btn:hover,
+        .add-description-btn:hover,
+        .add-inclusion-btn:hover,
+        .submit-btn:hover {
+            background-color: #c78081;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+        }
+
+        .remove-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background-color: #ff3333;
+        }
+        .back-btn {
+    background-color: #666;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 20px;
+        }
+
+.back-btn:hover {
+    background-color: #555;
+}
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <a href="dashboard#products" class="back-btn">← Back to Dashboard</a>
+        <h1>Add New Product</h1>
+        <form id="productForm">
+            <div class="form-group">
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <input type="text" id="type" name="type" required>
+            </div>
+
+            <div class="form-group">
+                <label for="artist">Artist:</label>
+                <input type="text" id="artist" name="artist" required>
+            </div>
+
+            <div id="descriptionsContainer">
+                <h2>Descriptions</h2>
+                <div class="description-container">
+                    <div class="description-header">
+                        <h3>Description 1</h3>
+                        <button type="button" class="remove-btn" onclick="removeDescription(this)">Remove</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="descriptions[]" required></textarea>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="add-description-btn" onclick="addDescription()">Add Another Description</button>
+
+            <div id="inclusionsContainer">
+                <h2>Inclusions</h2>
+                <div class="inclusion-container">
+                    <div class="inclusion-header">
+                        <h3>Inclusion 1</h3>
+                        <button type="button" class="remove-btn" onclick="removeInclusion(this)">Remove</button>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="inclusions[]" required></textarea>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="add-inclusion-btn" onclick="addInclusion()">Add Another Inclusion</button>
+
+            <div class="form-group">
+                <label for="imageH">Main Image:</label>
+                <input type="file" id="imageH" name="imageH" accept="image/*" required>
+                <img id="imageHPreview" class="image-preview" src="#" alt="Main Image Preview" style="display: none;">
+            </div>
+
+            <div id="versionsContainer">
+                <h2>Versions</h2>
+                <div class="version-container">
+                    <div class="version-header">
+                        <h3>Version 1</h3>
+                        <button type="button" class="remove-btn" onclick="removeVersion(this)">Remove</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="version1">Version Name:</label>
+                        <input type="text" id="version1" name="versions[0][version]" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity1">Quantity:</label>
+                        <input type="number" id="quantity1" name="versions[0][quantity]" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image1">Version Images:</label>
+                        <input type="file" id="image1" name="versions[0][image]" accept="image/*" multiple required>
+                        <div id="imagePreview1" class="image-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="add-version-btn" onclick="addVersion()">Add Another Version</button>
+
+            <button type="submit" class="submit-btn">Submit Product</button>
+        </form>
+    </div>
+
+    <script>
+        let versionCount = 1;
+        let descriptionCount = 1;
+        let inclusionCount = 1;
+
+        function addVersion() {
+            versionCount++;
+            const versionsContainer = document.getElementById('versionsContainer');
+            const newVersion = document.createElement('div');
+            newVersion.className = 'version-container';
+            newVersion.innerHTML = `
+                <div class="version-header">
+                    <h3>Version ${versionCount}</h3>
+                    <button type="button" class="remove-btn" onclick="removeVersion(this)">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label for="version${versionCount}">Version Name:</label>
+                    <input type="text" id="version${versionCount}" name="versions[${versionCount - 1}][version]" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity${versionCount}">Quantity:</label>
+                    <input type="number" id="quantity${versionCount}" name="versions[${versionCount - 1}][quantity]" required>
+                </div>
+                <div class="form-group">
+                    <label for="image${versionCount}">Version Images:</label>
+                    <input type="file" id="image${versionCount}" name="versions[${versionCount - 1}][image]" accept="image/*" multiple required>
+                    <div id="imagePreview${versionCount}" class="image-preview"></div>
+                </div>
+            `;
+            versionsContainer.appendChild(newVersion);
+        }
+
+        function addDescription() {
+            descriptionCount++;
+            const descriptionsContainer = document.getElementById('descriptionsContainer');
+            const newDescription = document.createElement('div');
+            newDescription.className = 'description-container';
+            newDescription.innerHTML = `
+                <div class="description-header">
+                    <h3>Description ${descriptionCount}</h3>
+                    <button type="button" class="remove-btn" onclick="removeDescription(this)">Remove</button>
+                </div>
+                <div class="form-group">
+                    <textarea name="descriptions[]" required></textarea>
+                </div>
+            `;
+            descriptionsContainer.appendChild(newDescription);
+        }
+
+        function addInclusion() {
+            inclusionCount++;
+            const inclusionsContainer = document.getElementById('inclusionsContainer');
+            const newInclusion = document.createElement('div');
+            newInclusion.className = 'inclusion-container';
+            newInclusion.innerHTML = `
+                <div class="inclusion-header">
+                    <h3>Inclusion ${inclusionCount}</h3>
+                    <button type="button" class="remove-btn" onclick="removeInclusion(this)">Remove</button>
+                </div>
+                <div class="form-group">
+                    <textarea name="inclusions[]" required></textarea>
+                </div>
+            `;
+            inclusionsContainer.appendChild(newInclusion);
+        }
+
+        function removeVersion(button) {
+            button.closest('.version-container').remove();
+        }
+
+        function removeDescription(button) {
+            button.closest('.description-container').remove();
+        }
+
+        function removeInclusion(button) {
+            button.closest('.inclusion-container').remove();
+        }
+
+        document.getElementById('imageH').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imageHPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // Replace the form submission code in addProduct.ejs with this:
+document.getElementById('productForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    
+    // Add main product image
+    const mainImage = document.getElementById('imageH').files[0];
+    formData.append('imageH', mainImage);
+    
+    // Collect product data
+    const productData = {
+        name: document.getElementById('name').value,
+        price: parseFloat(document.getElementById('price').value),
+        type: document.getElementById('type').value,
+        artist: document.getElementById('artist').value,
+        description: Array.from(document.getElementsByName('descriptions[]')).map(el => el.value),
+        inclusions: Array.from(document.getElementsByName('inclusions[]')).map(el => el.value),
+        versions: []
+    };
+
+    // Collect versions data
+    const versionContainers = document.querySelectorAll('.version-container');
+versionContainers.forEach((container, index) => {
+    const versionImages = container.querySelector(`input[type="file"]`).files;
+    Array.from(versionImages).forEach(image => {
+        // Change this line to include the version index
+        formData.append(`versionImages_${index}`, image);
+    });
+
+    productData.versions.push({
+        version: container.querySelector(`input[name="versions[${index}][version]"]`).value,
+        quantity: parseInt(container.querySelector(`input[name="versions[${index}][quantity]"]`).value),
+    });
+});
+
+    // Add the product data as JSON
+    formData.append('productData', JSON.stringify(productData));
+
+    try {
+        const response = await fetch('/admin/add-product', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Product added successfully!');
+            window.location.href = '/admin/dashboard';
+        } else {
+            alert('Error adding product: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error adding product');
+    }
+});
+    </script>
+</body>
+</html>

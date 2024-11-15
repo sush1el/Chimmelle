@@ -28,11 +28,12 @@ class CartManager {
     }
     
     throw new Error('Invalid response format');
-  }
+}
 
   static async addToCart(productId) {
     try {
-      const response = await fetch('/api/cart/add', {
+      // First try adding without version
+      const cartResponse = await fetch('/api/cart/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -41,21 +42,100 @@ class CartManager {
         credentials: 'include'
       });
 
-      const result = await this.handleResponse(response, 'Failed to add item to cart');
+      // If we get a 400 error about version required, show version selector
+      if (cartResponse.status === 400) {
+        const errorData = await cartResponse.json();
+        if (errorData.message.includes('Version selection is required')) {
+          const versions = errorData.versions || [];
+          const hasAvailableVersions = versions.some(v => v.quantity > 0);
+          
+          if (!hasAvailableVersions) {
+            await Swal.fire({
+              title: 'Out of Stock',
+              text: 'Sorry, all versions of this product are currently out of stock',
+              icon: 'info',
+              confirmButtonText: 'OK'
+            });
+            return;
+          }
+
+          const selectHTML = `
+            <select id="version-select" class="swal2-select">
+              <option value="">Select a version</option>
+              ${versions.map(v => `
+                <option 
+                  value="${v.version}" 
+                  ${v.quantity === 0 ? 'disabled' : ''}
+                  style="${v.quantity === 0 ? 'color: #999;' : ''}"
+                >
+                  ${v.version}${v.quantity === 0 ? ' (Out of stock)' : ''}
+                </option>
+              `).join('')}
+            </select>
+          `;
+
+          const { value: confirmed, dismiss } = await Swal.fire({
+            title: 'Select Version',
+            html: selectHTML,
+            showCancelButton: true,
+            confirmButtonText: 'Add to Cart',
+            preConfirm: () => {
+              const select = document.getElementById('version-select');
+              const selectedVersion = select.value;
+              if (!selectedVersion) {
+                Swal.showValidationMessage('Please select a version');
+                return false;
+              }
+              return selectedVersion;
+            }
+          });
+
+          if (!confirmed || dismiss) {
+            return;
+          }
+
+          const versionResponse = await fetch('/api/cart/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              productId,
+              version: confirmed 
+            }),
+            credentials: 'include'
+          });
+
+          const result = await this.handleResponse(versionResponse, 'Failed to add item to cart');
+          await this.updateCartDisplay();
+          
+          await Swal.fire({
+            title: 'Success!',
+            text: 'Item added to cart successfully',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          });
+
+          return result;
+        }
+      }
+
+      const result = await this.handleResponse(cartResponse, 'Failed to add item to cart');
+      await this.updateCartDisplay();
       
-      // Show success message using SweetAlert2
       await Swal.fire({
         title: 'Success!',
         text: 'Item added to cart successfully',
         icon: 'success',
-        confirmButtonText: 'OK'
+        timer: 1500,
+        showConfirmButton: false
       });
 
       return result;
 
     } catch (error) {
       console.error('Error adding to cart:', error);
-      // Show error message using SweetAlert2
       await Swal.fire({
         title: 'Error!',
         text: error.message,
@@ -79,26 +159,36 @@ class CartManager {
     }
   }
 
-  static async updateQuantity(productId, quantity) {
+  static async updateQuantity(cartItemId, quantity) {
     try {
+      if (quantity < 1) {
+        throw new Error('Quantity cannot be less than 1');
+      }
+
       const response = await fetch('/api/cart/quantity', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ productId, quantity }),
+        body: JSON.stringify({ cartItemId, quantity }),
         credentials: 'include'
       });
-
-      return await this.handleResponse(response, 'Failed to update quantity');
+  
+      const result = await this.handleResponse(response, 'Error updating quantity');
+      await this.updateCartDisplay();
+      return result;
     } catch (error) {
       console.error('Error updating quantity:', error);
       throw error;
     }
   }
-
-  static async toggleSelection(productId) {
+  static async toggleSelection(cartItemId) {
     try {
+      const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
+      if (!cartItem) throw new Error('Cart item not found');
+
+      const productId = cartItem.dataset.productId;
+      
       const response = await fetch('/api/cart/toggle-selection', {
         method: 'PUT',
         headers: {
@@ -109,23 +199,7 @@ class CartManager {
       });
 
       const result = await this.handleResponse(response, 'Failed to toggle selection');
-      
-      // Update UI elements immediately after successful toggle
-      const cartItem = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
-      if (cartItem) {
-        const checkbox = cartItem.querySelector('.item-checkbox');
-        const quantityButtons = cartItem.querySelectorAll('.quantity-btn');
-        const quantityInput = cartItem.querySelector('.quantity-input');
-        
-        // Update disabled state based on checkbox
-        const isSelected = checkbox.checked;
-        quantityButtons.forEach(btn => btn.disabled = !isSelected);
-        quantityInput.disabled = !isSelected;
-      }
-
-      // Update cart totals
-      await this.updateCartTotals();
-      
+      await this.updateCartDisplay();
       return result;
     } catch (error) {
       console.error('Error toggling selection:', error);
@@ -133,64 +207,34 @@ class CartManager {
     }
   }
 
-  static async deleteFromCart(productId) {
+  static async deleteFromCart(cartItemId) {
     try {
-      // First show confirmation dialog
-      const confirmation = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-      });
-
-      // If user confirms deletion
-      if (confirmation.isConfirmed) {
-        const response = await fetch('/api/cart/delete', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ productId }),
-          credentials: 'include'
+        const response = await fetch(`/api/cart/items/${cartItemId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to delete item from cart');
-        }
-
-        const result = await response.json();
-        
-        // Show success message
-        await Swal.fire({
-          title: 'Deleted!',
-          text: 'Item has been removed from your cart.',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
-
+        await this.handleResponse(response, 'Failed to delete item from cart');
         await this.updateCartDisplay();
-        return result;
-      }
+        
+        await Swal.fire({
+            title: 'Success',
+            text: 'Item removed from cart',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+        });
     } catch (error) {
-      console.error('Error deleting from cart:', error);
-      if (error.message === 'Authentication required') {
-        window.location.href = '/login-page';
-        return;
-      }
-      
-      // Show error message
-      await Swal.fire({
-        title: 'Error!',
-        text: error.message,
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-      
-      throw error;
+        console.error('Error deleting from cart:', error);
+        await Swal.fire({
+            title: 'Error',
+            text: 'Failed to remove item from cart. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
     }
   }
 
@@ -219,170 +263,389 @@ class CartManager {
     }
   }
 
+ 
+ 
   static async updateCartDisplay() {
     try {
       const cart = await this.getCart();
-      
       const cartItems = document.querySelector('.cart-items');
       if (!cartItems) return;
-      
+  
       cartItems.innerHTML = '';
-      
       cart.items.forEach(item => {
         const product = item.product;
+        const isSelected = item.selected;
+        
+        // Find the current version details
+        const currentVersion = product.versions.find(v => v.version === item.version);
+        const currentStock = currentVersion ? currentVersion.quantity : 0;
         
         cartItems.innerHTML += `
-          <div class="cart-item" data-product-id="${product._id}">
-            <input type="checkbox" class="item-checkbox" ${item.selected ? 'checked' : ''}>
-            <img src="${product.image}" alt="${product.name}">
+          <div class="cart-item ${isSelected ? '' : 'disabled'}" 
+               data-cart-item-id="${item.cartItemId}"
+               data-product-id="${product._id}">
+            <input type="checkbox" 
+                   class="item-checkbox" 
+                   ${isSelected ? 'checked' : ''} 
+                   data-cart-item-id="${item.cartItemId}">
+            <img src="${product.imageH}" alt="${product.name}" class="product-image">
+            
             <div class="item-details">
               <h3>${product.name}</h3>
-              <p>Price: P ${product.price.toFixed(2)}</p>
+              <p> <span>Price: ₱ ${product.price.toFixed(2)}</span></p>
+              
+              <div class="version-container">
+                <select class="version-select" 
+                        data-cart-item-id="${item.cartItemId}"
+                        data-current-version="${item.version}"
+                        ${!isSelected ? 'disabled' : ''}>
+                  ${product.versions.map(v => `
+                    <option value="${v.version}" 
+                            data-stock="${v.quantity}"
+                            ${v.quantity === 0 && v.version !== item.version ? 'disabled' : ''}
+                            ${item.version === v.version ? 'selected' : ''}>
+                      ${v.version}${v.quantity === 0 ? ' (Out of stock)' : ''}
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
             </div>
+  
             <div class="quantity-control">
-              <button class="quantity-btn decrease" ${!item.selected ? 'disabled' : ''}>-</button>
-              <input type="number" value="${item.quantity}" min="1" 
-                class="quantity-input" ${!item.selected ? 'disabled' : ''}>
-              <button class="quantity-btn increase" ${!item.selected ? 'disabled' : ''}>+</button>
+              <button class="quantity-btn decrease" 
+                      data-cart-item-id="${item.cartItemId}" 
+                      ${!isSelected || item.quantity <= 1 ? 'disabled' : ''}>-</button>
+              <input type="number" 
+                     value="${item.quantity}" 
+                     min="1" 
+                     max="${currentStock}"
+                     class="quantity-input" 
+                     data-cart-item-id="${item.cartItemId}" 
+                     ${!isSelected || currentStock === 0 ? 'disabled' : ''}>
+              <button class="quantity-btn increase" 
+                      data-cart-item-id="${item.cartItemId}" 
+                      ${!isSelected || item.quantity >= currentStock ? 'disabled' : ''}>+</button>
             </div>
+                    
             <span class="item-total">
-              P ${(product.price * item.quantity).toFixed(2)}
+              ₱ ${(product.price * item.quantity).toFixed(2)}
             </span>
-            <button class="delete-btn" aria-label="Delete item">
-              <button class="delete-btn">🗑</button>
+  
+            <button class="delete-btn" data-cart-item-id="${item.cartItemId}">
+              🗑
             </button>
           </div>
         `;
       });
-      
+
+      // Add version change event listener
+      const versionSelects = document.querySelectorAll('.version-select');
+      versionSelects.forEach(select => {
+        select.addEventListener('change', async function() {
+          const cartItemId = this.dataset.cartItemId;
+          const newVersion = this.value;
+          await CartManager.changeVersion(cartItemId, newVersion);
+        });
+      });
+
+      this.setupDeleteButtons();
       await this.updateCartTotals();
     } catch (error) {
       console.error('Error updating cart display:', error);
-      if (error.message === 'Authentication required') {
-        return;
-      }
     }
   }
-   static async proceedToCheckout() {
-    try {
-      // First check if user is authenticated by trying to get cart
-      const cart = await this.getCart();
-      if (!cart) {
-        throw new Error('Unable to access cart');
-      }
 
-      const selectedItems = cart.items.filter(item => item.selected);
-      
-      if (selectedItems.length === 0) {
+  static setupDeleteButtons() {
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+        const newButton = button.cloneNode(true); // Clone to remove previous listeners
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const cartItemId = newButton.getAttribute('data-cart-item-id');
+            if (!cartItemId) {
+                console.error('No cart item ID found');
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Remove Item',
+                text: 'Are you sure you want to remove this item from your cart?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it',
+                cancelButtonText: 'No, keep it',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            });
+
+            if (result.isConfirmed) {
+                newButton.disabled = true;
+                newButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                try {
+                    await this.deleteFromCart(cartItemId);
+                } catch (error) {
+                    console.error('Error handling click event:', error);
+                } finally {
+                    newButton.disabled = false;
+                    newButton.innerHTML = '<i class="fas fa-trash"></i>';
+                }
+            }
+        });
+    });
+}
+
+static async proceedToCheckout() {
+  try {
+    // 1. Get latest cart data
+    const cart = await this.getCart();
+    if (!cart || !cart.items || cart.items.length === 0) {
+      throw new Error('Your cart is empty');
+    }
+
+    const selectedItems = cart.items.filter(item => item.selected);
+    if (selectedItems.length === 0) {
+      await Swal.fire({
+        title: 'No items selected',
+        text: 'Please select at least one item to checkout',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    // 2. Validate stock availability and versions
+    const stockValidationErrors = [];
+    for (const item of selectedItems) {
+      // Get the current version from the DOM to ensure we're using the latest
+      const cartItem = document.querySelector(`[data-cart-item-id="${item.cartItemId}"]`);
+      const versionSelect = cartItem?.querySelector('.version-select');
+      const currentVersion = versionSelect?.value || item.version;
+
+      const version = item.product.versions.find(v => v.version === currentVersion);
+      if (!version) {
+        stockValidationErrors.push(`Invalid version selected for ${item.product.name}`);
+        continue;
+      }
+      if (version.quantity < item.quantity) {
+        stockValidationErrors.push(
+          `Only ${version.quantity} units available for ${item.product.name} (${currentVersion}). You requested ${item.quantity}.`
+        );
+      }
+      // Update the item's version to match the current selection
+      item.version = currentVersion;
+    }
+
+    if (stockValidationErrors.length > 0) {
+      throw new Error('Stock availability issues:\n' + stockValidationErrors.join('\n'));
+    }
+
+    // 3. Prepare checkout data with updated versions
+    const checkoutData = {
+      items: selectedItems.map(item => ({
+        cartItemId: item.cartItemId,
+        productId: item.product._id,
+        name: item.product.name,
+        artist: item.product.artist || 'Artist',
+        price: item.product.price,
+        quantity: item.quantity,
+        imageUrl: item.product.imageH || 'https://via.placeholder.com/80',
+        version: {
+          version: item.version, // Using the updated version
+          quantity: item.product.versions.find(v => v.version === item.version).quantity,
+          sku: item.product.versions.find(v => v.version === item.version).sku || null
+        },
+        subtotal: item.product.price * item.quantity
+      })),
+      summary: {
+        subtotal: selectedItems.reduce((total, item) => 
+          total + (item.product.price * item.quantity), 0),
+        itemCount: selectedItems.length,
+        totalItems: selectedItems.reduce((total, item) => 
+          total + item.quantity, 0)
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    // 4. Store checkout data and redirect
+    try {
+      sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+      window.location.href = '/checkout';
+    } catch (storageError) {
+      console.error('Storage error:', storageError);
+      throw new Error('Unable to initialize checkout session. Please try again.');
+    }
+
+  } catch (error) {
+    console.error('Checkout error:', error);
+    
+    // Clean up any partial checkout data
+    sessionStorage.removeItem('checkoutData');
+    
+    await Swal.fire({
+      title: 'Error!',
+      text: error.message || 'Failed to proceed to checkout',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+}
+
+static async changeVersion(cartItemId, newVersion) {
+  try {
+    console.log('Starting version change...', { cartItemId, newVersion });
+    
+    const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
+    if (!cartItem) throw new Error('Cart item not found');
+
+    const productId = cartItem.dataset.productId;
+    const versionSelect = cartItem.querySelector('.version-select');
+    const currentVersion = versionSelect.dataset.currentVersion;
+
+    const response = await fetch('/api/cart/change-version', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        productId,
+        cartItemId,
+        currentVersion,
+        newVersion
+      }),
+      credentials: 'include'
+    });
+
+    const result = await this.handleResponse(response, 'Failed to change version');
+    
+    // Instead of manually updating DOM elements, refresh the entire cart display
+    await this.updateCartDisplay();
+    
+    // Clear any existing checkout data
+    sessionStorage.removeItem('checkoutData');
+    
+    return result;
+  } catch (error) {
+    console.error('Error changing version:', error);
+    throw error;
+  }
+}
+
+static initializeEventListeners() {
+  const cartItems = document.querySelector('.cart-items');
+  const checkoutButton = document.querySelector('.checkout-btn');
+  
+  console.log('Initializing cart event listeners');
+  
+  if (checkoutButton) {
+    checkoutButton.addEventListener('click', async () => {
+      try {
+        await this.proceedToCheckout();
+      } catch (error) {
+        console.error('Error during checkout:', error);
         await Swal.fire({
-          title: 'No items selected',
-          text: 'Please select at least one item to checkout',
-          icon: 'warning',
+          title: 'Error!',
+          text: error.message || 'Failed to proceed to checkout',
+          icon: 'error',
           confirmButtonText: 'OK'
         });
-        return;
       }
+    });
+  }
 
-      // Calculate total price and items count
-      const subtotal = selectedItems.reduce((total, item) => {
-        return total + (item.product.price * item.quantity);
-      }, 0);
+  if (!cartItems) {
+    console.warn('Cart items container not found');
+    return;
+  }
 
-      // Store checkout data in sessionStorage
-      const checkoutData = {
-        items: selectedItems,
-        subtotal: subtotal,
-        itemCount: selectedItems.length
-      };
-      
-      sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
-      
-      // Redirect to checkout page
-      window.location.href = '/checkout';
+  // Handle version changes and checkbox toggles
+  cartItems.addEventListener('change', async (e) => {
+    const target = e.target;
+    const cartItemId = target.dataset.cartItemId;
+    if (!cartItemId) return;
+
+    try {
+      if (target.classList.contains('item-checkbox')) {
+        console.log('Toggling item selection:', cartItemId);
+        await this.toggleSelection(cartItemId);
+      }
+      else if (target.classList.contains('version-select')) {
+        console.log('Changing version:', {
+          cartItemId,
+          newVersion: target.value
+        });
+        await this.changeVersion(cartItemId, target.value);
+        
+        // After version change, force refresh the stock display
+        const stockDisplay = document.querySelector(`.stock-status[data-cart-item-id="${cartItemId}"]`);
+        if (stockDisplay) {
+          const selectedOption = target.options[target.selectedIndex];
+          const newStock = selectedOption.dataset.stock;
+          stockDisplay.textContent = `Stock: ${newStock}`;
+        }
+      }
     } catch (error) {
-      console.error('Error proceeding to checkout:', error);
-      
-      if (error.message === 'Authentication required') {
-        window.location.href = '/login-page';
-        return;
-      }
-      
+      console.error('Error handling change event:', error);
       await Swal.fire({
         title: 'Error!',
-        text: error.message || 'Failed to proceed to checkout',
+        text: error.message,
         icon: 'error',
         confirmButtonText: 'OK'
       });
     }
+  });
+
+  // Handle quantity changes and delete button clicks
+  cartItems.addEventListener('click', async (e) => {
+    const target = e.target;
+    const cartItem = target.closest('.cart-item');
+    const cartItemId = cartItem?.dataset.cartItemId;
+    if (!cartItemId) return;
+
+    try {
+      // Delete item
+      if (target.classList.contains('delete-btn') || target.closest('.delete-btn')) {
+        await this.deleteFromCart(cartItemId);
+        return;
+      }
+
+      // Handle quantity buttons for selected items
+      if (!cartItem.classList.contains('disabled') && target.classList.contains('quantity-btn')) {
+        const quantityInput = cartItem.querySelector('.quantity-input');
+        let quantity = parseInt(quantityInput.value);
+
+        if (target.classList.contains('decrease')) {
+          quantity = Math.max(1, quantity - 1);
+        } else if (target.classList.contains('increase')) {
+          quantity += 1;
+        }
+
+        await this.updateQuantity(cartItemId, quantity);
+      }
+    } catch (error) {
+      console.error('Error handling click event:', error);
+      await Swal.fire({
+        title: 'Error!',
+        text: error.message,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  });
   }
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-  CartManager.updateCartDisplay().catch(error => {
-    console.error('Failed to initialize cart:', error);
+  document.addEventListener('DOMContentLoaded', () => {
+    CartManager.updateCartDisplay().catch(error => {
+      console.error('Failed to initialize cart:', error);
+    });
+    CartManager.initializeEventListeners();
   });
   
-  const cartItems = document.querySelector('.cart-items');
-  if (cartItems) {
-    // Handle quantity changes and delete button clicks
-    cartItems.addEventListener('click', async (e) => {
-      try {
-        const cartItem = e.target.closest('.cart-item');
-        if (!cartItem) return;
-        
-        const productId = cartItem.dataset.productId;
-        
-        // Handle delete button click
-        if (e.target.closest('.delete-btn')) {
-          await CartManager.deleteFromCart(productId);
-          return;
-        }
-        
-        // Handle quantity buttons
-        if (e.target.classList.contains('quantity-btn')) {
-          const quantityInput = cartItem.querySelector('.quantity-input');
-          let quantity = parseInt(quantityInput.value);
-          
-          if (e.target.classList.contains('decrease')) {
-            quantity = Math.max(1, quantity - 1);
-          } else if (e.target.classList.contains('increase')) {
-            quantity += 1;
-          }
-          
-          await CartManager.updateQuantity(productId, quantity);
-          await CartManager.updateCartDisplay();
-        }
-      } catch (error) {
-        if (error.message === 'Authentication required') {
-          return;
-        }
-        console.error('Failed to update cart:', error);
-      }
-    });
-    
-    // Handle checkbox changes
-    cartItems.addEventListener('change', async (e) => {
-      try {
-        if (e.target.classList.contains('item-checkbox')) {
-          const cartItem = e.target.closest('.cart-item');
-          const productId = cartItem.dataset.productId;
-          await CartManager.toggleSelection(productId);
-        }
-      } catch (error) {
-        if (error.message === 'Authentication required') {
-          return;
-        }
-        alert('Failed to update selection: ' + error.message);
-      }
-    });
-  }
-  const checkoutBtn = document.querySelector('.checkout-btn');
-  if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
-      CartManager.proceedToCheckout();
-    });
-  }
-});
+
 
 window.CartManager = CartManager;

@@ -262,3 +262,7 @@ h1 {
 .return-to-store:hover {
   text-decoration: underline;
 }
+
+.hidden {
+  display: none;
+}

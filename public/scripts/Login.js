@@ -5,7 +5,7 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
     const password = document.querySelector('[placeholder="Password"]').value;
 
     try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -13,17 +13,21 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
             body: JSON.stringify({ email, password })
         });
 
-        // Don't parse JSON if it's a redirect
-        if (response.redirected) {
-            window.location.href = response.url;
-            return;
-        }
-
         const data = await response.json();
 
         if (response.ok) {
-            window.location.href = '/';
+            if (data.isAdmin) {
+                // Admin login successful
+                window.location.href = '/admin/dashboard';
+            } else {
+                // Regular user login successful
+                window.location.href = '/';
+            }
+        } else if (response.status === 401 && data.needsVerification) {
+            // Handle unverified user case
+            alert('Please verify your email before logging in.');
         } else {
+            // Handle other error cases
             alert(data.msg || 'Login failed');
         }
     } catch (error) {

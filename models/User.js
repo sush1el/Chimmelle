@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// Cart Item Schema (unchanged)
+// Updated Cart Item Schema to include version
 const CartItemSchema = new mongoose.Schema({
+  cartItemId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
   product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
-  selected: { type: Boolean, default: true }
+  selected: { type: Boolean, default: true },
+  version: { type: String, required: false } // Added version field
 });
 
-// Updated Address Schema with structured Philippine location fields
+// Address Schema remains the same
 const AddressSchema = new mongoose.Schema({
   street: { type: String, required: true },
-  // Philippine location fields
   region: { 
     code: { type: String, required: true },
     name: { type: String, required: true }
@@ -35,7 +36,7 @@ const AddressSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// Rest of User Schema remains the same
+// User Schema remains the same
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -58,7 +59,7 @@ const UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Existing middleware and methods remain the same
+// Existing middleware remains the same
 UserSchema.pre('save', async function(next) {
     if (!this.isModified('password')) {
         return next();
@@ -79,10 +80,10 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-// Existing cart methods remain the same
-UserSchema.methods.addToCart = async function(productId) {
+// Updated cart methods to handle versions
+UserSchema.methods.addToCart = async function(productId, version = null) {
   const existingItemIndex = this.cart.items.findIndex(
-    item => item.product.toString() === productId.toString()
+    item => item.product.toString() === productId.toString() && item.version === version
   );
 
   if (existingItemIndex > -1) {
@@ -91,29 +92,27 @@ UserSchema.methods.addToCart = async function(productId) {
     this.cart.items.push({
       product: productId,
       quantity: 1,
-      selected: true
+      selected: true,
+      version: version
     });
   }
-
   return this.save();
 };
 
-UserSchema.methods.updateCartItemQuantity = async function(productId, quantity) {
-  const item = this.cart.items.find(
-    item => item.product.toString() === productId.toString()
-  );
+UserSchema.methods.updateCartItemQuantity = async function(cartItemId, quantity) {
+  const item = this.cart.items.find(item => item.cartItemId.toString() === cartItemId.toString());
 
   if (item) {
     item.quantity = quantity;
     return this.save();
   }
-  
   throw new Error('Item not found in cart');
 };
 
-UserSchema.methods.toggleCartItemSelection = async function(productId) {
+UserSchema.methods.toggleCartItemSelection = async function(productId, version = null) {
   const item = this.cart.items.find(
-    item => item.product.toString() === productId.toString()
+    item => item.product.toString() === productId.toString() &&
+           item.version === version // Match both product ID and version
   );
 
   if (item) {
@@ -124,5 +123,28 @@ UserSchema.methods.toggleCartItemSelection = async function(productId) {
   throw new Error('Item not found in cart');
 };
 
+UserSchema.methods.toggleCartItemSelection = async function(productId) {
+  const cartItem = this.cart.items.find(
+    item => item.product.toString() === productId.toString()
+  );
+  
+  if (!cartItem) {
+    throw new Error('Item not found in cart');
+  }
+  
+  cartItem.selected = !cartItem.selected;
+  return this.save();
+};
+
+// New method to update item version
+UserSchema.methods.updateCartItemVersion = async function(cartItemId, newVersion) {
+  const item = this.cart.items.find(item => item.cartItemId.toString() === cartItemId.toString());
+
+  if (item) {
+    item.version = newVersion;
+    return this.save();
+  }
+  throw new Error('Item not found in cart');
+};
 const User = mongoose.model('User', UserSchema);
 module.exports = User;

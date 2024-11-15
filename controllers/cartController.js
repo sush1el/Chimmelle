@@ -18,7 +18,7 @@ const cartController = {
   // Add item to cart
   async addToCart(req, res) {
     try {
-      const { productId } = req.body;
+      const { productId, version } = req.body;
       
       if (!productId) {
         return res.status(400).json({ message: 'Product ID is required' });
@@ -30,10 +30,28 @@ const cartController = {
         return res.status(404).json({ message: 'Product not found' });
       }
 
+      // If product has versions, verify the version selection
+      if (product.versions && product.versions.length > 0) {
+        if (!version) {
+          return res.status(400).json({ 
+            message: 'Version selection is required for this product',
+            versions: product.versions // Include versions in error response
+          });
+        }
+
+        const selectedVersion = product.versions.find(v => v.version === version);
+        if (!selectedVersion) {
+          return res.status(400).json({ message: 'Invalid version selected' });
+        }
+
+        if (selectedVersion.quantity === 0) {
+          return res.status(400).json({ message: 'Selected version is out of stock' });
+        }
+      }
+
       const user = await User.findById(req.user._id);
-      await user.addToCart(productId);
+      await user.addToCart(productId, version);
       
-      // Fetch updated user with populated cart
       const updatedUser = await User.findById(user._id)
         .populate('cart.items.product');
       
@@ -44,30 +62,26 @@ const cartController = {
       
     } catch (error) {
       console.error('Add to cart error:', error);
-      res.status(500).json({ message: 'Error adding item to cart', error: error.message });
+      res.status(500).json({ 
+        message: 'You must be logged in to add items to cart', 
+        error: error.message 
+      });
     }
   },
 
   // Update item quantity
   async updateQuantity(req, res) {
     try {
-      const { productId, quantity } = req.body;
-      
-      if (!productId || !quantity) {
-        return res.status(400).json({ message: 'Product ID and quantity are required' });
-      }
-
-      if (quantity < 1) {
-        return res.status(400).json({ message: 'Quantity must be at least 1' });
-      }
+      const { cartItemId, quantity } = req.body;
 
       const user = await User.findById(req.user._id);
-      await user.updateCartItemQuantity(productId, quantity);
-      
-      const updatedUser = await User.findById(user._id)
-        .populate('cart.items.product');
-      
-      res.json(updatedUser.cart);
+      await user.updateCartItemQuantity(cartItemId, quantity);
+
+      const updatedUser = await User.findById(user._id).populate('cart.items.product');
+      res.json({
+        message: 'Quantity updated successfully',
+        cart: updatedUser.cart
+      });
     } catch (error) {
       console.error('Update quantity error:', error);
       res.status(500).json({ message: 'Error updating quantity', error: error.message });
@@ -84,23 +98,43 @@ const cartController = {
       }
 
       const user = await User.findById(req.user._id);
-      await user.toggleCartItemSelection(productId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const cartItem = user.cart.items.find(
+        item => item.product.toString() === productId.toString()
+      );
+
+      if (!cartItem) {
+        return res.status(404).json({ message: 'Item not found in cart' });
+      }
+
+      cartItem.selected = !cartItem.selected;
+      await user.save();
       
       const updatedUser = await User.findById(user._id)
         .populate('cart.items.product');
       
-      res.json(updatedUser.cart);
+      res.json({
+        message: 'Selection toggled successfully',
+        cart: updatedUser.cart
+      });
     } catch (error) {
       console.error('Toggle selection error:', error);
-      res.status(500).json({ message: 'Error toggling selection', error: error.message });
+      res.status(500).json({ 
+        message: 'Error toggling selection', 
+        error: error.message 
+      });
     }
   },
+
   async deleteFromCart(req, res) {
     try {
-      const { productId } = req.body;
+      const cartItemId = req.params.cartItemId; // Get cartItemId from URL params
       
-      if (!productId) {
-        return res.status(400).json({ message: 'Product ID is required' });
+      if (!cartItemId) {
+        return res.status(400).json({ message: 'Cart Item ID is required' });
       }
 
       const user = await User.findById(req.user._id);
@@ -110,7 +144,7 @@ const cartController = {
   
       // Check if the item exists in the cart
       const itemIndex = user.cart.items.findIndex(
-        item => item.product.toString() === productId.toString()
+        item => item.cartItemId.toString() === cartItemId.toString()
       );
 
       if (itemIndex === -1) {
@@ -132,6 +166,62 @@ const cartController = {
     } catch (error) {
       console.error('Delete from cart error:', error);
       res.status(500).json({ message: 'Error removing item from cart', error: error.message });
+    }
+  },
+  async changeVersion(req, res) {
+    try {
+      const { productId, cartItemId, currentVersion, newVersion } = req.body;
+      
+      if (!productId || !newVersion || !currentVersion) {
+        return res.status(400).json({ 
+          message: 'Product ID, current version, and new version are required' 
+        });
+      }
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const cartItem = user.cart.items.find(
+        item => item.cartItemId.toString() === cartItemId.toString()
+      );
+
+      if (!cartItem) {
+        return res.status(404).json({ message: 'Item not found in cart' });
+      }
+
+      // Verify the product and version
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+
+      const selectedVersion = product.versions.find(v => v.version === newVersion);
+      if (!selectedVersion) {
+        return res.status(400).json({ message: 'Invalid version selected' });
+      }
+
+      if (selectedVersion.quantity === 0) {
+        return res.status(400).json({ message: 'Selected version is out of stock' });
+      }
+
+      cartItem.version = newVersion;
+      await user.save();
+
+      const updatedUser = await User.findById(user._id)
+        .populate('cart.items.product');
+        
+      res.json({
+        message: 'Version updated successfully',
+        cart: updatedUser.cart
+      });
+    } catch (error) {
+      console.error('Change version error:', error);
+      res.status(500).json({ 
+        message: 'Error changing version', 
+        error: error.message 
+      });
     }
   }
 };

@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Admin = require("../models/Admin");
 const UserVerification = require('../models/UserVerification');
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
@@ -424,3 +425,148 @@ exports.checkVerification = async (req, res) => {
     return res.status(500).json({ verified: false });
   }
 };
+
+// authController.js - Add this new admin login function
+exports.adminLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // First check if it's an admin account
+    let admin = await Admin.findOne({ email }).select('+password');
+    
+    if (admin) {
+      const isMatch = await bcrypt.compare(password, admin.password);
+      
+      if (!isMatch) {
+        return res.status(400).json({ msg: 'Invalid credentials' });
+      }
+
+      // Create admin token with role
+      const token = jwt.sign(
+        { 
+          userId: admin._id,
+          role: admin.role,
+          isAdmin: true 
+        }, 
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Update last login
+      admin.lastLogin = new Date();
+      await admin.save();
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json({ 
+        success: true,
+        isAdmin: true
+      });
+    }
+
+    // If not an admin, proceed with regular user login
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ msg: 'Invalid credentials' });
+    }
+
+    if (!user.verified) {
+      return res.status(401).json({ 
+        msg: 'Email not verified. Please check your email for verification link.',
+        needsVerification: true 
+      });
+    }
+
+    const token = jwt.sign(
+      { 
+        userId: user._id,
+        role: 'user',
+        isAdmin: false
+      }, 
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({ 
+      success: true,
+      isAdmin: false 
+    });
+
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ msg: 'Server error during login' });
+  }
+};
+
+exports.createAdmin = async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+    
+    // Check if requester is super_admin (assuming we get this from the JWT token)
+    if (req.admin.role !== 'super_admin') {
+      return res.status(403).json({ msg: 'Only super admins can create admin accounts' });
+    }
+
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({ msg: 'All fields are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ msg: 'Invalid email format' });
+    }
+
+    // Validate password using existing password validation
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        msg: 'Password does not meet requirements',
+        errors: passwordValidation.errors
+      });
+    }
+
+    // Check if admin already exists
+    let adminExists = await Admin.findOne({ 
+      $or: [{ email }, { username }] 
+    });
+    
+    if (adminExists) {
+      return res.status(400).json({ 
+        msg: 'An admin with this email or username already exists' 
+      });
+    }
+
+    // Create new admin
+    const newAdmin = new Admin({
+      username,
+      email,
+      password,
+      role: role || 'admin' // Default to 'admin' if not specified
+    });
+
+    await newAdmin.save();
+
+    res.status(201).json({ 
+      success: true,
+      msg: 'Admin account created successfully' 
+    });
+
+  } catch (error) {
+    console.error('Create admin error:', error);
+    res.status(500).json({ msg: 'Server error during admin creation' });
+  }
+};
+

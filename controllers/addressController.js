@@ -41,7 +41,7 @@ class AddressController {
                 });
             }
 
-            const MAX_ADDRESSES = 10;
+            const MAX_ADDRESSES = 3;
             if (user.addresses.length >= MAX_ADDRESSES) {
                 return res.status(400).json({
                     success: false,
