@@ -134,7 +134,9 @@
             <input type="number" id="quantity-input" class="quantity-input" value="1" min="1" readonly>
             <button class="quantity-btn" id="incrementBtn">+</button>
         </div>
-        <button class="add-to-cart-btn" data-product-id="<%= product._id %>">Add to Cart</button>
+        <button class="add-to-cart-btn" data-product-id="<%= product._id %>">
+            <%= product.availability === 'pre-order' ? 'Pre-order' : 'Add to Cart' %>
+        </button>
     </div>
 </div>
 

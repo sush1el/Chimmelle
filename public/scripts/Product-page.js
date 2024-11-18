@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const BUTTON_STATES = {
         NORMAL: {
-            text: 'Add to Cart',
+            text: addToCartBtn.textContent, // This will now be either "Pre-order" or "Add to Cart"
             disabled: false
         },
         LOADING: {

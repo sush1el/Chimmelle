@@ -273,7 +273,7 @@ static async addToCart(productId, quantityOrOptions) {
       });
       
       if (subtotalElement) {
-        subtotalElement.textContent = `Total Price: P ${subtotal.toFixed(2)}`;
+        subtotalElement.textContent = `₱ ${subtotal.toFixed(2)}`;
       }
       if (itemCountElement) {
         itemCountElement.textContent = `Selected Products: ${selectedItemCount}`;

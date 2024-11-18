@@ -38,6 +38,7 @@
                         <th>Price</th>
                         <th>Type</th>
                         <th>Artist</th>
+                        <th>Availability</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -52,6 +53,7 @@
                                 <td>₱ <%= product.price.toLocaleString() %></td>
                                 <td><%= product.type %></td>
                                 <td><%= product.artist %></td>
+                                <td><%= product.availability %></td>
                                 <td>
                                     <a href="/admin/edit-product/<%= product._id %>" class="btn">Edit</a>
                                     <button onclick="deleteProduct('<%= product._id %>')" class="btn" style="background-color: #ff4d4d;">Delete</button>
@@ -60,7 +62,7 @@
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="6" class="empty-message">No products available.</td>
+                            <td colspan="7" class="empty-message">No products available.</td>
                         </tr>
                     <% } %>
                 </tbody>
