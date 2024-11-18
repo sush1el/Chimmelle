@@ -18,56 +18,63 @@ const cartController = {
   // Add item to cart
   async addToCart(req, res) {
     try {
-      const { productId, version } = req.body;
-      
-      if (!productId) {
-        return res.status(400).json({ message: 'Product ID is required' });
-      }
-
-      // Verify product exists
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(404).json({ message: 'Product not found' });
-      }
-
-      // If product has versions, verify the version selection
-      if (product.versions && product.versions.length > 0) {
-        if (!version) {
-          return res.status(400).json({ 
-            message: 'Version selection is required for this product',
-            versions: product.versions // Include versions in error response
-          });
+        const { productId, version, quantity = 1 } = req.body;  // Extract quantity with default value of 1
+        
+        if (!productId) {
+            return res.status(400).json({ message: 'Product ID is required' });
         }
 
-        const selectedVersion = product.versions.find(v => v.version === version);
-        if (!selectedVersion) {
-          return res.status(400).json({ message: 'Invalid version selected' });
+        // Verify product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
         }
 
-        if (selectedVersion.quantity === 0) {
-          return res.status(400).json({ message: 'Selected version is out of stock' });
-        }
-      }
+        // If product has versions, verify the version selection
+        if (product.versions && product.versions.length > 0) {
+            if (!version) {
+                return res.status(400).json({ 
+                    message: 'Version selection is required for this product',
+                    versions: product.versions
+                });
+            }
 
-      const user = await User.findById(req.user._id);
-      await user.addToCart(productId, version);
-      
-      const updatedUser = await User.findById(user._id)
-        .populate('cart.items.product');
-      
-      res.json({
-        message: 'Item added to cart successfully',
-        cart: updatedUser.cart
-      });
-      
+            const selectedVersion = product.versions.find(v => v.version === version);
+            if (!selectedVersion) {
+                return res.status(400).json({ message: 'Invalid version selected' });
+            }
+
+            if (selectedVersion.quantity === 0) {
+                return res.status(400).json({ message: 'Selected version is out of stock' });
+            }
+
+            // Check if requested quantity is available
+            if (quantity > selectedVersion.quantity) {
+                return res.status(400).json({ 
+                    message: `Only ${selectedVersion.quantity} items available in stock`
+                });
+            }
+        }
+
+        const user = await User.findById(req.user._id);
+        await user.addToCart(productId, version, quantity);  // Pass quantity to addToCart
+        
+        const updatedUser = await User.findById(user._id)
+            .populate('cart.items.product');
+        
+        res.json({
+            message: 'Item added to cart successfully',
+            cart: updatedUser.cart
+        });
+        
     } catch (error) {
-      console.error('Add to cart error:', error);
-      res.status(500).json({ 
-        message: 'You must be logged in to add items to cart', 
-        error: error.message 
-      });
+        console.error('Add to cart error:', error);
+        res.status(500).json({ 
+            message: 'You must be logged in to add items to cart', 
+            error: error.message 
+        });
     }
-  },
+},
 
   // Update item quantity
   async updateQuantity(req, res) {

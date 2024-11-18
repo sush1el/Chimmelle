@@ -15,12 +15,13 @@
     <div class="welcome-message">
         <p>Welcome to our website</p>
       </div>
+
     <nav class="navbar">
         <div class="nav-left">
             <a href="/">HOME</a>
             <a href="#">ARTISTS</a>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle">SHOP</a>
+                <a href="shop" class="dropdown-toggle">SHOP</a>
                 <div class="dropdown-menu">
                     <a href="/albums">Albums</a>
                     <a href="/merchandise">Pre-order</a>
@@ -41,7 +42,7 @@
             <% if (user) { %>
                 <div class="dropdown">
                     <a href="#">
-                        <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+                        <img class="profile-user" src="resources/profile.png" alt="Profile">
                     </a>
                     <div class="dropdown-menu">
                         <a style="font-weight: bold;" href="/account">Account</a>
@@ -54,9 +55,11 @@
                     </button>
                 </a>
             <% } else { %>   
+                <div class="dropdown">
                 <a href="/login-page">
-                    <img class="profile-user" src="resources/profile.jpg" alt="Profile">
+                    <img class="profile-user" src="resources/profile.png" alt="Profile">
                 </a>
+                </div>
                 <a class ="hidden" href="/cart">
                     <button class="cart-button">
                         <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
@@ -83,7 +86,7 @@
                 </div>
                 <div class="product-info">
                 <h3 class="product-name"><%= product.name %></h3>
-                <p class="product-price">$<%= product.price.toFixed(2) %></p>
+                <p class="product-price">₱<%= product.price.toFixed(2) %></p>
                 </a>
                 <button class="choose-options-btn">Add to Cart</button>
             </div>
@@ -111,7 +114,7 @@
             <div class="footer-section">
                 <h2>Quick Links</h2>
                 <ul class="footer-links">
-                    <li><a href="/products">Products</a></li>
+                    <li><a href="/shop">Products</a></li>
                     <li><a href="/artists">Artists</a></li>
                 </ul>
                 <div class="social-links">
@@ -134,7 +137,6 @@
     </footer>
     <script src="scripts/Homepage.js"></script>
     <script src="scripts/Cart.js"></script>
-    <script src="scripts/Footer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 </body>

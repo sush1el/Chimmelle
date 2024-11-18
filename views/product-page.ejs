@@ -4,56 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BABYMONSTER Album Pre-order</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/navbar.css">
     <link rel="stylesheet" href="/styles/product-page.css">
+    <link rel="stylesheet" href="/styles/details.css">
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar">
-      <div class="nav-left">
-          <a href="/">HOME</a>
-          <a href="#">ARTISTS</a>
-          <a href="#">SHOP</a>
-          <a href="#">SUPPORT</a>
-      </div>
-      <div class="nav-center">
-          <img class= "logo" src="/resources/logo.jpg" alt="Logo" class="logo">
-      </div>
-      <div class="search-container">
-          <i class="fa-solid fa-magnifying-glass search-icon"></i>
-          <input type="text" placeholder="Search for...">
-          <% if (user) { %>
+        <div class="nav-left">
+            <a href="/">HOME</a>
+            <a href="#">ARTISTS</a>
             <div class="dropdown">
-                <a href="#">
-                    <img class="profile-user" src="/resources/profile.jpg" alt="Profile">
-                </a>
+                <a href="shop" class="dropdown-toggle">SHOP</a>
                 <div class="dropdown-menu">
-                    <a style="font-weight: bold;" href="/account">Account</a>
-                    <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+                    <a href="/albums">Albums</a>
+                    <a href="/merchandise">Pre-order</a>
+                    <a href="/collectibles">Onhand</a>
+                    <a href="/accessories">Lightsticks</a>
+                    <a href="/accessories">Merchandise</a>
+                    <a href="/accessories">All Products</a>
                 </div>
             </div>
-            <a href="/cart">
-                <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                </button>
-            </a>
-        <% } else { %>   
-            <a href="/login-page">
-                <img class="profile-user" src="/resources/profile.jpg" alt="Profile">
-            </a>
-            <a class ="hidden" href="/cart">
-                <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                </button>
-            </a>
-        <% } %>
-      </div>
-  </nav>
-
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class= "logo" src="/resources/logo.jpg" alt="Logo" class="logo">
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
+            <% if (user) { %>
+                <div class="dropdown">
+                    <a href="#">
+                        <img class="profile-user" src="/resources/profile.png" alt="Profile">
+                    </a>
+                    <div class="dropdown-menu">
+                        <a style="font-weight: bold;" href="/account">Account</a>
+                        <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+                    </div>
+                </div>
+                <a href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
+            <% } else { %>   
+                <div class="dropdown">
+                <a href="/login-page">
+                    <img class="profile-user" src="/resources/profile.png" alt="Profile">
+                </a>
+                </div>
+                <a class ="hidden" href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
+            <% } %>
+        </div>
+    </nav>
   
 <div class="main-content">
     <div class="product-images">
-        <img src="<%= product.imageH %>" alt="Main Product Image" class="main-image" id="mainImage">
+        <div class="main-image-wrapper">
+            <img src="<%= product.imageH %>" alt="Main Product Image" class="main-image" id="mainImage">
+            <button class="nav-button prev" id="prevButton">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="nav-button next" id="nextButton">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
         <div class="thumbnail-container">
             <!-- Initial header thumbnail -->
             <img src="<%= product.imageH %>" alt="Header Thumbnail" class="thumbnail">
@@ -71,35 +93,35 @@
     <div class="product-info">
         <p class="product-artist"><%= product.artist %></p>
         <h1 class="product-title"><%= product.name %></h1>
-        <p class="product-price">$<%= product.price.toFixed(2) %></p>
+        <p class="product-price">₱<%= product.price.toFixed(2) %></p>
         
-        <label for="versionSelect">Choose Version:</label>
+        <p class="version">Version</p>
         <select id="versionSelect" class="version-select">
             <% product.versions.forEach((version, index) => { %>
                 <option value="<%= index %>"><%= version.version %></option>
             <% }) %>
         </select>
         <div class="expandable-section">
-          <div class="expandable-header">
-            <span>Product Information</span>
-            <span class="expand-icon">+</span>
-          </div>
-          <div class="expandable-content">
-            <ul class="product-description-list">
-              <% product.description.forEach(item => { %>
-                <li><%= item %></li>
-              <% }) %>
-            </ul>
-          </div>
+            <div class="expandable-header">
+                <span><i class="fas fa-info-circle"></i> Product Information</span>
+                <span class="expand-icon">+</span>
+            </div>
+            <div class="expandable-content">
+                <ul>
+                    <% product.description.forEach(item => { %>
+                        <li><%= item %></li>
+                    <% }) %>
+                </ul>
+            </div>
         </div>
         
         <div class="expandable-section">
             <div class="expandable-header">
-                <span>Inclusions</span>
+                <span><i class="fas fa-box-open"></i> Inclusions</span>
                 <span class="expand-icon">+</span>
             </div>
             <div class="expandable-content">
-                <ul class="product-inclusions-list">
+                <ul>
                     <% product.inclusions.forEach(inclusion => { %>
                         <li><%= inclusion %></li>
                     <% }) %>
@@ -107,9 +129,16 @@
             </div>
         </div>
         <p class="stock-info" id="stockInfo"><%= product.totalQuantity %> items left in stock</p>
+        <div class="quantity-selector">
+            <button class="quantity-btn" id="decrementBtn">-</button>
+            <input type="number" id="quantity-input" class="quantity-input" value="1" min="1" readonly>
+            <button class="quantity-btn" id="incrementBtn">+</button>
+        </div>
         <button class="add-to-cart-btn" data-product-id="<%= product._id %>">Add to Cart</button>
     </div>
 </div>
+
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
       const mainImage = document.getElementById('mainImage');
@@ -143,20 +172,43 @@
           }
       });
   
-      // Expandable sections for product information and inclusions
       document.querySelectorAll('.expandable-header').forEach(header => {
-          header.addEventListener('click', () => {
-              const content = header.nextElementSibling;
-              const icon = header.querySelector('.expand-icon');
-              if (content.style.display === 'block') {
-                  content.style.display = 'none';
-                  icon.textContent = '+';
-              } else {
-                  content.style.display = 'block';
-                  icon.textContent = '-';
-              }
-          });
-      });
+    header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('.expand-icon');
+        
+        // Toggle current section only
+        const isActive = header.classList.contains('active');
+        
+        if (!isActive) {
+            content.classList.add('active');
+            header.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + 'px';
+            icon.textContent = '−';
+        } else {
+            content.classList.remove('active');
+            header.classList.remove('active');
+            content.style.maxHeight = '0';
+            icon.textContent = '+';
+        }
+    });
+});
+
+// Add keyboard accessibility
+document.querySelectorAll('.expandable-header').forEach(header => {
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('role', 'button');
+    header.setAttribute('aria-expanded', 'false');
+    
+    header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            header.click();
+            header.setAttribute('aria-expanded', 
+                header.classList.contains('active') ? 'true' : 'false');
+        }
+    });
+});
   
       // Thumbnail gallery to change the main image
       document.querySelectorAll('.thumbnail').forEach(thumb => {

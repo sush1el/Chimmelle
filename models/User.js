@@ -81,20 +81,23 @@ UserSchema.pre('save', function(next) {
 });
 
 // Updated cart methods to handle versions
-UserSchema.methods.addToCart = async function(productId, version = null) {
-  const existingItemIndex = this.cart.items.findIndex(
-    item => item.product.toString() === productId.toString() && item.version === version
+UserSchema.methods.addToCart = async function(productId, version, quantity = 1) {
+  const cartItemIndex = this.cart.items.findIndex(item => 
+      item.product.toString() === productId && 
+      (!version || item.version === version)
   );
 
-  if (existingItemIndex > -1) {
-    this.cart.items[existingItemIndex].quantity += 1;
+  if (cartItemIndex >= 0) {
+      // If item exists, update quantity
+      this.cart.items[cartItemIndex].quantity += quantity;
   } else {
-    this.cart.items.push({
-      product: productId,
-      quantity: 1,
-      selected: true,
-      version: version
-    });
+      // If item doesn't exist, add new item with specified quantity
+      this.cart.items.push({
+          product: productId,
+          version: version,
+          quantity: quantity,
+          selected: true
+      });
   }
   return this.save();
 };

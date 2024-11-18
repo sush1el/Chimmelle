@@ -138,6 +138,21 @@
 .back-btn:hover {
     background-color: #555;
 }
+
+.form-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        background-color: white;
+        cursor: pointer;
+    }
+    
+    .form-select:focus {
+        outline: none;
+        border-color: #da9e9f;
+    }
     </style>
 </head>
 <body>
@@ -157,7 +172,21 @@
 
             <div class="form-group">
                 <label for="type">Type:</label>
-                <input type="text" id="type" name="type" required>
+                <select id="type" name="type" required class="form-select">
+                    <option value="">Select Type</option>
+                    <option value="album">Album</option>
+                    <option value="lightstick">Lightstick</option>
+                    <option value="merchandise">Merchandise</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="availability">Availability:</label>
+                <select id="availability" name="availability" required class="form-select">
+                    <option value="">Select Availability</option>
+                    <option value="pre-order">Pre-order</option>
+                    <option value="on-hand">On-hand</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -331,6 +360,7 @@ document.getElementById('productForm').addEventListener('submit', async function
         name: document.getElementById('name').value,
         price: parseFloat(document.getElementById('price').value),
         type: document.getElementById('type').value,
+        availability: document.getElementById('availability').value,  // Add this line
         artist: document.getElementById('artist').value,
         description: Array.from(document.getElementsByName('descriptions[]')).map(el => el.value),
         inclusions: Array.from(document.getElementsByName('inclusions[]')).map(el => el.value),

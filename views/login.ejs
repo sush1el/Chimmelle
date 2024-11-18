@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chimelle Shop</title>
+    <link rel="stylesheet" href="styles/navbar.css">
     <link rel="stylesheet" href="styles/login.css">
     <link rel="stylesheet" href="styles/Footer.css"> 
 </head>
@@ -26,14 +27,16 @@
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input type="text" placeholder="Search for...">
-            <a href="/login-page">
-                <img class="profile-user" src="resources/profile.jpg" alt="Profile">
-            </a>
-            <a class="hidden" href="#">
-                <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart 
-                </button>
-            </a>
+            <div class="dropdown">
+                <a href="/login-page">
+                    <img class="profile-user" src="resources/profile.png" alt="Profile">
+                </a>
+                </div>
+                <a class ="hidden" href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
         </div>
     </nav>
 

@@ -30,121 +30,141 @@ class CartManager {
     throw new Error('Invalid response format');
 }
 
-  static async addToCart(productId) {
-    try {
-      // First try adding without version
+static async addToCart(productId, quantityOrOptions) {
+  try {
+      let quantity = 1;
+      let version = null;
+      
+      // Handle different parameter formats
+      if (typeof quantityOrOptions === 'number') {
+          quantity = quantityOrOptions;
+      } else if (typeof quantityOrOptions === 'object') {
+          quantity = quantityOrOptions.quantity || 1;
+          version = quantityOrOptions.version;
+      }
+
+      const initialPayload = {
+          productId,
+          quantity: parseInt(quantity)
+      };
+      
+      if (version) {
+          initialPayload.version = version;
+      }
+
       const cartResponse = await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ productId }),
-        credentials: 'include'
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(initialPayload),
+          credentials: 'include'
       });
 
       // If we get a 400 error about version required, show version selector
       if (cartResponse.status === 400) {
-        const errorData = await cartResponse.json();
-        if (errorData.message.includes('Version selection is required')) {
-          const versions = errorData.versions || [];
-          const hasAvailableVersions = versions.some(v => v.quantity > 0);
-          
-          if (!hasAvailableVersions) {
-            await Swal.fire({
-              title: 'Out of Stock',
-              text: 'Sorry, all versions of this product are currently out of stock',
-              icon: 'info',
-              confirmButtonText: 'OK'
-            });
-            return;
-          }
-
-          const selectHTML = `
-            <select id="version-select" class="swal2-select">
-              <option value="">Select a version</option>
-              ${versions.map(v => `
-                <option 
-                  value="${v.version}" 
-                  ${v.quantity === 0 ? 'disabled' : ''}
-                  style="${v.quantity === 0 ? 'color: #999;' : ''}"
-                >
-                  ${v.version}${v.quantity === 0 ? ' (Out of stock)' : ''}
-                </option>
-              `).join('')}
-            </select>
-          `;
-
-          const { value: confirmed, dismiss } = await Swal.fire({
-            title: 'Select Version',
-            html: selectHTML,
-            showCancelButton: true,
-            confirmButtonText: 'Add to Cart',
-            preConfirm: () => {
-              const select = document.getElementById('version-select');
-              const selectedVersion = select.value;
-              if (!selectedVersion) {
-                Swal.showValidationMessage('Please select a version');
-                return false;
+          const errorData = await cartResponse.json();
+          if (errorData.message.includes('Version selection is required')) {
+              const versions = errorData.versions || [];
+              const hasAvailableVersions = versions.some(v => v.quantity >= quantity);
+              
+              if (!hasAvailableVersions) {
+                  await Swal.fire({
+                      title: 'Out of Stock',
+                      text: 'Sorry, all versions of this product are currently out of stock',
+                      icon: 'info',
+                      confirmButtonText: 'OK'
+                  });
+                  return;
               }
-              return selectedVersion;
-            }
-          });
 
-          if (!confirmed || dismiss) {
-            return;
+              const selectHTML = `
+                  <select id="version-select" class="swal2-select">
+                      <option value="">Select a version</option>
+                      ${versions.map(v => `
+                          <option 
+                              value="${v.version}" 
+                              ${v.quantity < quantity ? 'disabled' : ''}
+                              style="${v.quantity < quantity ? 'color: #999;' : ''}"
+                          >
+                              ${v.version}${v.quantity < quantity ? ` (Only ${v.quantity} available)` : ''}
+                          </option>
+                      `).join('')}
+                  </select>
+              `;
+
+              const { value: confirmed, dismiss } = await Swal.fire({
+                  title: 'Select Version',
+                  html: selectHTML,
+                  showCancelButton: true,
+                  confirmButtonText: 'Add to Cart',
+                  preConfirm: () => {
+                      const select = document.getElementById('version-select');
+                      const selectedVersion = select.value;
+                      if (!selectedVersion) {
+                          Swal.showValidationMessage('Please select a version');
+                          return false;
+                      }
+                      return selectedVersion;
+                  }
+              });
+
+              if (!confirmed || dismiss) {
+                  return;
+              }
+
+              const versionResponse = await fetch('/api/cart/add', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ 
+                      productId,
+                      version: confirmed,
+                      quantity: parseInt(quantity)
+                  }),
+                  credentials: 'include'
+              });
+
+              const result = await this.handleResponse(versionResponse, 'Failed to add item to cart');
+              await this.updateCartDisplay();
+              
+              await Swal.fire({
+                  title: 'Success!',
+                  text: `${quantity} item${quantity > 1 ? 's' : ''} added to cart successfully`,
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false
+              });
+
+              return result;
           }
-
-          const versionResponse = await fetch('/api/cart/add', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-              productId,
-              version: confirmed 
-            }),
-            credentials: 'include'
-          });
-
-          const result = await this.handleResponse(versionResponse, 'Failed to add item to cart');
-          await this.updateCartDisplay();
-          
-          await Swal.fire({
-            title: 'Success!',
-            text: 'Item added to cart successfully',
-            icon: 'success',
-            timer: 1500,
-            showConfirmButton: false
-          });
-
-          return result;
-        }
       }
 
       const result = await this.handleResponse(cartResponse, 'Failed to add item to cart');
       await this.updateCartDisplay();
       
       await Swal.fire({
-        title: 'Success!',
-        text: 'Item added to cart successfully',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false
+          title: 'Success!',
+          text: `${quantity} item${quantity > 1 ? 's' : ''} added to cart successfully`,
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
       });
 
       return result;
 
-    } catch (error) {
+  } catch (error) {
       console.error('Error adding to cart:', error);
       await Swal.fire({
-        title: 'Error!',
-        text: error.message,
-        icon: 'error',
-        confirmButtonText: 'OK'
+          title: 'Error!',
+          text: error.message,
+          icon: 'error',
+          confirmButtonText: 'OK'
       });
       throw error;
-    }
   }
+}
 
   static async getCart() {
     try {

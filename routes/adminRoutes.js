@@ -127,31 +127,92 @@ router.post('/add-product', requireAdmin, upload.any(), async (req, res) => {
         });
     }
 });
-// Get product for editing
-router.get('/edit-product/:id', requireAdmin, async (req, res) => {
+// GET /edit-product/:id
+// Update/Replace the edit product route
+router.put('/edit-product/:id', requireAdmin, upload.any(), async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).render('error', { 
+        const productData = JSON.parse(req.body.productData);
+        const oldProduct = await Product.findById(req.params.id);
+
+        if (!oldProduct) {
+            return res.status(404).json({
+                success: false,
                 message: 'Product not found'
             });
         }
-        res.render('editProduct', { product });
+
+        // Handle main image
+        if (req.files && req.files.find(file => file.fieldname === 'imageH')) {
+            const mainImage = req.files.find(file => file.fieldname === 'imageH');
+            // Delete old image if it exists
+            if (oldProduct.imageH) {
+                try {
+                    await fs.unlink('public' + oldProduct.imageH);
+                } catch (err) {
+                    console.error('Error deleting old image:', err);
+                }
+            }
+            productData.imageH = '/resources/' + mainImage.filename;
+        } else {
+            // Keep existing main image
+            productData.imageH = oldProduct.imageH;
+        }
+
+        // Handle version images
+        productData.versions = await Promise.all(productData.versions.map(async (version, index) => {
+            // Check if new images were uploaded for this version
+            const newImages = req.files ? req.files.filter(file => file.fieldname === `versionImages_${index}`) : [];
+
+            if (newImages.length > 0) {
+                // If we have new images, delete the old ones
+                const oldVersion = oldProduct.versions[index];
+                if (oldVersion && oldVersion.image) {
+                    await Promise.all(oldVersion.image.map(async (img) => {
+                        try {
+                            await fs.unlink('public' + img);
+                        } catch (err) {
+                            console.error('Error deleting old version image:', err);
+                        }
+                    }));
+                }
+                // Use new images
+                return {
+                    ...version,
+                    image: newImages.map(file => '/resources/' + file.filename)
+                };
+            }
+            // If no new images, keep the existing image array from the version
+            return version;
+        }));
+
+        // Update the product
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            productData,
+            { new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Product updated successfully',
+            product: updatedProduct
+        });
     } catch (error) {
-        res.status(500).render('error', { 
-            message: 'Error loading product'
+        console.error('Error updating product:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error updating product'
         });
     }
 });
-
-// Update product
-router.put('/edit-product/:id', requireAdmin, upload.fields([
+// PUT /edit-product/:id
+router.put('/edit-product', requireAdmin, upload.fields([
     { name: 'imageH', maxCount: 1 },
     { name: 'versionImages', maxCount: 10 }
 ]), async (req, res) => {
     try {
-        const productData = JSON.parse(req.body.productData);
-        const oldProduct = await Product.findById(req.params.id);
+        const { productId, productData } = req.body;
+        const oldProduct = await Product.findById(productId);
 
         // Handle main image update
         if (req.files['imageH']) {
@@ -184,8 +245,8 @@ router.put('/edit-product/:id', requireAdmin, upload.fields([
         }
 
         const updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id,
-            productData,
+            productId,
+            JSON.parse(productData),
             { new: true }
         );
 

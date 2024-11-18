@@ -5,6 +5,7 @@ const ProductSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   type: { type: String, required: true },
   artist: { type: String, required: true },
+  availability: { type: String, required: true },
   description: { type: Array, required: true },  // Now an array
   inclusions: { type: Array, required: true },
   imageH: { type: String, required: true },

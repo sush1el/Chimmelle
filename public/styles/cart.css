@@ -10,15 +10,6 @@ body {
   color: #333;
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 30px;
-  background-color: #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
 .nav-left a {
   text-decoration: none;
   color: black;
@@ -39,7 +30,6 @@ body {
 .logo {
   width: 70px;
   height: auto;
-  margin-right: 20px;
   display: inline-block;
   cursor: pointer;
   transition: transform 0.3s ease;
@@ -332,7 +322,7 @@ d
     border: none;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
-    -moz-appearance: textfield;
+
 }
 
 .quantity-input::-webkit-outer-spin-button,

@@ -152,6 +152,20 @@
 .back-btn:hover {
     background-color: #555;
 }
+.form-select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        background-color: white;
+        cursor: pointer;
+    }
+    
+    .form-select:focus {
+        outline: none;
+        border-color: #da9e9f;
+    }
     </style>
 </head>
 <body>
@@ -171,7 +185,21 @@
 
             <div class="form-group">
                 <label for="type">Type:</label>
-                <input type="text" id="type" name="type" value="<%= product.type %>" required>
+                <select id="type" name="type" required class="form-select">
+                    <option value="">Select Type</option>
+                    <option value="album" <%= product.type === 'album' ? 'selected' : '' %>>Album</option>
+                    <option value="lightstick" <%= product.type === 'lightstick' ? 'selected' : '' %>>Lightstick</option>
+                    <option value="merchandise" <%= product.type === 'merchandise' ? 'selected' : '' %>>Merchandise</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="availability">Availability:</label>
+                <select id="availability" name="availability" required class="form-select">
+                    <option value="">Select Availability</option>
+                    <option value="pre-order" <%= product.availability === 'pre-order' ? 'selected' : '' %>>Pre-order</option>
+                    <option value="on-hand" <%= product.availability === 'on-hand' ? 'selected' : '' %>>On-hand</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -353,62 +381,123 @@
     e.preventDefault();
     const formData = new FormData();
     
-    // Add main product image
-    const mainImage = document.getElementById('imageH').files[0];
-    formData.append('imageH', mainImage);
+    // Add product ID
+    const productId = '<%= product._id %>';
     
     // Collect product data
     const productData = {
         name: document.getElementById('name').value,
         price: parseFloat(document.getElementById('price').value),
         type: document.getElementById('type').value,
+        availability: document.getElementById('availability').value,  // Add this line
         artist: document.getElementById('artist').value,
-        description: Array.from(document.getElementsByName('descriptions[]')).map(el => el.value),
-        inclusions: Array.from(document.getElementsByName('inclusions[]')).map(el => el.value),
-        versions: []
+        description: [], // Will be filled below
+        inclusions: [], // Will be filled below
+        versions: [] // Will be filled below
     };
 
-    // Collect versions data
+    // Collect descriptions (only from existing containers)
+    const descriptionContainers = document.querySelectorAll('.description-container');
+    descriptionContainers.forEach(container => {
+        const textarea = container.querySelector('textarea');
+        if (textarea && textarea.value.trim()) {
+            productData.description.push(textarea.value.trim());
+        }
+    });
+
+    // Collect inclusions (only from existing containers)
+    const inclusionContainers = document.querySelectorAll('.inclusion-container');
+    inclusionContainers.forEach(container => {
+        const textarea = container.querySelector('textarea');
+        if (textarea && textarea.value.trim()) {
+            productData.inclusions.push(textarea.value.trim());
+        }
+    });
+
+    // Get the main image if it exists
+    const mainImage = document.getElementById('imageH').files[0];
+    if (mainImage) {
+        formData.append('imageH', mainImage);
+    }
+
+    // Collect versions data (only from existing containers)
     const versionContainers = document.querySelectorAll('.version-container');
     versionContainers.forEach((container, index) => {
-        // Get the files for this version
-        const fileInput = container.querySelector(`input[type="file"]`);
-        const files = fileInput.files;
+        const versionInput = container.querySelector('input[type="text"]');
+        const quantityInput = container.querySelector('input[type="number"]');
+        const fileInput = container.querySelector('input[type="file"]');
+        const existingImages = container.querySelectorAll('.current-image img');
         
-        // Append each file with a unique field name that includes the version index
-        for (let i = 0; i < files.length; i++) {
-            formData.append(`versionImages_${index}`, files[i]);
-        }
+        if (versionInput && quantityInput) {
+            const versionData = {
+                version: versionInput.value,
+                quantity: parseInt(quantityInput.value),
+                image: []
+            };
 
-        productData.versions.push({
-            version: container.querySelector(`input[type="text"]`).value,
-            quantity: parseInt(container.querySelector(`input[type="number"]`).value),
-        });
+            // Handle images
+            if (fileInput && fileInput.files.length > 0) {
+                // If new images are selected
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append(`versionImages_${index}`, fileInput.files[i]);
+                }
+            } else {
+                // Keep existing images
+                versionData.image = Array.from(existingImages).map(img => {
+                    // Extract the path from the src attribute
+                    const src = img.getAttribute('src');
+                    return src.startsWith('http') ? src.split(window.location.origin)[1] : src;
+                });
+            }
+
+            productData.versions.push(versionData);
+        }
     });
 
     // Add the product data as JSON
     formData.append('productData', JSON.stringify(productData));
 
     try {
-        const response = await fetch('/admin/add-product', {
-            method: 'POST',
+        const response = await fetch(`/admin/edit-product/${productId}`, {
+            method: 'PUT',
             body: formData
         });
 
         const result = await response.json();
         
         if (result.success) {
-            alert('Product added successfully!');
+            alert('Product updated successfully!');
             window.location.href = '/admin/dashboard';
         } else {
-            alert('Error adding product: ' + result.message);
+            alert('Error updating product: ' + result.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error adding product');
+        alert('Error updating product');
     }
-        });
+});
 
+// Update the remove functions to actually remove the elements
+function removeVersion(button) {
+    if (confirm('Are you sure you want to remove this version?')) {
+        const container = button.closest('.version-container');
+        container.remove();
+    }
+}
+
+function removeDescription(button) {
+    if (confirm('Are you sure you want to remove this description?')) {
+        const container = button.closest('.description-container');
+        container.remove();
+    }
+}
+
+function removeInclusion(button) {
+    if (confirm('Are you sure you want to remove this inclusion?')) {
+        const container = button.closest('.inclusion-container');
+        container.remove();
+    }
+}
     </script>
 </body>
 </html>

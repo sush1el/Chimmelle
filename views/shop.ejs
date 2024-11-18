@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/details.css">
+    <link rel="stylesheet" href="/styles/navbar.css">
+    <link rel="stylesheet" href="/styles/shop.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/">HOME</a>
+            <a href="#">ARTISTS</a>
+            <div class="dropdown">
+                <a href="shop" class="dropdown-toggle">SHOP</a>
+                <div class="dropdown-menu">
+                    <a href="/albums">Albums</a>
+                    <a href="/merchandise">Pre-order</a>
+                    <a href="/collectibles">Onhand</a>
+                    <a href="/accessories">Lightsticks</a>
+                    <a href="/accessories">Merchandise</a>
+                    <a href="/accessories">All Products</a>
+                </div>
+            </div>
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class= "logo" src="resources/logo.jpg" alt="Logo" class="logo">
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
+            <% if (user) { %>
+                <div class="dropdown">
+                    <a href="#">
+                        <img class="profile-user" src="resources/profile.png" alt="Profile">
+                    </a>
+                    <div class="dropdown-menu">
+                        <a style="font-weight: bold;" href="/account">Account</a>
+                        <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+                    </div>
+                </div>
+                <a href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
+            <% } else { %>   
+                <div class="dropdown">
+                <a href="/login-page">
+                    <img class="profile-user" src="resources/profile.png" alt="Profile">
+                </a>
+                </div>
+                <a class ="hidden" href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <aside class="filters">
+
+            <div class="filter-section">
+                <h3>Availability</h3>
+                <div class="filter-option">
+                    <input type="checkbox" id="onhand">
+                    <label for="onhand">On Hand (268)</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="preorder">
+                    <label for="preorder">Pre-Order (67)</label>
+                </div>
+            </div>
+
+           <div class="filter-section">
+            <h3>Category</h3>
+                <% counts.types.forEach(({_id, count}) => { %>
+                    <div class="filter-option">
+                        <input type="checkbox" id="<%= _id.toLowerCase() %>" value="<%= _id %>">
+                        <label for="<%= _id.toLowerCase() %>"><%= _id.charAt(0).toUpperCase() + _id.slice(1) %> (<%= count %>)</label>
+                    </div>
+                <% }) %>
+            </div>
+
+            <div class="filter-section">
+                <h3>Price</h3>
+                <div class="price-range">
+                    <input type="number" name="minPrice" placeholder="₱" class="price-input">
+                    <span>to</span>
+                    <input type="number" name="maxPrice" placeholder="₱" class="price-input">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Artists</h3>
+                <% counts.artists.forEach(({_id, count}) => { %>
+                    <div class="filter-option">
+                        <input type="checkbox" id="<%= _id.toLowerCase().replace(/ /g, '-') %>" value="<%= _id %>">
+                        <label for="<%= _id.toLowerCase().replace(/ /g, '-') %>"><%= _id %> (<%= count %>)</label>
+                    </div>
+                <% }) %>
+            </div>
+        </aside>
+
+        <main class="products-section">
+            <div class="products-header">
+                <select class="sort-select">
+                    <option value="name_asc" <%= currentSort === 'name_asc' ? 'selected' : '' %>>Alphabetically, A-Z</option>
+                    <option value="name_desc" <%= currentSort === 'name_desc' ? 'selected' : '' %>>Alphabetically, Z-A</option>
+                    <option value="price_asc" <%= currentSort === 'price_asc' ? 'selected' : '' %>>Price, low to high</option>
+                    <option value="price_desc" <%= currentSort === 'price_desc' ? 'selected' : '' %>>Price, high to low</option>
+                </select>
+            </div>
+
+            <div class="products-grid">
+                <% products.forEach(product => { %>
+                    <div class="product-card" data-product-id="<%= product._id %>">
+                        <a href="/product-page/<%= product._id %>">
+                        <div class="product-image">
+                            <img src="<%= product.imageH %>" class="product-image">
+                        </div>
+                        <div class="product-info">
+                        <h3 class="product-name"><%= product.name %></h3>
+                        <p class="product-price">₱<%= product.price.toFixed(2) %></p>
+                        </a>
+                        <button class="choose-options-btn">Add to Cart</button>
+                    </div>
+                    </div>
+                <% }) %>
+            </div>
+        </main>
+    </div>
+
+    
+
+    <div class="details-container">
+
+        <h1 class = "h1"> Details </h1>
+        </header>
+        
+        
+                <h2>Albums (CD, DVD, LP, QR)</h2>
+                <p> <b> Album Production Timing: </b></p>
+                <ul>
+                    <li><b>First Press:</b> Albums bought during the pre-order period in South Korea.</li>
+                    <li><b>Restock:</b> Albums made after the release date.</li>
+                </ul>
+                <p> <b> Album Availability:</b></p>
+        
+                <ul>
+                    <li><b>Pre-Order:</b> Albums that have not been released yet or are in the process of being sent to our warehouse or going through customs. Shipping typically starts 1 to 3 weeks after the release date in South Korea.</li>
+                    <li><b>Onhand:</b> Albums that are in our warehouse in the Philippines and ready to be shipped.</li>
+                </ul>
+        
+                <p> <b> Special Add-ons:</b></p>
+        
+                <ul>
+                    <li><b>First-Press Benefits: </b>  Only for albums bought during the pre-order period. These may include posters, photocards, etc. If an album comes with a poster, it will include a poster tube.</li>
+                    <li><b>Pre-order Benefits:</b> Available at some stores like Makestar, WITHMUU, and Weverse Shop. They may include photocards, postcards, stamps, etc. Keep in mind that albums with these extra benefits might not come with first-press items.</li>
+                </ul>
+        
+            <h2>Merchandise (Concert MD, etc.)</h2>
+            <ul>
+                <li><b>Shipping Timeline:</b> Merchandise is usually shipped 3 to 4 weeks after the release date in South Korea. </li>
+                <li><b>Stock Availability:</b>  Items can sell out before the pre-order period ends.</li>
+                <li><b>Packaging Details:</b> The packaging may vary and may not have an official seal. The plastic and box protect the product, so small marks or discolorations from manufacturing are not reasons for return or exchange.</li>
+            </ul>
+        
+            <h2>Lightstick Safety Tips</h2>
+            <ul>
+                <li> The box protects the lightstick inside, and small scratches or marks are not valid reasons for return. </li>
+                <li> If the battery runs low, the lightstick will turn off automatically. Use 3 AAA alkaline batteries (not included). Insert batteries correctly to avoid overheating or leaks.</li>
+                <ul style="margin-left: 20px;">
+                <li> Remove the battery if it overheats. </span></li>
+                <li> Only use real AAA alkaline batteries to prevent damage. </li>
+                <li> Take out batteries when not using the lightstick. </li>
+                <li> Do not mix old and new batteries or different types. </li>
+                </ul>
+            </ul>
+        
+            <h2>Return and Exchange Policy</h2>
+            <ul>
+                <li> Only items with serious damage, major defects, or missing parts due to the manufacturer can be reviewed for return or exchange. </li>
+            </ul>
+            
+            <h2>Unboxing Video</h2>
+            <ul>
+                <li> Always record an unboxing video from opening the pouch to the item itself. This video is required if you need to process a return or refund. </li>
+            </ul>
+            
+            <h2>Packing and Delivery </h2>
+            <ul>
+                <li> All orders are packed carefully with bubble wrap and cardboard if needed and sent on time. After the package is handed to the delivery service, the delivery time is out of our control. If you notice any visible damage to your package (opened pouch, damaged box, torn label), do not accept it and report it to us right away. </li>
+            </ul>
+        
+            <ul>
+                <li> <b>Important: </b> We guarantee that items are sealed and imported from Korea. Missing or damaged items inside the box are considered manufacturer errors and are not covered by our liability. </li>
+            </ul>
+        
+            </div>
+    <script src="scripts/Cart.js"></script>
+    <script src="scripts/Shop.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>
