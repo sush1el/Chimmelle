@@ -138,24 +138,30 @@ body {
 }
 
 .h1 {
-    font-size: 5vw; /* Font size adjusts based on viewport width */
+  font-size: 40px; /* Font size adjusts based on viewport width */
   text-align: left;
   margin-top: 50px;
-  margin-bottom: 50px;
   color: #da9e9f;
   padding: 20px 0; 
 }
 
 /* Main content */
 .details-container {
+    text-align: center;
+    font-size: 15px;
     margin: 0 auto;
     padding: 0 1rem;
     text-align: justify;
+    background-color: solid white;
+    width: 1450px;
+}
+.bg-container {
     background-color: white;
+    margin-top: 50px;
 }
 
 h2 {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
     color: #da9e9f;
@@ -242,10 +248,7 @@ a:hover, a:focus {
         height: auto;
     }
 
-    h1 {
-        font-size: 2rem;
-    }
-
+    
     h2 {
         font-size: 1.3rem;
     }

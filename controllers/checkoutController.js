@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
+
 
 const checkoutController = {
   async initiateCheckout(req, res) {
@@ -50,6 +52,76 @@ const checkoutController = {
       });
     } catch (error) {
       // Error handling
+    }
+  },
+  async updateProductStock(orderId) {
+    try {
+      // Find the order and populate product details
+      const order = await Order.findById(orderId)
+        .populate('items.product');
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      const updateErrors = [];
+
+      // Update stock for each item in the order
+      for (const item of order.items) {
+        try {
+          const product = await Product.findById(item.product._id);
+          
+          if (!product) {
+            throw new Error(`Product ${item.product._id} not found`);
+          }
+
+          // Find the version that matches the order
+          const versionIndex = product.versions.findIndex(v => 
+            v.version === item.version
+          );
+
+          if (versionIndex === -1) {
+            throw new Error(`Version ${item.version} not found for product ${product.name}`);
+          }
+
+          // Check if enough stock is available
+          if (product.versions[versionIndex].quantity < item.quantity) {
+            throw new Error(`Insufficient stock for ${product.name} - ${item.version}`);
+          }
+
+          // Update the stock
+          product.versions[versionIndex].quantity -= item.quantity;
+          await product.save();
+
+        } catch (itemError) {
+          updateErrors.push({
+            productId: item.product._id,
+            version: item.version,
+            error: itemError.message
+          });
+        }
+      }
+
+      // If any updates failed, throw an error with details
+      if (updateErrors.length > 0) {
+        // Update order status to indicate stock update failure
+        await Order.findByIdAndUpdate(orderId, {
+          status: 'stockUpdateFailed',
+          stockUpdateErrors: updateErrors
+        });
+        
+        throw new Error(`Failed to update stock for some items: ${JSON.stringify(updateErrors)}`);
+      }
+
+      // Update order status to indicate successful stock update
+      await Order.findByIdAndUpdate(orderId, {
+        status: 'processing',
+        stockUpdateStatus: 'completed'
+      });
+
+    } catch (error) {
+      console.error('Stock update error:', error);
+      throw error;
     }
   },
   async processCheckout(req, res) {

@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'Availability':
                     params.append('availability', checkbox.id === 'onhand' ? 'on-hand' : 'pre-order');
                     break;
-                case 'Type': // Changed from Category to Type
+                case 'Category': // Match the h3 text in the HTML
                     params.append('type', checkbox.value || checkbox.id);
                     break;
                 case 'Artists':
@@ -124,30 +124,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to update filter counts
   function updateFilterCounts(counts) {
-    if (typeof counts === 'object') {
+    // Check if counts is undefined or null
+    if (!counts) {
+        console.warn('No filter counts provided');
+        return;
+    }
+
+    // Check if specific count properties exist before processing
+    try {
         // Update availability counts
-        Object.entries(counts.availability).forEach(([key, count]) => {
-            const label = document.querySelector(`label[for="${key === 'on-hand' ? 'onhand' : 'preorder'}"]`);
-            if (label) {
-                label.textContent = `${key === 'on-hand' ? 'On Hand' : 'Pre-Order'} (${count})`;
-            }
-        });
+        if (counts.availability) {
+            Object.entries(counts.availability).forEach(([key, count]) => {
+                const label = document.querySelector(`label[for="${key === 'on-hand' ? 'onhand' : 'preorder'}"]`);
+                if (label) {
+                    label.textContent = `${key === 'on-hand' ? 'On Hand' : 'Pre-Order'} (${count})`;
+                }
+            });
+        }
 
         // Update type counts
-        counts.types.forEach(({ _id, count }) => {
-            const label = document.querySelector(`label[for="${_id.toLowerCase()}"]`);
-            if (label) {
-                label.textContent = `${_id.charAt(0).toUpperCase() + _id.slice(1)} (${count})`;
-            }
-        });
+        if (counts.types && Array.isArray(counts.types)) {
+            counts.types.forEach(({ _id, count }) => {
+                const label = document.querySelector(`label[for="${_id.toLowerCase()}"]`);
+                if (label) {
+                    label.textContent = `${_id.charAt(0).toUpperCase() + _id.slice(1)} (${count})`;
+                }
+            });
+        }
 
         // Update artist counts
-        counts.artists.forEach(({ _id, count }) => {
-            const label = document.querySelector(`label[for="${_id.toLowerCase().replace(/ /g, '-')}"]`);
-            if (label) {
-                label.textContent = `${_id} (${count})`;
-            }
-        });
+        if (counts.artists && Array.isArray(counts.artists)) {
+            counts.artists.forEach(({ _id, count }) => {
+                const label = document.querySelector(`label[for="${_id.toLowerCase().replace(/ /g, '-')}"]`);
+                if (label) {
+                    label.textContent = `${_id} (${count})`;
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error updating filter counts:', error);
     }
 }
 
