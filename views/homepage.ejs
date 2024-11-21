@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="welcome-message">
-        <p>Welcome to our website</p>
+        <p>Welcome to Chimmelle Shop! your one-stop Kpop Shop </p>
       </div>
 
     <nav class="navbar">
@@ -70,7 +70,9 @@
     </nav>
     
     <section class="announcement">
-        <div class="album-cover"></div>
+        <div class="album-cover">
+            <img style ="border-radius: 10px;" src="resources/rose.jpg" alt="Album Cover">
+        </div>
         <div class="announcement-text">
             <h2>ROSÉ First Studio Album</h2>
             <a href="#" class="pre-order-btn">Pre-order →</a>
@@ -86,14 +88,55 @@
                 </div>
                 <div class="product-info">
                 <h3 class="product-name"><%= product.name %></h3>
+            </a>
                 <p class="product-price">₱<%= product.price.toFixed(2) %></p>
-                </a>
                 <button class="choose-options-btn">Add to Cart</button>
             </div>
             </div>
         <% }) %>
     </section>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h2>Support</h2>
+                <ul class="footer-links">
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faqs">FAQs</a></li>
+                    <li><a href="/tc" >Terms and Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/return">Return & Exchange</a></li>
+                    <li><a href="/payment">Shipping & Payment </a></li>
+                </ul>
+            </div>
+    
+            <div class="footer-section">
+                <h2>Quick Links</h2>
+                <ul class="footer-links">
+                    <li><a href="/shop">Products</a></li>
+                    <li><a href="/artists">Artists</a></li>
+                </ul>
+                <div class="social-links">
+                    <a href="https://facebook.com" aria-label="Visit our Facebook page">
+                        <i class="fa-brands fa-facebook social-icon"></i>
+                    </a>
+                    <a href="https://twitter.com" aria-label="Visit our Twitter page">
+                        <i class="fa-brands fa-twitter social-icon"></i>
+                    </a>
+                </div>
+            </div>
+    
+            <div class="footer-section">
+                <!-- Replace /placeholder.svg with your mascot image URL -->
+                <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
+                
+            </div>
+            </div>
+                
+            <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
+        </footer>
 </div>
+
+
    
  
 

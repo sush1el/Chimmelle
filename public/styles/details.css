@@ -187,12 +187,7 @@ ul {
     margin-bottom: 1.5rem;
 }
 
-/* Links */
-a {
-    color: #da9e9f;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
+
 
 a:hover, a:focus {
     color: #b57e7f;

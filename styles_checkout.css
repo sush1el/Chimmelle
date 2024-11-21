@@ -13,15 +13,15 @@ header {
 
 .header-image-container {
     width: 100%;
-    height: 100%; /* Adjusted height to match the image */
+    height: 250px; /* Fixed height */
     overflow: hidden;
 }
 
 .header-banner {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensures the image covers the container */
-    object-position: center; /* Centers the image */
+    object-fit: cover; /* This will make the image cover the container */
+    object-position: center; /* This will center the image within the container */
 }
 
 .container {
@@ -29,28 +29,13 @@ header {
     margin: 0 auto;
     padding: 20px;
     display: flex;
-    flex-wrap: nowrap; /* Prevents the containers from wrapping */
+    flex-wrap: wrap;
     gap: 20px;
-    align-items: flex-start; /* Aligns containers at the top */
 }
 
-
-.checkout-form {
+.checkout-form, .order-summary {
     flex: 1;
-    min-width: 550px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Keeps content and button aligned */
-    height: 100%;
-}
-
-.order-summary {
-    flex: 1;
-    min-width: 715px;
+    min-width: 300px;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -78,6 +63,7 @@ h2 {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    justify-content: space-between;
 }
 
 .radio-option input[type="radio"] {
@@ -87,7 +73,7 @@ h2 {
 .order-item {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .order-item img {
@@ -103,7 +89,6 @@ h2 {
 
 .item-price {
     font-weight: bold;
-    white-space: nowrap; /* Prevents text overflow */
 }
 
 .order-total {
@@ -123,12 +108,11 @@ h2 {
     color: white;
     border: none;
     padding: 15px;
+    width: 100%;
     font-size: 18px;
     cursor: pointer;
     border-radius: 5px;
-    margin-top: 20px; /* Adds space above the button */
 }
-
 
 .pay-button:hover {
     background-color: #ff8da1;

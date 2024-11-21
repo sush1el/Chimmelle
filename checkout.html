@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your One-Stop Kpop Shop - Checkout</title>
+    <link rel="stylesheet" href="styles_checkout.css">
+</head>
+<body>
+    <header>
+        <div class="header-image-container">
+            <img src="public\resources\checkheader.png" alt="Header Banner" class="header-banner">
+        </div>
+    </header>
+    <div class="container">
+        <div class="checkout-form">
+            <div class="form-section">
+                <h2>Account</h2>
+                <p>hatdoggmail.com</p>
+            </div>
+            <div class="form-section">
+                <h2>Ship to</h2>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="address" checked>
+                        Hwang Yeji, 1234 chimelle st. tondo manila barangay 62 TONDO I/II, PH
+                        <button class="edit-btn">Edit</button>
+                        <button class="delete-btn">Delete</button>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="address">
+                        Shin Ryujin, 567 jyp st. tondo manila barangay 62 TONDO I/II, PH
+                    </label>
+                </div>
+            </div>
+            <div class="form-section">
+                <h2>Delivery</h2>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="delivery" checked>
+                        Standard Delivery (CGX & J&T)<br>
+                        <small>Metro Manila: 2-7 business days | Provincial: 3-12 business days | Pre-order items: 30 days</small>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="delivery">
+                        Same-Day Delivery (within Metro Manila Only)
+                    </label>
+                </div>
+            </div>
+            <div class="form-section">
+                <h2>Payment</h2>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="payment" checked>
+                        GCASH
+                    </label>
+                </div>
+            </div>
+            <button class="pay-button">Pay now</button>
+        </div>
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <div class="order-item">
+                <img src="/placeholder.svg?height=80&width=80" alt="Product Image">
+                <div class="item-details">
+                    <p>CHANYEOL - BLACK OUT The First Mini Album</p>
+                    <span class="item-price">P 791.00</span>
+                </div>
+            </div>
+            <div class="order-item">
+                <img src="/placeholder.svg?height=80&width=80" alt="Product Image">
+                <div class="item-details">
+                    <p>CHANYEOL - BLACK OUT The First Mini Album</p>
+                    <span class="item-price">P 791.00</span>
+                </div>
+            </div>
+            <div class="order-total">
+                <div class="total-row">
+                    <span>Subtotal - 2 items</span>
+                    <span>P 1,582.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Shipping</span>
+                    <span>TBD</span>
+                </div>
+                <div class="total-row" style="font-weight: bold; font-size: 1.2em;">
+                    <span>Total</span>
+                    <span>P 1,582.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

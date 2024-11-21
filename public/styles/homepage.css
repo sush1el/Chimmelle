@@ -14,6 +14,11 @@ a{
   color:rgb(0, 0, 0);
 }
 
+a:hover, a:focus {
+  color: #b57e7f;
+  text-decoration: underline;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -79,18 +84,32 @@ a{
 }
 
 .welcome-message {
-  background-color: #da9e9f;
+  width: 100%;
+  background-color: #e9aeae;
   color: white;
   padding: 10px;
   text-align: center;
   font-size: 16px;
   font-weight: bold;
-  transition: opacity 0.3s ease-in-out;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 110;
+  padding: 10px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+
+.welcome-message p {
+  display: inline-block;
+  animation: moveLeftToRight 15s linear infinite;
+  padding-left: 100%;
+}
+
+@keyframes moveLeftToRight {
+  0% {
+      transform: translateX(0);
+  }
+  100% {
+      transform: translateX(-100%);
+  }
 }
 
 .welcome-message.visible {
@@ -102,6 +121,8 @@ a{
   opacity: 0;
   transform: translateY(-100%);
 }
+
+
 
 .logo {
   width: 70px;
@@ -163,7 +184,10 @@ a{
 
 a {
   text-decoration: none;
+  
 }
+
+
 
 .search-container {
   display: flex;
@@ -230,8 +254,8 @@ footer {
     max-width: 70px;
     height: auto;
   }
+  
 }
-
 
 .announcement {
   background-color: #e6e6e6;
@@ -242,15 +266,17 @@ footer {
   gap: 2rem;
   margin: 2rem 0;
 }
+
 .album-cover {
   width: 200px;
   height: 200px;
-  background-image: url('/logo/rose.jpg');
+  display: flex;
   background-size: cover;
   background-position: center;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.3s ease;
+
 }
 
 .album-cover:hover {
@@ -333,7 +359,7 @@ gap: 0.5rem; /
 
 .product-info h3 {
 font-size: 1rem;
-margin-bottom: 0.5rem;
+margin-bottom: 1rem;
 min-height: 50px; /* Ensure consistent spacing for titles */
 }
 

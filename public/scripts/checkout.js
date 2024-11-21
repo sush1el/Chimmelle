@@ -31,10 +31,7 @@ class CheckoutHandler {
   
         addressContainer.innerHTML = sortedAddresses.map((address, index) => `
           <label class="radio-option ${address.isDefault ? 'default-address' : ''}">
-            <input type="radio" 
-                   name="address" 
-                   value="${index}" 
-                   ${address.isDefault ? 'checked' : ''}>
+            <input type="radio" name="address" value="${index}" ${address.isDefault ? 'checked' : ''}>
             <div class="address-details">
               <p class="recipient">${address.firstName || ''} ${address.lastName || ''}</p>
               <p class="address-line">${address.street}</p>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Font Awesome and Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Page</title>
+
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="cart 1 (1).css">
+    <link rel="stylesheet" href="/styles.css/Footer.css"> 
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/">HOME</a>
+            <a href="#">ARTISTS</a>
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle">SHOP</a>
+                <div class="dropdown-menu">
+                    <a href="/albums">Albums</a>
+                    <a href="/merchandise">Pre-order</a>
+                    <a href="/collectibles">Onhand</a>
+                    <a href="/accessories">Lightsticks</a>
+                    <a href="/accessories">Merchandise</a>
+                    <a href="/accessories">All Products</a>
+                </div>
+            </div>
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class="logo" src="/logo/chimelle-logo.png" alt="Logo">
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
+            <div class="dropdown">
+                <a href="#">
+                    <img class="profile-user" src="/logo/profile.png" alt="Profile">
+                </a>
+                <div class="dropdown-menu">
+                    <a style="font-weight: bold;" href="/account">Account</a>
+                    <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+                </div>
+            </div>
+            <a href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Cart Section -->
+    <section class="cart-page">
+        <h1>Your Cart</h1>
+        <a href="/">
+            <button class="continue-shopping-btn">
+                <span>&larr; Continue shopping</span>
+            </button>
+        </a>
+    
+        <div class="cart-container">
+            <div class="cart-items">
+                <!-- Item 1 -->
+                <div class="cart-item">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="item-checkbox" checked>
+                        <span class="checkmark"></span>
+                      </label>
+
+                    <img src="/logo/BMONSTER.jpg" alt="BTS Album">
+                    
+                    <div class="item-details">
+                        <h3>BTS - Face (Jimin Solo Album)</h3>
+                        <p><span>P 850.00</span></p>
+                        <select class="version-select">
+                            <option value="Version 1" selected>Version 1</option>
+                            <option value="Version 2">Version 2</option>
+                            <option value="Version 3">Version 3</option>
+                            <option value="Version 4" disabled>Version 4 (Out of stock)</option>
+                        </select>
+                    </div>
+
+                    <div class="quantity-control">
+                        <button class="quantity-btn decrease">-</button>
+                        <input type="number" value="1" min="1" max="5" class="quantity-input">
+                        <button class="quantity-btn increase">+</button>
+                      </div>
+
+                    <span class="item-total">P 1,900.00</span>
+
+                    <button class="delete-btn">
+                        <i class="fa-solid fa-trash-can"></i> 
+                      </button>
+                </div>
+
+                <!-- Item 2 -->
+                    <div class="cart-item">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" class="item-checkbox" checked>
+                            <span class="checkmark"></span>
+                          </label>
+                    <img src="/logo/chanyeol.jpg" alt="Twice Album">
+                    
+                    <div class="item-details">
+                        <h3>TWICE - With YOU-th</h3>
+                        <p><span>P 850.00</span></p>
+                        <select class="version-select">
+                            <option value="Version A" selected>Version A</option>
+                            <option value="Version B">Version B</option>
+                            <option value="Version C" disabled>Version C (Out of stock)</option>
+                        </select>
+                    </div>
+
+                    <div class="quantity-control">
+                        <button class="quantity-btn decrease">-</button>
+                        <input type="number" value="1" min="1" max="5" class="quantity-input">
+                        <button class="quantity-btn increase">+</button>
+                    </div>
+
+                    <span class="item-total">P 850.00</span>
+
+                    <button class="delete-btn">
+                        <i class="fa-solid fa-trash-can"></i> 
+                      </button>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <h2>Subtotal</h2> <p class="total-price"> P 2,750.00</p>
+                <p class = "selected-products">Selected Products: 3</p>
+               
+
+                <div class="note-box">
+                    <p class ="order-note">Add a note to your order </p>
+                    <textarea class="order-note-box" placeholder="Order note"></textarea>
+                </div>
+
+                <button class="checkout-btn">Check out</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h2>Support</h2>
+                <ul class="footer-links">
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faqs">FAQs</a></li>
+                    <li><a href="TC.html">Terms and Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/return">Return & Exchange</a></li>
+                    <li><a href="/payment">Shipping & Payment </a></li>
+                </ul>
+            </div>
+    
+            <div class="footer-section">
+                <h2>Quick Links</h2>
+                <ul class="footer-links">
+                    <li><a href="/products">Products</a></li>
+                    <li><a href="/artists">Artists</a></li>
+                </ul>
+                <div class="social-links">
+                    <a href="https://facebook.com" aria-label="Visit our Facebook page">
+                        <i class="fa-brands fa-facebook social-icon"></i>
+                    </a>
+                    <a href="https://twitter.com" aria-label="Visit our Twitter page">
+                        <i class="fa-brands fa-twitter social-icon"></i>
+                    </a>
+                </div>
+            </div>
+    
+            <div class="footer-section">
+                <img src="/logo/chimmy-footer.png" alt="Cute mascot character" class="mascot">
+            </div>
+        </div>
+        <p class="copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/Cart.js"></script>
+    <script src="scripts/Footer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

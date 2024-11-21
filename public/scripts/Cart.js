@@ -304,10 +304,13 @@ static async addToCart(productId, quantityOrOptions) {
           <div class="cart-item ${isSelected ? '' : 'disabled'}" 
                data-cart-item-id="${item.cartItemId}"
                data-product-id="${product._id}">
-            <input type="checkbox" 
+              <label class="custom-checkbox">
+               <input type="checkbox" 
                    class="item-checkbox" 
                    ${isSelected ? 'checked' : ''} 
                    data-cart-item-id="${item.cartItemId}">
+                   <span class="checkmark"></span>
+               </label>
             <img src="${product.imageH}" alt="${product.name}" class="product-image">
             
             <div class="item-details">
@@ -352,7 +355,7 @@ static async addToCart(productId, quantityOrOptions) {
             </span>
   
             <button class="delete-btn" data-cart-item-id="${item.cartItemId}">
-              🗑
+              <i class="fa-solid fa-trash-can"> </i>
             </button>
           </div>
         `;
