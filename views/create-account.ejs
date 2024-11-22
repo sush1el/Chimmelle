@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account Page</title>
+    <link rel="stylesheet" href="styles/navbar.css">
     <link rel="stylesheet" href="styles/create-account.css">
     <link rel="stylesheet" href="styles/Footer.css"> 
 </head>
@@ -15,7 +16,7 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-left">
-            <a href="#">HOME</a>
+            <a href="/">HOME</a>
             <a href="#">ARTISTS</a>
             <a href="#">SHOP</a>
             <a href="#">SUPPORT</a>
@@ -26,14 +27,16 @@
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input type="text" placeholder="Search for...">
-            <a href="#">
-                <img class="profile-user" src="resources/profile.jpg" alt="Profile">
-            </a>
-            <a href="#">
-                <button class="cart-button">
-                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart 
-                </button>
-            </a>
+            <div class="dropdown">
+                <a href="/login-page">
+                    <img class="profile-user" src="resources/profile.png" alt="Profile">
+                </a>
+                </div>
+                <a class ="hidden" href="/cart">
+                    <button class="cart-button">
+                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                    </button>
+                </a>
         </div>
     </nav>
 
@@ -52,7 +55,7 @@
                 <button type="submit" class="create-account-btn">Submit</button>
             </div>
         </form>
-        <a href="#" class="return-to-store">Return to Store</a>
+        <a href="/" class="return-to-store">Return to Store</a>
     </div>
     
     <footer class="footer">
@@ -62,18 +65,17 @@
                 <ul class="footer-links">
                     <li><a href="/contact">Contact Us</a></li>
                     <li><a href="/faqs">FAQs</a></li>
-                    <li><a href="TC.html" >Terms and Conditions</a></li>
+                    <li><a href="/tc">Terms and Conditions</a></li>
                     <li><a href="/privacy">Privacy Policy</a></li>
                     <li><a href="/return">Return & Exchange</a></li>
-                    <li><a href="/payment">Shipping & Payment </a></li>
-                    
+                    <li><a href="/payment">Shipping & Payment</a></li>
                 </ul>
             </div>
     
             <div class="footer-section">
                 <h2>Quick Links</h2>
                 <ul class="footer-links">
-                    <li><a href="/products">Products</a></li>
+                    <li><a href="/shop">Products</a></li>
                     <li><a href="/artists">Artists</a></li>
                 </ul>
                 <div class="social-links">
@@ -87,17 +89,15 @@
             </div>
     
             <div class="footer-section">
-                <!-- Replace /placeholder.svg with your mascot image URL -->
-                <img src="resources/chimmy-footer.jpg" alt="Cute mascot character" class="mascot">
-         
+                <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
             </div>
         </div>
-        <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
+        <p class="copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
     </footer>
-
+    <script src="scripts/Footer.js"></script>
     <script src="scripts/Create-Account.js"></script> 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="scripts/Footer.js"></script>
+   
 </body>
 
 </html>

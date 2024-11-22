@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
+const {authenticateUser} = require('../middleware/authMiddleware');
 
-router.get('/contact', (req, res) => {
+router.get('/contact',authenticateUser, (req, res) => {
   res.render('contact-us');
 });
 
-router.get('/tc', (req, res) => {
+router.get('/tc', authenticateUser, (req, res) => {
   res.render('tc');
 });
 
-router.get('/privacy', (req, res) => {
+router.get('/privacy', authenticateUser, (req, res) => {
   res.render('privacy');
 });
 
-router.get('/return', (req, res) => {
+router.get('/return', authenticateUser, (req, res) => {
   res.render('return');
 });
 
