@@ -3,11 +3,21 @@ const bcrypt = require('bcryptjs');
 
 // Updated Cart Item Schema to include version
 const CartItemSchema = new mongoose.Schema({
-  cartItemId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
+  cartItemId: { 
+    type: mongoose.Schema.Types.ObjectId,
+    // Remove the default function as we'll handle ID generation when actually adding items
+    required: false  // Make it not required for initial user creation
+  },
   product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
   selected: { type: Boolean, default: true },
-  version: { type: String, required: false } // Added version field
+  version: { type: String, required: false }
+});
+
+// Add this index to the CartItemSchema
+CartItemSchema.index({ cartItemId: 1 }, { 
+  unique: true, 
+  sparse: true  // This allows multiple null values
 });
 
 // Address Schema remains the same
@@ -52,7 +62,10 @@ const UserSchema = new mongoose.Schema({
     default: Date.now
   },
   cart: {
-    items: [CartItemSchema],
+    items: { 
+      type: [CartItemSchema],
+      default: []  // Initialize as empty array instead of null
+    },
     updatedAt: { type: Date, default: Date.now }
   }
 }, {
@@ -92,13 +105,19 @@ UserSchema.methods.addToCart = async function(productId, version, quantity = 1) 
       this.cart.items[cartItemIndex].quantity += quantity;
   } else {
       // If item doesn't exist, add new item with specified quantity
-      this.cart.items.push({
+      const newCartItem = {
+          cartItemId: new mongoose.Types.ObjectId(), // Generate new ID here
           product: productId,
           version: version,
           quantity: quantity,
           selected: true
-      });
+      };
+      this.cart.items.push(newCartItem);
   }
+  
+  // Update the cart's updatedAt timestamp
+  this.cart.updatedAt = Date.now();
+  
   return this.save();
 };
 

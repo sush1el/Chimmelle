@@ -150,4 +150,23 @@ h2 {
 .delete-btn:hover {
     background-color: #ddd;
 }
+.gcash-input {
+    margin-top: 10px;
+}
 
+.gcash-input input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.gcash-input input:focus {
+    outline: none;
+    border-color: #da9e9f;
+}
+
+.gcash-input input::placeholder {
+    color: #999;
+}

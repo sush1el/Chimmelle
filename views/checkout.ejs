@@ -44,8 +44,19 @@
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="payment" value="gcash" checked>
-                        GCASH
+                        GCash
                     </label>
+                    <div class="form-group">
+                        <label for="gcash-number">GCash Number</label>
+                        <input type="text" 
+                               id="gcash-number" 
+                               name="gcash-number" 
+                               class="form-control" 
+                               placeholder="Enter your GCash number"
+                               required
+                               pattern="[0-9]{11}"
+                               title="Please enter a valid 11-digit GCash number">
+                      </div>
                 </div>
             </div>
             <button class="pay-button" id="checkout-button">Pay now</button>
@@ -73,6 +84,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="scripts/PaymongoHandler.js"></script>
     <script src="scripts/Checkout.js"></script>
    
     <style>

@@ -156,7 +156,7 @@ h1 {
 }
 
 .continue-shopping-btn {
-  margin-left: 590px;
+  margin-left: 605px;
 }
 
 
@@ -183,29 +183,36 @@ d
   justify-content: space-between;
   align-items: center;
   background-color: #fff;
-  padding: 10px;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   margin-left: 20px;
-  
+  gap: 24px;
+  width: 1200px; /* Fixed width */
 }
 
+
 .cart-item img {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Make the image cover the container while maintaining aspect ratio */
+  object-position: center; /* Center the image within the container */
 }
 
 .item-details {
-  flex: 2;
-  
+  flex: 1;
+  min-width: 0; /* Allow text to wrap within the container */
 }
+
 
 .item-details h3 {
   font-size: 18px;
-    margin-bottom: 5px;
-    color: #333;
+  margin-bottom: 5px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  white-space: nowrap; /* Keep text in single line */
 }
 
 .item-details p {
@@ -294,6 +301,14 @@ d
     margin-bottom: 20px;
     margin-left: 20px;
     gap: 24px; /* Add consistent spacing between all direct children */
+}
+
+.cart-item .product-image-container {
+  width: 130px;
+  height: 130px;
+  overflow: hidden;
+  border-radius: 8px;
+  flex-shrink: 0; /* Prevent the image container from shrinking */
 }
 
 /* Add a wrapper for the controls to group them */
@@ -663,4 +678,57 @@ h1  {
   margin: 0 10px;
 }
 
+
+.empty-cart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-cart-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #000;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.empty-cart-mascot {
+  width: 150px;
+  height: auto;
+  margin: 2rem 0;
+}
+
+.empty-cart-btn {
+  background-color: #E5A5A5;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.empty-cart-btn:hover {
+  background-color: #d88e8e;
+}
+
+/* Add this to handle the cart page layout */
+.cart-page {
+  min-height: 70vh;
+  padding: 2rem;
+}
+
+/* Hide the original continue shopping button when showing empty cart */
+.empty-cart-container + .continue-shopping-btn {
+  display: none;
+}
 

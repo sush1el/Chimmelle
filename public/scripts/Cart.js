@@ -204,20 +204,15 @@ static async addToCart(productId, quantityOrOptions) {
   }
   static async toggleSelection(cartItemId) {
     try {
-      const cartItem = document.querySelector(`[data-cart-item-id="${cartItemId}"]`);
-      if (!cartItem) throw new Error('Cart item not found');
-
-      const productId = cartItem.dataset.productId;
-      
       const response = await fetch('/api/cart/toggle-selection', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ cartItemId }),
         credentials: 'include'
       });
-
+  
       const result = await this.handleResponse(response, 'Failed to toggle selection');
       await this.updateCartDisplay();
       return result;
@@ -283,13 +278,18 @@ static async addToCart(productId, quantityOrOptions) {
     }
   }
 
- 
- 
   static async updateCartDisplay() {
     try {
       const cart = await this.getCart();
       const cartItems = document.querySelector('.cart-items');
-      if (!cartItems) return;
+      const cartPage = document.querySelector('.cart-page');
+      
+      if (!cartItems || !cartPage) return;
+  
+      if (!cart || !cart.items || cart.items.length === 0) {
+        this.displayEmptyCartMessage();
+        return;
+      }
   
       cartItems.innerHTML = '';
       cart.items.forEach(item => {
@@ -302,16 +302,18 @@ static async addToCart(productId, quantityOrOptions) {
         
         cartItems.innerHTML += `
           <div class="cart-item ${isSelected ? '' : 'disabled'}" 
-               data-cart-item-id="${item.cartItemId}"
-               data-product-id="${product._id}">
-              <label class="custom-checkbox">
-               <input type="checkbox" 
-                   class="item-checkbox" 
-                   ${isSelected ? 'checked' : ''} 
-                   data-cart-item-id="${item.cartItemId}">
-                   <span class="checkmark"></span>
-               </label>
+            data-cart-item-id="${item.cartItemId}"
+            data-product-id="${product._id}">
+          <label class="custom-checkbox">
+            <input type="checkbox" 
+                class="item-checkbox" 
+                ${isSelected ? 'checked' : ''} 
+                data-cart-item-id="${item.cartItemId}">
+                <span class="checkmark"></span>
+          </label>
+          <div class="product-image-container">
             <img src="${product.imageH}" alt="${product.name}" class="product-image">
+          </div>
             
             <div class="item-details">
               <h3>${product.name}</h3>
@@ -558,6 +560,34 @@ static async changeVersion(cartItemId, newVersion) {
   }
 }
 
+static displayEmptyCartMessage() {
+  const cartItems = document.querySelector('.cart-items');
+  const cartSummary = document.querySelector('.cart-summary');
+  const yourCart = document.querySelector('.your-cart');
+  const cartPage = document.querySelector('.cart-page');
+  
+  if (!cartItems || !cartPage) return;
+  
+  // Hide cart summary and your-cart section when cart is empty
+  if (cartSummary) {
+    cartSummary.style.display = 'none';
+  }
+  if (yourCart) {
+    yourCart.style.display = 'none';
+  }
+
+  // Clear any existing content and add empty cart message
+  cartPage.innerHTML = `
+    <div class="empty-cart-container">
+      <h1 class="empty-cart-title">Oops! Your cart is<br>currently empty.</h1>
+      <img src="/resources/bt21-chimmy.png" alt="Empty Cart Mascot" class="empty-cart-mascot">
+      <button onclick="window.location.href='/shop'" class="empty-cart-btn">
+        Continue Shopping
+      </button>
+    </div>
+  `;
+}
+
 static initializeEventListeners() {
   const cartItems = document.querySelector('.cart-items');
   const checkoutButton = document.querySelector('.checkout-btn');
@@ -588,15 +618,19 @@ static initializeEventListeners() {
   // Handle version changes and checkbox toggles
   cartItems.addEventListener('change', async (e) => {
     const target = e.target;
-    const cartItemId = target.dataset.cartItemId;
-    if (!cartItemId) return;
-
+    
     try {
       if (target.classList.contains('item-checkbox')) {
+        const cartItemId = target.dataset.cartItemId;
+        if (!cartItemId) return;
+        
         console.log('Toggling item selection:', cartItemId);
         await this.toggleSelection(cartItemId);
       }
       else if (target.classList.contains('version-select')) {
+        const cartItemId = target.dataset.cartItemId;
+        if (!cartItemId) return;
+        
         console.log('Changing version:', {
           cartItemId,
           newVersion: target.value
@@ -660,6 +694,7 @@ static initializeEventListeners() {
     }
   });
   }
+
 }
 
   document.addEventListener('DOMContentLoaded', () => {

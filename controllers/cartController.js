@@ -98,10 +98,10 @@ const cartController = {
   // Toggle item selection
   async toggleSelection(req, res) {
     try {
-      const { productId } = req.body;
+      const { cartItemId } = req.body;
       
-      if (!productId) {
-        return res.status(400).json({ message: 'Product ID is required' });
+      if (!cartItemId) {
+        return res.status(400).json({ message: 'Cart Item ID is required' });
       }
 
       const user = await User.findById(req.user._id);
@@ -110,7 +110,7 @@ const cartController = {
       }
 
       const cartItem = user.cart.items.find(
-        item => item.product.toString() === productId.toString()
+        item => item.cartItemId.toString() === cartItemId.toString()
       );
 
       if (!cartItem) {
@@ -135,7 +135,6 @@ const cartController = {
       });
     }
   },
-
   async deleteFromCart(req, res) {
     try {
       const cartItemId = req.params.cartItemId; // Get cartItemId from URL params

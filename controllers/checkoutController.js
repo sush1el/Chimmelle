@@ -115,7 +115,7 @@ const checkoutController = {
 
       // Update order status to indicate successful stock update
       await Order.findByIdAndUpdate(orderId, {
-        status: 'processing',
+        status: 'confirmed',
         stockUpdateStatus: 'completed'
       });
 
