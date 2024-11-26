@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product'); // Assuming you have a Product model
+const Product = require('../models/Product'); 
 const { authenticateUser } = require('../middleware/authMiddleware');
 
 router.get('/product-page/:id', authenticateUser, async (req, res) => {

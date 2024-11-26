@@ -71,7 +71,54 @@
 
         <section id="orders" class="section">
             <h2>Orders</h2>
-            <p class="empty-message">No orders available at the moment.</p>
+            <% if (orders && orders.length > 0) { %>
+                <div class="orders-container">
+                    <% orders.forEach(order => { %>
+                        <div class="order-card">
+                            <div class="order-header" onclick="toggleOrderDetails(this)">
+                                <span>Order #<%= order._id.toString().slice(-6) %></span>
+                                <span>Total: ₱ <%= order.totalAmount.toLocaleString() %></span>
+                                <span class="status-badge <%= order.status %>"><%= order.status %></span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="order-details" style="display:none;">
+                                <div class="order-customer-info">
+                                    <h4>Customer: <%= order.customerName.firstName %> <%= order.customerName.lastName %></h4>
+                                    <p>Shipping Address: 
+                                        <%= order.shippingAddress.street %>, 
+                                        <%= order.shippingAddress.barangay %>, 
+                                        <%= order.shippingAddress.city %>
+                                    </p>
+                                </div>
+                                <div class="order-items">
+                                    <h4>Items:</h4>
+                                    <% order.items.forEach(item => { %>
+                                        <div class="order-item">
+                                            <span><%= item.product.name %></span>
+                                            <span>Qty: <%= item.quantity %></span>
+                                            <span>₱ <%= item.price.toLocaleString() %></span>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                                <div class="order-shipping">
+                                    <h4>Shipping Status</h4>
+                                    <select 
+                                        class="shipping-status-select" 
+                                        onchange="updateShippingStatus('<%= order._id %>', this.value)"
+                                        <%= order.shippingStatus === 'shipped' ? 'disabled' : '' %>
+                                    >
+                                        <option value="preparing" <%= order.shippingStatus === 'preparing' ? 'selected' : '' %>>Preparing</option>
+                                        <option value="shipped" <%= order.shippingStatus === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                        <option value="received" <%= order.shippingStatus === 'received' ? 'selected' : '' %>>Received</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="empty-message">No orders available at the moment.</p>
+            <% } %>
         </section>
 
          <!-- New Manage Admins section -->

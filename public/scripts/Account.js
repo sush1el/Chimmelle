@@ -603,7 +603,79 @@ async function setDefaultAddress(index) {
     }
 }
 
-// Export functions to window
+async function confirmOrderReceived(orderId) {
+    try {
+        const response = await fetch(`/api/orders/${orderId}/receive`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to mark order as received');
+        }
+
+        const result = await response.json();
+        
+        // Refresh the page or update the UI
+        Swal.fire({
+            title: 'Order Received',
+            text: 'Thank you for confirming receipt of your order!',
+            icon: 'success',
+            confirmButtonColor: '#da9e9f'
+        }).then(() => {
+            location.reload(); // Or update the specific order's status in the UI
+        });
+    } catch (error) {
+        Swal.fire({
+            title: 'Error',
+            text: error.message,
+            icon: 'error',
+            confirmButtonColor: '#da9e9f'
+        });
+    }
+}
+
+function setupOrderTabs() {
+    const tabs = document.querySelectorAll('.order-tab');
+    const orderLists = document.querySelectorAll('.order-list');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active class from all tabs and lists
+            tabs.forEach(t => t.classList.remove('active'));
+            orderLists.forEach(l => l.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding list
+            tab.classList.add('active');
+            document.getElementById(`${tab.dataset.tab}-orders`).classList.add('active');
+        });
+    });
+}
+
+// Toggle order details
+function toggleOrderDetails(header) {
+    const orderCard = header.closest('.order-card');
+    const details = orderCard.querySelector('.order-details');
+    const toggleIcon = header.querySelector('.toggle-icon');
+
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+        toggleIcon.textContent = '▲';
+    } else {
+        details.style.display = 'none';
+        toggleIcon.textContent = '▼';
+    }
+}
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    setupOrderTabs();
+    
+});
+
+window.toggleOrderDetails = toggleOrderDetails;
 window.showAccount = showAccount;
 window.showAddresses = showAddresses;
 window.showEditAddress = showEditAddress;
@@ -611,3 +683,4 @@ window.showAddNewAddress = showAddNewAddress;
 window.deleteAddress = deleteAddress;
 window.setDefaultAddress = setDefaultAddress;
 window.setupLocationDropdowns = setupLocationDropdownListeners;
+window.confirmOrderReceived = confirmOrderReceived;

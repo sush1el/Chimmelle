@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENHYPEN - Romance: Untold (Standard Ver.) 2nd Full Album</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="product-pagewithdropdown.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/">HOME</a>
+            <a href="#">ARTISTS</a>
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle">SHOP</a>
+                <div class="dropdown-menu">
+                    <a href="/albums">Albums</a>
+                    <a href="/merchandise">Pre-order</a>
+                    <a href="/collectibles">Onhand</a>
+                    <a href="/accessories">Lightsticks</a>
+                    <a href="/accessories">Merchandise</a>
+                    <a href="/accessories">All Products</a>
+                </div>
+            </div>
+            <a href="#">SUPPORT</a>
+        </div>
+        <div class="nav-center">
+            <img class="logo" src="/logo/chimelle-logo.png" alt="Logo">
+        </div>
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" placeholder="Search for...">
+            <div class="dropdown">
+                <a href="#">
+                    <img class="profile-user" src="/logo/profile.png" alt="Profile">
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/account">Account</a>
+                    <a href="/api/auth/logout">Logout</a>
+                </div>
+            </div>
+            <a href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="product-images">
+            <img src="/logo/Main cover.jpg" alt="Main Product Image" class="main-image" id="mainImage">
+            <div class="thumbnail-container">
+                <img src="/logo/Main cover.jpg" alt="Thumbnail 1" class="thumbnail">
+                <img src="/logo/1.jpg" alt="Thumbnail 2" class="thumbnail">
+                <img src="/logo/2.jpg" alt="Thumbnail 3" class="thumbnail">
+                <img src="/logo/3.jpg" alt="Thumbnail 4" class="thumbnail">
+                <img src="/logo/4.jpg" alt="Thumbnail 5" class="thumbnail">
+                <img src="/logo/5.jpg" alt="Thumbnail 6" class="thumbnail">
+            </div>
+        </div>
+        <div class="product-info">
+            <p class="product-artist">ENHYPEN</p>
+            <h1 class="product-title">ENHYPEN - Romance: Untold (Standard Ver.) 2nd Full Album</h1>
+            <p class="product-price">P 979.00</p>
+            <p class="version">Version</p>
+            
+            <select class="version-select">
+                <option class="placeholder" value="" selected hidden>Choose an option</option>
+                <option value="standard">Standard</option>
+                <option value="deluxe">Deluxe</option>
+            </select>
+
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <span><i class="fas fa-info-circle"></i> Product Information</span>
+                    <i class="fa-solid fa-plus expand-icon"></i>
+                </div>
+                <div class="expandable-content">
+                    <ul>
+                        <li><strong>Release Date:</strong> July 15, 2024</li>
+                        <li><strong>Press:</strong> First Press</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="expandable-section">
+                <div class="expandable-header">
+                    <span><i class="fas fa-box-open"></i> Inclusion</span>
+                    <i class="fa-solid fa-plus expand-icon"></i>
+                </div>
+                <div class="expandable-content">
+                    <ul>
+                        <li>OUT BOX</li>
+                        <li>LETTER</li>
+                        <li>PHOTO BOOK (92p)</li>
+                        <li>CD-R (1ea)</li>
+                        <li>PHOTO CARD A (random 1 of 7)</li>
+                        <li>PHOTO CARD B (random 1 of 7)</li>
+                        <li>STICKER (1ea)</li>
+                        <li>ALBUM LOGO STICKER (1ea)</li>
+                        <li>POSTCARD (random 1 of 7)</li>
+                        <li>PAPER RINGS (1 set of 7 sets) (2ea/set)</li>
+                        <li>POSTER (1ea)</li>
+                        <li>FABRIC PIECE worn by ENHYPEN (random 1 of 150,000)</li>
+                        <li>INSTANT PHOTO (random 1 of 400)*NOT ALL WILL HAVE THIS INCLUSION</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="stock-info">5 items left in stock</p>
+
+            <div class="quantity-selector">
+                <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                <input type="number" id="quantity" class="quantity-input" value="1" min="1">
+                <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+            </div>
+
+            <button class="add-to-cart-btn">Add to Cart</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const mainImage = document.getElementById('mainImage');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const expandableSections = document.querySelectorAll('.expandable-section');
+
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+            mainImage.src = thumb.src;
+        });
+    });
+
+    expandableSections.forEach(section => {
+        const header = section.querySelector('.expandable-header');
+        const content = section.querySelector('.expandable-content');
+        const icon = header.querySelector('.expand-icon');
+
+        header.addEventListener('click', () => {
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+            icon.classList.toggle('fa-plus');
+            icon.classList.toggle('fa-minus');
+        });
+    });
+});
+
+function decreaseQuantity() {
+    const quantityInput = document.getElementById('quantity');
+    if (quantityInput.value > 1) {
+        quantityInput.value = parseInt(quantityInput.value) - 1;
+    }
+}
+
+function increaseQuantity() {
+    const quantityInput = document.getElementById('quantity');
+    quantityInput.value = parseInt(quantityInput.value) + 1;
+}
+    </script>
+</html>

@@ -87,7 +87,7 @@ static async addToCart(productId, quantityOrOptions) {
                               ${v.quantity < quantity ? 'disabled' : ''}
                               style="${v.quantity < quantity ? 'color: #999;' : ''}"
                           >
-                              ${v.version}${v.quantity < quantity ? ` (Only ${v.quantity} available)` : ''}
+                              ${v.version}${v.quantity < quantity ? ` (Out of Stock)` : ''}
                           </option>
                       `).join('')}
                   </select>

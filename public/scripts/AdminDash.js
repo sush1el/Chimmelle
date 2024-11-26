@@ -260,3 +260,33 @@ window.deleteAdmin = async function(adminId) {
 function logout() {
     window.location.href = '/api/auth/logout';
 }
+
+function toggleOrderDetails(header) {
+    const details = header.nextElementSibling;
+    details.style.display = details.style.display === 'none' ? 'block' : 'none';
+    header.querySelector('.fa-chevron-down').classList.toggle('rotated');
+}
+
+async function updateShippingStatus(orderId, status) {
+    try {
+        const response = await fetch(`/admin/update-order-status/${orderId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ shippingStatus: status })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire('Updated!', 'Order shipping status updated.', 'success');
+            // Optional: Refresh or update UI
+        } else {
+            Swal.fire('Error!', data.message || 'Could not update status', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        Swal.fire('Error!', 'Network error occurred', 'error');
+    }
+}

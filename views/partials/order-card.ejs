@@ -1,0 +1,61 @@
+<div class="order-card" data-order-id="<%= order._id %>">
+  <div class="order-header" onclick="toggleOrderDetails(this)">
+      <p class="order-id">Order #<%= order._id %></p>
+      <p class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></p>
+      <span class="toggle-icon">▼</span>
+  </div>
+  <div class="order-details" style="display: none;">
+      <div class="order-items">
+          <% order.items.forEach((item) => { %>
+              <div class="order-item">
+                  <img src="<%= item.product.imageH %>" alt="<%= item.product.name %>">
+                  <div class="item-details">
+                      <p class="item-name"><%= item.product.name %></p>
+                      <p class="item-quantity">Qty: <%= item.quantity %></p>
+                      <p class="item-price">₱ <%= (item.price * item.quantity).toLocaleString() %></p>
+                  </div>
+              </div>
+          <% }); %>
+      </div>
+      <div class="order-summary">
+          <p class="total-amount">Total: ₱ <%= order.totalAmount.toLocaleString() %></p>
+      </div>
+      <% if (order.shippingStatus === 'shipped' || (type === 'ongoing' && order.shippingStatus === 'preparing')) { %>
+        <div class="order-tracking">
+            <div class="tracking-steps">
+                <div class="step <%= order.shippingStatus === 'preparing' ? 'active' : '' %>">
+                    <span>Preparing</span>
+                </div>
+                <div class="step <%= order.shippingStatus === 'shipped' ? 'active' : '' %>">
+                    <span>Shipped</span>
+                </div>
+                <div class="step <%= order.shippingStatus === 'received' ? 'active' : '' %>">
+                  <span>Received</span>
+              </div>
+            </div>
+            <button 
+                  class="btn btn-receive <%= order.shippingStatus === 'preparing' ? 'btn-disabled' : '' %>"
+                  onclick="confirmOrderReceived('<%= order._id %>')"
+                  <%= order.shippingStatus === 'preparing' ? 'disabled' : '' %>
+              >
+                  Order Received
+              </button>
+        </div>
+    <% } %> <% if (order.shippingStatus === 'received') { %>
+      <div class="order-tracking">
+          <div class="tracking-steps">
+              <div class="step <%= order.shippingStatus === 'preparing' ? 'active' : '' %>">
+                  <span>Preparing</span>
+              </div>
+              <div class="step <%= order.shippingStatus === 'shipped' ? 'active' : '' %>">
+                  <span>Shipped</span>
+              </div>
+              <div class="step <%= order.shippingStatus === 'received' ? 'active' : '' %>">
+                  <span>Received</span>
+              </div>
+          </div>
+          <p class="order-received-date">Received on: <%= new Date(order.receivedAt).toLocaleDateString() %></p>
+      </div>
+    <% } %>
+  </div>
+</div>

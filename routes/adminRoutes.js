@@ -5,6 +5,7 @@ const { requireAdmin } = require('../middleware/adminAuth');
 const { createAdmin } = require('../controllers/authController');
 const Product = require('../models/Product');
 const Admin = require('../models/Admin');
+const Order = require('../models/Order');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
@@ -37,13 +38,20 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
         const products = await Product.find({});
         const admin = req.admin;
         
-        // Initialize admins as an empty array by default
         let admins = [];
+        let orders = [];
         
-        // Only fetch admin list if the current user is a super_admin
         if (admin.role === 'super_admin') {
             admins = await Admin.find({}, '-password');
         }
+        
+        // Fetch paid and confirmed orders with populated product details
+        orders = await Order.find({ 
+            $or: [
+                { status: 'confirmed' },
+                { paymentStatus: 'paid' }
+            ]
+        }).populate('items.product');
         
         res.render('adminDash', {
             admin: {
@@ -54,7 +62,8 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
                 lastLogin: admin.lastLogin
             },
             products: products,
-            admins: admins, // Pass the admins array to the template
+            admins: admins,
+            orders: orders,
             title: 'Admin Dashboard'
         });
     } catch (error) {
@@ -83,6 +92,26 @@ router.get('/add-product', requireAdmin, async (req, res) => {
         res.status(500).render('error', { 
             message: 'Error loading add product form'
         });
+    }
+});
+
+router.put('/update-order-status/:id', requireAdmin, async (req, res) => {
+    try {
+        const { shippingStatus } = req.body;
+        const order = await Order.findByIdAndUpdate(
+            req.params.id, 
+            { shippingStatus }, 
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        res.json({ success: true, order });
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).json({ success: false, message: 'Server error updating order status' });
     }
 });
 

@@ -115,16 +115,44 @@
                 <a href="/api/auth/logout" class="logout-btn">Logout</a>
             </div>
 
-            <div class="order-history-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Order History</h2>
-                    </div>
-                    <div class="card-content">
-                        <p>You haven't placed any orders yet.</p>
-                    </div>
-                </div>
+        <div class="order-history-section">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Order History</h2>
+    </div>
+    <div class="card-content">
+      <div class="order-tabs">
+                <button class="order-tab active" data-tab="ongoing">Ongoing Orders</button>
+                <button class="order-tab" data-tab="completed">Completed Orders</button>
             </div>
+            <div class="order-list-container">
+            <div id="ongoing-orders" class="order-list active">
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach((order) => { %>
+                        <% if (order.status === 'confirmed' && order.paymentStatus === 'paid' && order.shippingStatus !== 'received') { %>
+                            <%- include('partials/order-card', { order: order, type: 'ongoing' }) %>
+                        <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No ongoing orders.</p>
+                <% } %>
+            </div>
+            
+            <div id="completed-orders" class="order-list">
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach((order) => { %>
+                        <% if (order.status === 'confirmed' && order.paymentStatus === 'paid' && order.shippingStatus === 'received') { %>
+                            <%- include('partials/order-card', { order: order, type: 'completed' }) %>
+                        <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No completed orders.</p>
+                <% } %>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
         </div>
 
         <!-- Addresses View -->
@@ -229,7 +257,7 @@
             color: #da9e9f;
         }
     </style>
-
+    
     <script type="module"src="scripts/Account.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

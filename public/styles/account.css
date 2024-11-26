@@ -139,12 +139,15 @@ h4 {
 .account-grid {
   display: flex;
   gap: 2rem;
+  min-height: 600px; /* Set a fixed minimum height */
 }
 
 .account-details-section {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 400px; /* Set a fixed width */
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .card {
@@ -425,249 +428,163 @@ h4 {
   color: #da9e9f;
   border-radius: 20px;
   margin: 0 10px;
-}/* Order History Styles 
-.order-history-section {
-  display: flex; 
 }
 
-.card {
-  background: #fff;
-  border-radius: 8px;
-  width: 700px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.card-title {
-  font-size: 1rem;
-  margin: 0;
-  color:white;
-  text-align: center;
-  padding: 10px;
-}
-
-
-.card-details {
-  text-align: center;
-}
-
-.card-content {
-  padding: 20px;
-}
-
-.orders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.order-history-section .card-content {
+  flex-grow: 1; /* Allow this section to expand */
+  min-height: 100%; /* Ensure it fills the container height */
+  overflow-y: auto; /* Add scrolling if content overflows */
+  min-width: 750px;
 }
 
 .order-card {
-  border: 1px solid #eee;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 20px;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  margin-bottom: 40px;
 }
 
 .order-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
 }
 
-.order-meta h3 {
-  margin: 0;
-  font-size: 1.2rem;
+.order-id {
+  font-weight: bold;
   color: #333;
 }
 
 .order-date {
   color: #666;
-  font-size: 0.9rem;
 }
 
-.order-status {
+.order-items {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 0.9rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-/* Status colors 
-.order-status.pending {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.order-status.pending .status-dot {
-  background: #856404;
-}
-
-.order-status.confirmed {
-  background: #d4edda;
-  color: #155724;
-}
-
-.order-status.confirmed .status-dot {
-  background: #155724;
-}
-
-.order-status.processing {
-  background: #cce5ff;
-  color: #004085;
-}
-
-.order-status.processing .status-dot {
-  background: #004085;
-}
-
-.order-status.shipped {
-  background: #e2e3ff;
-  color: #2c3177;
-}
-
-.order-status.shipped .status-dot {
-  background: #2c3177;
-}
-
-.order-status.delivered {
-  background: #d4edda;
-  color: #155724;
-}
-
-.order-status.delivered .status-dot {
-  background: #155724;
-}
-
-.order-status.cancelled {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.order-status.cancelled .status-dot {
-  background: #721c24;
-}
-
-.order-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .order-details {
-      grid-template-columns: 1fr;
-  }
-}
-
-.order-items, .shipping-details {
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 6px;
-}
-
-.order-items h4, .shipping-details h4 {
-  margin: 0 0 15px 0;
-  color: #333;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .order-item {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  align-items: center;
+  gap: 1rem;
 }
 
-.order-item:last-child {
-  border-bottom: none;
+.order-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
-.timeline-events {
-  position: relative;
-  padding-left: 20px;
+.item-details {
+  flex-grow: 1;
 }
 
-.timeline-event {
-  position: relative;
-  padding-bottom: 20px;
-}
-
-.timeline-event:before {
-  content: '';
-  position: absolute;
-  left: -20px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #eee;
-}
-
-.event-dot {
-  position: absolute;
-  left: -24px;
-  top: 4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #007bff;
-  z-index: 1;
-}
-
-.event-details {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.event-status {
-  font-weight: 600;
-  color: #333;
-}
-
-.event-time {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.event-description {
-  margin: 4px 0;
-  color: #555;
+.item-name {
+  font-weight: bold;
 }
 
 .order-summary {
-  grid-column: 1 / -1;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-  margin-top: 20px;
+  text-align: right;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
 
-.summary-row {
+.order-tracking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tracking-steps {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
-.summary-row.total {
-  font-weight: 600;
-  font-size: 1.1rem;
-  border-top: 1px solid #eee;
-  padding-top: 15px;
-  margin-top: 8px;
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
 }
 
-.no-orders {
-  text-align: center;
-  color: #666;
-  padding: 40px 0;
-}/*
+.step::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  margin-bottom: 0.5rem;
+}
+
+.step.active::before {
+  background-color: #da9e9f;
+}
+
+.btn-receive {
+  background-color: #da9e9f;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.order-tabs {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.order-tab {
+  flex: 1;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border: none;
+  cursor: pointer;
+}
+
+.order-tab.active {
+  background-color: #da9e9f;
+  color: white;
+}
+
+.order-list {
+  display: none;
+}
+
+.order-list.active {
+  display: block;
+}
+
+.order-card .order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.toggle-icon {
+  font-size: 0.8em;
+}
+
+.order-details {
+  padding: 15px;
+  border: 1px solid #eee;
+}
+
+.btn-disabled {
+  background-color: grey;
+  color: white;
+  cursor: not-allowed;
+}

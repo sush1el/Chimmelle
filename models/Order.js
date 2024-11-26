@@ -38,7 +38,7 @@ const OrderSchema = new mongoose.Schema({
   },
   shippingStatus: {
     type: String,
-    enum: ['preparing', 'shipped', 'delivered'],
+    enum: ['preparing', 'shipped', 'received'],
     default: 'preparing'
   },
   totalAmount: {
@@ -59,6 +59,10 @@ const OrderSchema = new mongoose.Schema({
     paymentIntentId: String,
     paymentMethod: String,
     paidAt: Date
+  },
+  receivedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
