@@ -35,3 +35,20 @@ document.querySelector('.login-form').addEventListener('submit', async (e) => {
         alert('An error occurred while logging in');
     }
 });
+
+document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', (e) => {
+        const passwordInput = e.target.closest('.password-container').querySelector('input');
+        const eyeIcon = e.target.closest('button').querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.remove('fa-regular', 'fa-eye');
+            eyeIcon.classList.add('fa-solid', 'fa-eye');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-solid', 'fa-eye');
+            eyeIcon.classList.add('fa-regular', 'fa-eye');
+        }
+    });
+});

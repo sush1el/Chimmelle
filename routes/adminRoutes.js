@@ -98,6 +98,16 @@ router.get('/add-product', requireAdmin, async (req, res) => {
 router.put('/update-order-status/:id', requireAdmin, async (req, res) => {
     try {
         const { shippingStatus } = req.body;
+
+        // Validate shipping status
+        const validStatuses = ['preparing', 'shipped'];
+        if (!validStatuses.includes(shippingStatus)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid shipping status' 
+            });
+        }
+
         const order = await Order.findByIdAndUpdate(
             req.params.id, 
             { shippingStatus }, 
@@ -114,6 +124,7 @@ router.put('/update-order-status/:id', requireAdmin, async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error updating order status' });
     }
 });
+
 
 // Handle product creation
 router.post('/add-product', requireAdmin, upload.any(), async (req, res) => {
@@ -396,15 +407,29 @@ router.post('/create-admin', requireAdmin, async (req, res) => {
       res.status(500).json({ msg: 'Server error in create admin route' });
     }
   });
+
 router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
         const products = await Product.find({});
         const admin = req.admin;
         
         let admins = [];
+        let orders = [];
+        
         if (admin.role === 'super_admin') {
             admins = await Admin.find({}, '-password');
+            console.log('Super admin role:', admin.role);
+            console.log('Admins found:', admins.length);
+            console.log('Admin details:', admin);
         }
+        
+        // Fetch orders with populated product details
+        orders = await Order.find({ 
+            $or: [
+                { status: 'confirmed' },
+                { paymentStatus: 'paid' }
+            ]
+        }).populate('items.product');
         
         res.render('adminDash', {
             admin: {
@@ -416,6 +441,7 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
             },
             products: products,
             admins: admins,
+            orders: orders,
             title: 'Admin Dashboard'
         });
     } catch (error) {

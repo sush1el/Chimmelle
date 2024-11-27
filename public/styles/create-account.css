@@ -3,11 +3,13 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Montserrat';
+  
 }
 
 body {
   background-color: #fff7f7;
   color: #333;
+  
 }
 
 .navbar {
@@ -142,6 +144,7 @@ a {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 300px;
 }
 
 footer {
@@ -282,4 +285,131 @@ h1 {
     max-width: 70px;
     height: auto;
   }
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+  padding: 20px;
+}
+
+.dropdown-toggle {
+  text-decoration: none;
+  color: black;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px;
+  transition: all 0.3s ease;
+  border-radius: 20px;
+}
+
+.dropdown:hover .dropdown-toggle {
+  background-color: #da9e9f;
+  color: white;
+  border-radius: 20px;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+  background-color: #da9e9f;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  text-align: center;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  min-width: 150px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 8px;
+  padding: 20px 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+.dropdown-menu a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 8px 20px;
+  text-align: center;
+}
+
+.dropdown-menu a:hover {
+  background-color: #EDE9E9;
+  color: #da9e9f;
+  border-radius: 20px;
+  margin: 0 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-container input {
+  flex-grow: 1;
+}
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+}
+#password-requirements,
+#password-match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  padding: 0 10px;
+}
+
+#password-requirements li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+#password-requirements li i {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+#password-requirements li.valid i {
+  color: #4CAF50;
+}
+#password-requirements li.invalid i {
+  color: #F44336;
+}
+#password-match {
+  font-size: 16px;
+  
+}
+#password-match.valid {
+  color: #4CAF50;
+}
+#password-match.invalid {
+  color: #F44336;
 }

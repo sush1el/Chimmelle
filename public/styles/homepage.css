@@ -85,13 +85,14 @@ a:hover, a:focus {
 
 .welcome-message {
   width: 100%;
-  background-color: #e9aeae;
+  background-color: #da9e9f;
   color: white;
   padding: 10px;
   text-align: center;
   font-size: 16px;
   font-weight: bold;
-  padding: 10px 0;
+  font-style: italic;
+  padding: 15px 0;
   white-space: nowrap;
   overflow: hidden;
   position: relative;
@@ -257,14 +258,19 @@ footer {
   
 }
 
+
 .announcement {
-  background-color: #e6e6e6;
-  padding: 2rem;
+  background-color: #EDE9E9;
+  padding: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2rem;
-  margin: 2rem 0;
+  margin-left: 75px;
+  margin-right: 75px;
+  margin-bottom: 30px;
+  margin-top: 30px;
+  border-radius: 50px;
 }
 
 .album-cover {
@@ -291,19 +297,26 @@ transform: translateY(-5px);
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
+
 .pre-order-btn {
   background-color: #da9e9f;
   color: white;
-  padding: 0.5rem 2rem;
+  padding: 0.6rem 2.5rem;
   text-decoration: none;
   border-radius: 20px;
   transition: all 0.3s ease;
+  
 }
 
 .pre-order-btn:hover {
-  background-color: #da9e9f;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  text-decoration: none;
+  padding: 0.6rem 2.5rem;
+  color: white;
+  background-color: #d98e8e;
+  transform: scale(1.05);
+
 }
 
 

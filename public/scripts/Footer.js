@@ -3,9 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const html = document.documentElement;
  
-    // Check if page is actually scrollable
-    const isPageScrollable = body.scrollHeight > window.innerHeight;
-    
+   
     // Add smooth transition to footer
     footer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
     
@@ -13,9 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     footer.style.opacity = '0';
     footer.style.transform = 'translateY(20px)';
  
-    // Ensure page is always scrollable
-    const minHeight = window.innerHeight * 1.1;
-    body.style.minHeight = `${minHeight}px`;
+    
  
     let lastScrollTop = 0;
     let isFooterVisible = false;

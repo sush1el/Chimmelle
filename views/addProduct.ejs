@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href= "/public/styles/addProduct.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page - Product Upload</title>
     <style>
@@ -32,6 +38,14 @@
             color: #da9e9f;
             margin-bottom: 20px;
             text-align: center;
+        }
+        h2 {
+            font-size: 28px;
+            color: #da9e9f;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            text-align: center;
+
         }
 
         .form-group {
@@ -86,7 +100,11 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s ease;
+            margin-bottom: 10px;
         }
+
+
+    
 
         .add-version-btn:hover,
         .add-description-btn:hover,
@@ -108,21 +126,25 @@
         }
 
         .remove-btn {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        .remove-btn:hover {
+            font-size: 15px;
+        text-decoration: none;
+        margin-top: 15px;
+        color: white;
+        background-color: rgb(190, 6, 6);
+        font-weight: bold;
+        padding: 0 20px;
+        border: none;
+        padding-bottom: 5px;
+        padding-top: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+.remove-btn:hover {
             background-color: #ff3333;
         }
         .back-btn {
-    background-color: #666;
+    background-color: #da9e9f;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -136,8 +158,10 @@
         }
 
 .back-btn:hover {
-    background-color: #555;
+    background-color: #c78081;
 }
+
+
 
 .form-select {
         width: 100%;
@@ -153,6 +177,20 @@
         outline: none;
         border-color: #da9e9f;
     }
+
+    .description-container{
+        margin-top: 10px;
+    }
+
+    h2 i{
+        margin-right: 5px;
+    }
+    
+    .add-inclusion-btn i, .add-description-btn i, .add-version-btn i {
+    margin-right: 5px;
+}
+
+    
     </style>
 </head>
 <body>
@@ -195,7 +233,7 @@
             </div>
 
             <div id="descriptionsContainer">
-                <h2>Descriptions</h2>
+                <h2><i class="fas fa-info-circle"></i> Product Information</h2>
                 <div class="description-container">
                     <div class="description-header">
                         <h3>Description 1</h3>
@@ -206,10 +244,10 @@
                     </div>
                 </div>
             </div>
-            <button type="button" class="add-description-btn" onclick="addDescription()">Add Another Description</button>
-
-            <div id="inclusionsContainer">
-                <h2>Inclusions</h2>
+            <button type="button" class="add-description-btn" onclick="addDescription()">
+                <i class="fa-solid fa-plus"></i>Add Another Description</button>
+<div id="inclusionsContainer">
+                <h2><i class="fas fa-box-open"></i>Inclusions</h2>
                 <div class="inclusion-container">
                     <div class="inclusion-header">
                         <h3>Inclusion 1</h3>
@@ -220,7 +258,8 @@
                     </div>
                 </div>
             </div>
-            <button type="button" class="add-inclusion-btn" onclick="addInclusion()">Add Another Inclusion</button>
+            <button type="button" class="add-inclusion-btn" onclick="addInclusion()" >
+                <i class="fa-solid fa-plus"></i>Add Another Inclusion</button>
 
             <div class="form-group">
                 <label for="imageH">Main Image:</label>
@@ -251,9 +290,12 @@
                 </div>
             </div>
 
-            <button type="button" class="add-version-btn" onclick="addVersion()">Add Another Version</button>
+            <button type="button" class="add-version-btn" onclick="addVersion()">
+                <i class="fa-solid fa-plus"></i>Add Another Version</button>
 
-            <button type="submit" class="submit-btn">Submit Product</button>
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-plus"></i>
+               Add Product</button>
         </form>
     </div>
 
@@ -261,8 +303,7 @@
         let versionCount = 1;
         let descriptionCount = 1;
         let inclusionCount = 1;
-
-        function addVersion() {
+function addVersion() {
             versionCount++;
             const versionsContainer = document.getElementById('versionsContainer');
             const newVersion = document.createElement('div');
@@ -345,8 +386,7 @@
             }
             reader.readAsDataURL(file);
         });
-
-        // Replace the form submission code in addProduct.ejs with this:
+// Replace the form submission code in addProduct.ejs with this:
 document.getElementById('productForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData();

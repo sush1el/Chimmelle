@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Chimelle Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/navbar.css">
+    <link rel="stylesheet" href="/styles/homepage.css">
+    <link rel="stylesheet" href="/styles/search-results.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-left">
+        <a href="/">HOME</a>
+        <a href="#">ARTISTS</a>
+        <div class="dropdown">
+            <a href="shop" class="dropdown-toggle">SHOP</a>
+            <div class="dropdown-menu">
+                <a href="/albums">Albums</a>
+                <a href="/merchandise">Pre-order</a>
+                <a href="/collectibles">Onhand</a>
+                <a href="/accessories">Lightsticks</a>
+                <a href="/accessories">Merchandise</a>
+                <a href="/shop">All Products</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <a href="#">SUPPORT</a>
+            <div class="dropdown-menu">
+                <a href="/contact">Contanct Us</a>
+                <a href="/faqs">FAQS</a>
+                <a href="/tc">Terms and Conditions</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/return">Return & Exchange</a>
+                <a href="/payment">Shipping & Payment</a>
+            </div>
+        </div>
+    </div>
+    <div class="nav-center">
+        <img class= "logo" src="resources/logo.jpg" alt="Logo" class="logo">
+    </div>
+    <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" placeholder="Search for...">
+        <% if (user) { %>
+            <div class="dropdown">
+                <a href="#">
+                    <img class="profile-user" src="resources/profile.png" alt="Profile">
+                </a>
+                <div class="dropdown-menu">
+                    <a style="font-weight: bold;" href="/account">Account</a>
+                    <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+                </div>
+            </div>
+            <a href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                </button>
+            </a>
+        <% } else { %>   
+            <div class="dropdown">
+            <a href="/login-page">
+                <img class="profile-user" src="resources/profile.png" alt="Profile">
+            </a>
+            </div>
+            <a class ="hidden" href="/cart">
+                <button class="cart-button">
+                    <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                </button>
+            </a>
+        <% } %>
+    </div>
+</nav>
+    
+    
+    <div class="search-results-container">
+        <h1>Search Results 
+            <% if (searchQuery) { %>
+                for "<%= searchQuery %>"
+            <% } %>
+        </h1>
+
+        <% if (products.length === 0) { %>
+            <div class="no-results">
+                <p>No products found matching your search.</p>
+                <p>Try different keywords or check our <a href="/shop">full shop</a>.</p>
+            </div>
+        <% } else { %>
+            <section class="product-grid" id="search-results-grid">
+                <% products.forEach(product => { %>
+                    <div class="product-card" data-product-id="<%= product._id %>">
+                        <a href="/product-page/<%= product._id %>">
+                            <div class="product-image">
+                                <img src="<%= product.imageH %>" class="product-image">
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name"><%= product.name %></h3>
+                                <p class="product-artist"><%= product.artist %></p>
+                            </a>
+                            <p class="product-price">₱<%= product.price.toFixed(2) %></p>
+                            <button class="choose-options-btn">Add to Cart</button>
+                        </div>
+                    </div>
+                <% }) %>
+            </section>
+        <% } %>
+    </div>
+
+  
+
+    <script src="/scripts/Search.js"></script>
+</body>
+</html>

@@ -34,6 +34,14 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        h2 {
+            font-size: 28px;
+            color: #da9e9f;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            text-align: center;
+
+        }
 
         .form-group {
             margin-bottom: 20px;
@@ -87,7 +95,11 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s ease;
+            margin-bottom: 10px;
         }
+
+
+    
 
         .add-version-btn:hover,
         .add-description-btn:hover,
@@ -103,40 +115,31 @@
         }
 
         .image-preview {
-            max-width: 200px;
-            max-height: 200px;
+            max-width: 20px;
+            max-height: 20px;
             margin-top: 10px;
         }
 
         .remove-btn {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        .remove-btn:hover {
+            font-size: 15px;
+        text-decoration: none;
+        margin-top: 15px;
+        color: white;
+        background-color: rgb(190, 6, 6);
+        font-weight: bold;
+        padding: 0 20px;
+        border: none;
+        padding-bottom: 5px;
+        padding-top: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+.remove-btn:hover {
             background-color: #ff3333;
         }
-
-        .current-image {
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .current-image img {
-            max-width: 100px;
-            max-height: 100px;
-            object-fit: cover;
-        }
         .back-btn {
-    background-color: #666;
+    background-color: #da9e9f;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -150,8 +153,11 @@
         }
 
 .back-btn:hover {
-    background-color: #555;
+    background-color: #c78081;
 }
+
+
+
 .form-select {
         width: 100%;
         padding: 10px;
@@ -166,6 +172,44 @@
         outline: none;
         border-color: #da9e9f;
     }
+
+    .description-container{
+        margin-top: 10px;
+    }
+
+    h2 i{
+        margin-right: 5px;
+    }
+    
+    .add-inclusion-btn i, .add-description-btn i, .add-version-btn i {
+    margin-right: 5px;
+}
+    .mainImage{
+        max-width: 20px;
+        max-height: 20px;
+    }
+
+    .current-image img {
+    max-width: 100px;  /* Limit width */
+    max-height: 100px; /* Limit height */
+    object-fit: contain; /* Maintain aspect ratio */
+    margin: 10px 0;
+    border: 1px solid #ddd;
+}
+
+.current-image {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.current-image span {
+    margin-left: 10px;
+    color: #666;
+}
+
     </style>
 </head>
 <body>

@@ -40,6 +40,66 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('hashchange', updateActiveSection);
     updateActiveSection();
 
+    // Order Status Filtering
+    const orderStatusButtons = document.querySelectorAll('.order-status-btn');
+    const orderRows = document.querySelectorAll('.orders-table tbody tr');
+    const orderDetailsModal = document.getElementById('orderDetailsModal');
+    const modalClose = document.querySelector('.modal-close');
+
+    if (orderStatusButtons && orderRows) {
+        orderStatusButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const status = button.dataset.status;
+
+                // Update active button
+                orderStatusButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Filter orders
+                orderRows.forEach(row => {
+                    const rowStatus = row.dataset.status;
+                    row.style.display = status === 'all' || rowStatus === status ? '' : 'none';
+                });
+            });
+        });
+    }
+
+    // Open Order Details Modal
+    function openOrderDetails(orderId) {
+        const orderDetailsContent = document.getElementById(`orderDetails-${orderId}`);
+        if (orderDetailsContent && orderDetailsModal) {
+            orderDetailsModal.querySelector('.modal-body').innerHTML = orderDetailsContent.innerHTML;
+            orderDetailsModal.style.display = 'block';
+        }
+    }
+
+    // Close Order Details Modal
+    function closeOrderDetailsModal() {
+        if (orderDetailsModal) {
+            orderDetailsModal.style.display = 'none';
+        }
+    }
+
+    // Attach click events to view details buttons
+    document.querySelectorAll('.order-details-btn')?.forEach(button => {
+        button.addEventListener('click', () => {
+            const orderId = button.dataset.orderid;
+            openOrderDetails(orderId);
+        });
+    });
+
+    // Close modal when clicking on close button
+    if (modalClose) {
+        modalClose.addEventListener('click', closeOrderDetailsModal);
+    }
+
+    // Close modal when clicking outside the modal
+    window.addEventListener('click', (event) => {
+        if (event.target === orderDetailsModal) {
+            closeOrderDetailsModal();
+        }
+    });
+
     // Create admin account functionality
     const createAdminBtn = document.getElementById('createAdminBtn');
     if (createAdminBtn) {
@@ -102,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
 
-
                     if (!username || !email || !password) {
                         Swal.showValidationMessage('Please fill in all fields');
                         return false;
@@ -129,7 +188,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             username,
                             email,
                             password
-        
                         })
                     })
                         .then(response => response.json())
@@ -261,14 +319,22 @@ function logout() {
     window.location.href = '/api/auth/logout';
 }
 
-function toggleOrderDetails(header) {
-    const details = header.nextElementSibling;
-    details.style.display = details.style.display === 'none' ? 'block' : 'none';
-    header.querySelector('.fa-chevron-down').classList.toggle('rotated');
-}
-
 async function updateShippingStatus(orderId, status) {
     try {
+        // Prevent changing status of a completed order
+        const existingStatus = document.querySelector(`#orderDetails-${orderId} .order-shipping-details p:first-child`).textContent.split(': ')[1].trim();
+        
+        if (existingStatus === 'received') {
+            Swal.fire('Error!', 'Cannot modify a completed order', 'error');
+            return;
+        }
+
+        // Only allow 'preparing' or 'shipped'
+        if (!['preparing', 'shipped'].includes(status)) {
+            Swal.fire('Error!', 'Invalid shipping status', 'error');
+            return;
+        }
+
         const response = await fetch(`/admin/update-order-status/${orderId}`, {
             method: 'PUT',
             headers: {
@@ -281,7 +347,8 @@ async function updateShippingStatus(orderId, status) {
 
         if (data.success) {
             Swal.fire('Updated!', 'Order shipping status updated.', 'success');
-            // Optional: Refresh or update UI
+            // Reload the page to reflect the updated status
+            location.reload();
         } else {
             Swal.fire('Error!', data.message || 'Could not update status', 'error');
         }
