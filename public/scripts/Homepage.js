@@ -1,4 +1,5 @@
-// public/js/homepage.js
+
+  // public/js/homepage.js
 document.addEventListener('DOMContentLoaded', () => {
   // Check if CartManager is available
   if (typeof CartManager === 'undefined') {
@@ -27,22 +28,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // Try to add to cart
         try {
           await CartManager.addToCart(productId);
-          
-          // Visual feedback on success
-          button.innerHTML = '<i class="fas fa-check"></i> Added!';
-          setTimeout(() => {
-            button.disabled = false;
-            button.innerHTML = originalText;
-          }, 2000);
-          
         } catch (error) {
           console.error('Failed to add to cart:', error);
-          button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed';
-          setTimeout(() => {
-            button.disabled = false;
-            button.innerHTML = originalText;
-          }, 2000);
+          
+          // Reset button to original state immediately
+          button.disabled = false;
+          button.innerHTML = originalText;
+          
+          // If error is not a user dismissal, you might want to show an error
+          if (error.message !== 'cancel') {
+            await Swal.fire({
+              title: 'Error!',
+              text: 'Failed to add item to cart',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+          
+          return;
         }
+
+        // Reset button to original state without "Added!" state
+        button.disabled = false;
+        button.innerHTML = originalText;
 
       } catch (error) {
         console.error('Error in click handler:', error);
@@ -77,4 +85,3 @@ window.addEventListener('scroll', () => {
 
   lastScrollTop = scrollTop;
 });
-

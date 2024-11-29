@@ -28,143 +28,207 @@ class CartManager {
     }
     
     throw new Error('Invalid response format');
+  }
+
+
+static async updateCartButtonCount() {
+  try {
+    const cart = await this.getCart();
+    const cartButton = document.querySelector('.cart-button');
+    
+    if (!cartButton) return;
+
+    // Calculate total number of items in the cart
+    const totalItems = cart && cart.items 
+      ? cart.items.reduce((total, item) => total + item.quantity, 0)
+      : 0;
+
+    // Create or update cart item count badge
+    let badge = cartButton.querySelector('.cart-item-count');
+    
+    if (totalItems > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.classList.add('cart-item-count');
+        cartButton.appendChild(badge);
+      }
+      badge.textContent = totalItems > 99 ? '99+' : totalItems.toString();
+    } else if (badge) {
+      // Remove badge if no items
+      badge.remove();
+    }
+  } catch (error) {
+    console.error('Error updating cart button count:', error);
+  }
 }
 
 static async addToCart(productId, quantityOrOptions) {
   try {
-      let quantity = 1;
-      let version = null;
-      
-      // Handle different parameter formats
-      if (typeof quantityOrOptions === 'number') {
-          quantity = quantityOrOptions;
-      } else if (typeof quantityOrOptions === 'object') {
-          quantity = quantityOrOptions.quantity || 1;
-          version = quantityOrOptions.version;
-      }
+    let quantity = 1;
+    let version = null;
 
-      const initialPayload = {
+    // Handle different parameter formats
+    if (typeof quantityOrOptions === 'number') {
+      quantity = quantityOrOptions;
+    } else if (typeof quantityOrOptions === 'object') {
+      quantity = quantityOrOptions.quantity || 1;
+      version = quantityOrOptions.version;
+    }
+
+    const initialPayload = {
+      productId,
+      quantity: parseInt(quantity)
+    };
+
+    if (version) {
+      initialPayload.version = version;
+    }
+
+    console.log('Initial Payload:', initialPayload);
+
+    const cartResponse = await fetch('/api/cart/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(initialPayload),
+      credentials: 'include'
+    });
+
+    // Handle 400 error for version selection
+    if (cartResponse.status === 400) {
+      const errorData = await cartResponse.json();
+      if (errorData.message.includes('Version selection is required')) {
+        const versions = errorData.versions || [];
+        const hasAvailableVersions = versions.some(v => v.quantity >= quantity);
+
+        if (!hasAvailableVersions) {
+          await Swal.fire({
+            title: 'Out of Stock',
+            text: 'Sorry, all versions of this product are currently out of stock',
+            icon: 'info',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+
+        const selectHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <img id="selected-version-image" 
+                 src="${versions[0]?.image || ''}" 
+                 alt="Selected Version Image" 
+                 style="width: 200px; height: 200px; margin-bottom: 10px; object-fit: cover; border: 1px solid #ccc; border-radius: 5px;">
+            <select id="version-select" class="swal2-select">
+              ${versions.map(v => `
+                <option value="${v.version}" 
+                        data-image="${v.image}" 
+                        ${v.quantity < quantity ? 'disabled' : ''}>
+                  ${v.version}${v.quantity < quantity ? ' (Out of Stock)' : ''}
+                </option>
+              `).join('')}
+            </select>
+          </div>
+        `;
+
+        const result = await Swal.fire({
+          title: 'Select Version',
+          html: selectHTML,
+          showCancelButton: true,
+          confirmButtonText: 'Add to Cart',
+          didOpen: () => {
+            const versionSelect = document.getElementById('version-select');
+            const versionImage = document.getElementById('selected-version-image');
+
+            // Update image on dropdown change
+            versionSelect.addEventListener('change', () => {
+              const selectedOption = versionSelect.options[versionSelect.selectedIndex];
+              const imageUrl = selectedOption.getAttribute('data-image');
+              if (imageUrl) {
+                versionImage.src = imageUrl;
+              } else {
+                versionImage.src = ''; // Clear image if no version selected
+              }
+            });
+          },
+          preConfirm: () => {
+            const select = document.getElementById('version-select');
+            const selectedVersion = select.value;
+            if (!selectedVersion) {
+              Swal.showValidationMessage('Please select a version');
+              return false;
+            }
+            return selectedVersion;
+          }
+        });
+
+        if (!result.value) {
+          // User cancelled
+          return;
+        }
+
+        version = result.value;
+
+        // Send the updated payload with the selected version
+        const versionPayload = {
           productId,
+          version,
           quantity: parseInt(quantity)
-      };
-      
-      if (version) {
-          initialPayload.version = version;
-      }
+        };
 
-      const cartResponse = await fetch('/api/cart/add', {
+        console.log('Version Payload:', versionPayload);
+
+        const versionResponse = await fetch('/api/cart/add', {
           method: 'POST',
           headers: {
-              'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(initialPayload),
+          body: JSON.stringify(versionPayload),
           credentials: 'include'
-      });
+        });
 
-      // If we get a 400 error about version required, show version selector
-      if (cartResponse.status === 400) {
-          const errorData = await cartResponse.json();
-          if (errorData.message.includes('Version selection is required')) {
-              const versions = errorData.versions || [];
-              const hasAvailableVersions = versions.some(v => v.quantity >= quantity);
-              
-              if (!hasAvailableVersions) {
-                  await Swal.fire({
-                      title: 'Out of Stock',
-                      text: 'Sorry, all versions of this product are currently out of stock',
-                      icon: 'info',
-                      confirmButtonText: 'OK'
-                  });
-                  return;
-              }
+        const resultData = await this.handleResponse(versionResponse, 'Failed to add item to cart');
+        await this.updateCartDisplay();
+        await this.updateCartButtonCount(); // Added this line
 
-              const selectHTML = `
-                  <select id="version-select" class="swal2-select">
-                      <option value="">Select a version</option>
-                      ${versions.map(v => `
-                          <option 
-                              value="${v.version}" 
-                              ${v.quantity < quantity ? 'disabled' : ''}
-                              style="${v.quantity < quantity ? 'color: #999;' : ''}"
-                          >
-                              ${v.version}${v.quantity < quantity ? ` (Out of Stock)` : ''}
-                          </option>
-                      `).join('')}
-                  </select>
-              `;
-
-              const { value: confirmed, dismiss } = await Swal.fire({
-                  title: 'Select Version',
-                  html: selectHTML,
-                  showCancelButton: true,
-                  confirmButtonText: 'Add to Cart',
-                  preConfirm: () => {
-                      const select = document.getElementById('version-select');
-                      const selectedVersion = select.value;
-                      if (!selectedVersion) {
-                          Swal.showValidationMessage('Please select a version');
-                          return false;
-                      }
-                      return selectedVersion;
-                  }
-              });
-
-              if (!confirmed || dismiss) {
-                  return;
-              }
-
-              const versionResponse = await fetch('/api/cart/add', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ 
-                      productId,
-                      version: confirmed,
-                      quantity: parseInt(quantity)
-                  }),
-                  credentials: 'include'
-              });
-
-              const result = await this.handleResponse(versionResponse, 'Failed to add item to cart');
-              await this.updateCartDisplay();
-              
-              await Swal.fire({
-                  title: 'Success!',
-                  text: `${quantity} item${quantity > 1 ? 's' : ''} added to cart successfully`,
-                  icon: 'success',
-                  timer: 1500,
-                  showConfirmButton: false
-              });
-
-              return result;
-          }
-      }
-
-      const result = await this.handleResponse(cartResponse, 'Failed to add item to cart');
-      await this.updateCartDisplay();
-      
-      await Swal.fire({
+        await Swal.fire({
           title: 'Success!',
           text: `${quantity} item${quantity > 1 ? 's' : ''} added to cart successfully`,
           icon: 'success',
           timer: 1500,
           showConfirmButton: false
-      });
+        });
 
-      return result;
+        return resultData;
+      }
+    }
+
+    // Handle success for cases without version selection
+    const result = await this.handleResponse(cartResponse, 'Failed to add item to cart');
+    await this.updateCartDisplay();
+    await this.updateCartButtonCount(); // Added this line
+
+    await Swal.fire({
+      title: 'Success!',
+      text: `${quantity} item${quantity > 1 ? 's' : ''} added to cart successfully`,
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    return result;
 
   } catch (error) {
-      console.error('Error adding to cart:', error);
-      await Swal.fire({
-          title: 'Error!',
-          text: error.message,
-          icon: 'error',
-          confirmButtonText: 'OK'
-      });
-      throw error;
+    console.error('Error adding to cart:', error);
+    await Swal.fire({
+      title: 'Error!',
+      text: error.message,
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+    throw error;
   }
 }
+
 
   static async getCart() {
     try {
@@ -196,12 +260,14 @@ static async addToCart(productId, quantityOrOptions) {
   
       const result = await this.handleResponse(response, 'Error updating quantity');
       await this.updateCartDisplay();
+      await this.updateCartButtonCount(); // Added this line
       return result;
     } catch (error) {
       console.error('Error updating quantity:', error);
       throw error;
     }
   }
+
   static async toggleSelection(cartItemId) {
     try {
       const response = await fetch('/api/cart/toggle-selection', {
@@ -224,32 +290,33 @@ static async addToCart(productId, quantityOrOptions) {
 
   static async deleteFromCart(cartItemId) {
     try {
-        const response = await fetch(`/api/cart/items/${cartItemId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'
-        });
+      const response = await fetch(`/api/cart/items/${cartItemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
 
-        await this.handleResponse(response, 'Failed to delete item from cart');
-        await this.updateCartDisplay();
-        
-        await Swal.fire({
-            title: 'Success',
-            text: 'Item removed from cart',
-            icon: 'success',
-            timer: 1500,
-            showConfirmButton: false
-        });
+      await this.handleResponse(response, 'Failed to delete item from cart');
+      await this.updateCartDisplay();
+      await this.updateCartButtonCount(); // Added this line
+      
+      await Swal.fire({
+        title: 'Success',
+        text: 'Item removed from cart',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (error) {
-        console.error('Error deleting from cart:', error);
-        await Swal.fire({
-            title: 'Error',
-            text: 'Failed to remove item from cart. Please try again.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
+      console.error('Error deleting from cart:', error);
+      await Swal.fire({
+        title: 'Error',
+        text: 'Failed to remove item from cart. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   }
 
@@ -375,6 +442,7 @@ static async addToCart(productId, quantityOrOptions) {
 
       this.setupDeleteButtons();
       await this.updateCartTotals();
+      await this.updateCartButtonCount();
     } catch (error) {
       console.error('Error updating cart display:', error);
     }
@@ -682,6 +750,7 @@ static initializeEventListeners() {
         }
 
         await this.updateQuantity(cartItemId, quantity);
+        await this.updateCartButtonCount();
       }
     } catch (error) {
       console.error('Error handling click event:', error);
@@ -697,13 +766,46 @@ static initializeEventListeners() {
 
 }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    CartManager.updateCartDisplay().catch(error => {
-      console.error('Failed to initialize cart:', error);
-    });
-    CartManager.initializeEventListeners();
+document.addEventListener('DOMContentLoaded', () => {
+  this.updateCartButtonCount().catch(error => {
+    console.error('Failed to update cart button count:', error);
   });
-  
+});
 
+
+
+// Add CSS for cart item count badge
+const style = document.createElement('style');
+style.textContent = `
+.cart-button {
+    position: relative;
+  }
+  .cart-item-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #da9e9f;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      text-decoration: none !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 2px solid #fff;
+  }
+`;
+document.head.appendChild(style);
+
+document.addEventListener('DOMContentLoaded', () => {
+CartManager.updateCartDisplay().catch(error => {
+console.error('Failed to initialize cart:', error);
+});
+CartManager.initializeEventListeners();
+});
 
 window.CartManager = CartManager;

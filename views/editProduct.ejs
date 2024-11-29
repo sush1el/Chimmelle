@@ -4,213 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page - Edit Product</title>
-    <style>
-        /* Copy all styles from addProduct.ejs */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        body {
-            background-color: #fff7f7;
-            color: #333;
-            padding: 20px;
-        }
-
-        .admin-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            font-size: 28px;
-            color: #da9e9f;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        h2 {
-            font-size: 28px;
-            color: #da9e9f;
-            margin-bottom: 20px;
-            margin-top: 20px;
-            text-align: center;
-
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-
-        .version-container, .description-container, .inclusion-container {
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-
-        .version-header, .description-header, .inclusion-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .add-version-btn,
-        .add-description-btn,
-        .add-inclusion-btn,
-        .submit-btn {
-            background-color: #da9e9f;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-            margin-bottom: 10px;
-        }
-
-
-    
-
-        .add-version-btn:hover,
-        .add-description-btn:hover,
-        .add-inclusion-btn:hover,
-        .submit-btn:hover {
-            background-color: #c78081;
-        }
-
-        .submit-btn {
-            display: block;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .image-preview {
-            max-width: 20px;
-            max-height: 20px;
-            margin-top: 10px;
-        }
-
-        .remove-btn {
-            font-size: 15px;
-        text-decoration: none;
-        margin-top: 15px;
-        color: white;
-        background-color: rgb(190, 6, 6);
-        font-weight: bold;
-        padding: 0 20px;
-        border: none;
-        padding-bottom: 5px;
-        padding-top: 5px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-.remove-btn:hover {
-            background-color: #ff3333;
-        }
-        .back-btn {
-    background-color: #da9e9f;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
-    margin-bottom: 20px;
-        }
-
-.back-btn:hover {
-    background-color: #c78081;
-}
-
-
-
-.form-select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 16px;
-        background-color: white;
-        cursor: pointer;
-    }
-    
-    .form-select:focus {
-        outline: none;
-        border-color: #da9e9f;
-    }
-
-    .description-container{
-        margin-top: 10px;
-    }
-
-    h2 i{
-        margin-right: 5px;
-    }
-    
-    .add-inclusion-btn i, .add-description-btn i, .add-version-btn i {
-    margin-right: 5px;
-}
-    .mainImage{
-        max-width: 20px;
-        max-height: 20px;
-    }
-
-    .current-image img {
-    max-width: 100px;  /* Limit width */
-    max-height: 100px; /* Limit height */
-    object-fit: contain; /* Maintain aspect ratio */
-    margin: 10px 0;
-    border: 1px solid #ddd;
-}
-
-.current-image {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.current-image span {
-    margin-left: 10px;
-    color: #666;
-}
-
-    </style>
+    <link rel="stylesheet" href="/styles/editProduct.css">
 </head>
 <body>
   <div class="admin-container">
@@ -285,44 +79,51 @@
 
             <div class="form-group">
                 <label for="imageH">Main Image:</label>
-                <div class="current-image">
-                    <img src="<%= product.imageH %>" alt="Current main image">
-                    <span>Current image</span>
+                <div id="mainImageContainer" class="current-image">
+                    <% if (product.imageH) { %>
+                        <div class="image-container">
+                            <button type="button" class="delete-image-btn" onclick="deleteMainImage()">×</button>
+                            <img src="<%= product.imageH %>" alt="Current main image">
+                        </div>
+                    <% } %>
                 </div>
                 <input type="file" id="imageH" name="imageH" accept="image/*">
                 <img id="imageHPreview" class="image-preview" src="#" alt="Main Image Preview" style="display: none;">
             </div>
 
-            <div id="versionsContainer">
-                <h2>Versions</h2>
-                <% product.versions.forEach((version, index) => { %>
-                    <div class="version-container">
-                        <div class="version-header">
-                            <h3>Version <%= index + 1 %></h3>
-                            <button type="button" class="remove-btn" onclick="removeVersion(this)">Remove</button>
-                        </div>
-                        <div class="form-group">
-                            <label for="version<%= index + 1 %>">Version Name:</label>
-                            <input type="text" id="version<%= index + 1 %>" name="versions[<%= index %>][version]" value="<%= version.version %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="quantity<%= index + 1 %>">Quantity:</label>
-                            <input type="number" id="quantity<%= index + 1 %>" name="versions[<%= index %>][quantity]" value="<%= version.quantity %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="image<%= index + 1 %>">Version Images:</label>
-                            <div class="current-image">
-                                <% version.image.forEach(img => { %>
-                                    <img src="<%= img %>" alt="Current version image">
-                                <% }); %>
-                                <span>Current images</span>
+             <div id="versionsContainer">
+        <h2>Versions</h2>
+        <% product.versions.forEach((version, index) => { %>
+            <div class="version-container">
+                <div class="version-header">
+                    <h3>Version <%= index + 1 %></h3>
+                    <button type="button" class="remove-btn" onclick="removeVersion(this)">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label for="version<%= index + 1 %>">Version Name:</label>
+                    <input type="text" id="version<%= index + 1 %>" name="versions[<%= index %>][version]" value="<%= version.version %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity<%= index + 1 %>">Quantity:</label>
+                    <input type="number" id="quantity<%= index + 1 %>" name="versions[<%= index %>][quantity]" value="<%= version.quantity %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="image<%= index + 1 %>">Version Images:</label>
+                    <div class="current-version-images" id="versionImagesContainer<%= index %>">
+                        <% version.image.forEach((img, imgIndex) => { %>
+                            <div class="image-container">
+                                <button type="button" class="delete-image-btn" 
+                                    onclick="deleteVersionImage(<%= index %>, <%= imgIndex %>)">×</button>
+                                <img src="<%= img %>" alt="Current version image">
                             </div>
-                            <input type="file" id="image<%= index + 1 %>" name="versions[<%= index %>][image]" accept="image/*" multiple>
-                            <div id="imagePreview<%= index + 1 %>" class="image-preview"></div>
-                        </div>
+                        <% }); %>
                     </div>
-                <% }); %>
+                    <input type="file" id="image<%= index + 1 %>" name="versions[<%= index %>][image]" accept="image/*" multiple>
+                    <div id="imagePreview<%= index + 1 %>" class="image-preview"></div>
+                </div>
             </div>
+        <% }); %>
+    </div>
 
             <button type="button" class="add-version-btn" onclick="addVersion()">Add Another Version</button>
 
@@ -334,6 +135,47 @@
         let versionCount = <%= product.versions.length %>;
         let descriptionCount = <%= product.description.length %>;
         let inclusionCount = <%= product.inclusions.length %>;
+
+        let deletedMainImage = false;
+        const deletedVersionImages = {};
+
+        function deleteMainImage() {
+            const mainImageContainer = document.getElementById('mainImageContainer');
+            const imageInput = document.getElementById('imageH');
+            
+            // Clear existing images
+            mainImageContainer.innerHTML = '';
+            
+            // Create a hidden input to track deletion
+            const deletedImageInput = document.createElement('input');
+            deletedImageInput.type = 'hidden';
+            deletedImageInput.name = 'deleteMainImage';
+            deletedImageInput.value = 'true';
+            mainImageContainer.appendChild(deletedImageInput);
+            
+            // Mark that main image has been deleted
+            deletedMainImage = true;
+        }
+
+        function deleteVersionImage(versionIndex, imageIndex) {
+            const versionImagesContainer = document.getElementById(`versionImagesContainer${versionIndex}`);
+            const imageToDelete = versionImagesContainer.querySelector(`.image-container:nth-child(${imageIndex + 1})`);
+            
+            // Remove the image from the display
+            imageToDelete.remove();
+            
+            // Initialize the deleted images tracking for this version if not exists
+            if (!deletedVersionImages[versionIndex]) {
+                deletedVersionImages[versionIndex] = [];
+            }
+            
+            // Add a hidden input to track deleted images
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `versions[${versionIndex}][deletedImages][]`;
+            hiddenInput.value = `true`;
+            versionImagesContainer.appendChild(hiddenInput);
+        }
 
         // Reuse the same functions from addProduct.ejs
         function addVersion() {
@@ -421,105 +263,107 @@
         });
 
         // Modified form submission for editing
-        document.getElementById('productForm').addEventListener('submit', async function(e) {
+    document.getElementById('productForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const formData = new FormData();
-    
-    // Add product ID
-    const productId = '<%= product._id %>';
-    
-    // Collect product data
-    const productData = {
-        name: document.getElementById('name').value,
-        price: parseFloat(document.getElementById('price').value),
-        type: document.getElementById('type').value,
-        availability: document.getElementById('availability').value,  // Add this line
-        artist: document.getElementById('artist').value,
-        description: [], // Will be filled below
-        inclusions: [], // Will be filled below
-        versions: [] // Will be filled below
-    };
-
-    // Collect descriptions (only from existing containers)
-    const descriptionContainers = document.querySelectorAll('.description-container');
-    descriptionContainers.forEach(container => {
-        const textarea = container.querySelector('textarea');
-        if (textarea && textarea.value.trim()) {
-            productData.description.push(textarea.value.trim());
-        }
-    });
-
-    // Collect inclusions (only from existing containers)
-    const inclusionContainers = document.querySelectorAll('.inclusion-container');
-    inclusionContainers.forEach(container => {
-        const textarea = container.querySelector('textarea');
-        if (textarea && textarea.value.trim()) {
-            productData.inclusions.push(textarea.value.trim());
-        }
-    });
-
-    // Get the main image if it exists
-    const mainImage = document.getElementById('imageH').files[0];
-    if (mainImage) {
-        formData.append('imageH', mainImage);
-    }
-
-    // Collect versions data (only from existing containers)
-    const versionContainers = document.querySelectorAll('.version-container');
-    versionContainers.forEach((container, index) => {
-        const versionInput = container.querySelector('input[type="text"]');
-        const quantityInput = container.querySelector('input[type="number"]');
-        const fileInput = container.querySelector('input[type="file"]');
-        const existingImages = container.querySelectorAll('.current-image img');
+        const formData = new FormData();
         
-        if (versionInput && quantityInput) {
-            const versionData = {
-                version: versionInput.value,
-                quantity: parseInt(quantityInput.value),
-                image: []
-            };
+        // Add product ID
+        const productId = '<%= product._id %>';
+        
+        // Collect product data
+        const productData = {
+            name: document.getElementById('name').value,
+            price: parseFloat(document.getElementById('price').value),
+            type: document.getElementById('type').value,
+            availability: document.getElementById('availability').value,
+            artist: document.getElementById('artist').value,
+            description: [], // Will be filled below
+            inclusions: [], // Will be filled below
+            versions: [], // Will be filled below
+            deletedMainImage: deletedMainImage // Track main image deletion
+        };
 
-            // Handle images
-            if (fileInput && fileInput.files.length > 0) {
-                // If new images are selected
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    formData.append(`versionImages_${index}`, fileInput.files[i]);
-                }
-            } else {
-                // Keep existing images
-                versionData.image = Array.from(existingImages).map(img => {
-                    // Extract the path from the src attribute
-                    const src = img.getAttribute('src');
-                    return src.startsWith('http') ? src.split(window.location.origin)[1] : src;
-                });
+        // Collect descriptions (only from existing containers)
+        const descriptionContainers = document.querySelectorAll('.description-container');
+        descriptionContainers.forEach(container => {
+            const textarea = container.querySelector('textarea');
+            if (textarea && textarea.value.trim()) {
+                productData.description.push(textarea.value.trim());
             }
-
-            productData.versions.push(versionData);
-        }
-    });
-
-    // Add the product data as JSON
-    formData.append('productData', JSON.stringify(productData));
-
-    try {
-        const response = await fetch(`/admin/edit-product/${productId}`, {
-            method: 'PUT',
-            body: formData
         });
 
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('Product updated successfully!');
-            window.location.href = '/admin/dashboard';
-        } else {
-            alert('Error updating product: ' + result.message);
+        // Collect inclusions (only from existing containers)
+        const inclusionContainers = document.querySelectorAll('.inclusion-container');
+        inclusionContainers.forEach(container => {
+            const textarea = container.querySelector('textarea');
+            if (textarea && textarea.value.trim()) {
+                productData.inclusions.push(textarea.value.trim());
+            }
+        });
+
+        // Get the main image if it exists
+        const mainImage = document.getElementById('imageH').files[0];
+        if (mainImage) {
+            formData.append('imageH', mainImage);
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error updating product');
-    }
-});
+
+        // Collect versions data (only from existing containers)
+        const versionContainers = document.querySelectorAll('.version-container');
+        versionContainers.forEach((container, index) => {
+            const versionInput = container.querySelector('input[type="text"]');
+            const quantityInput = container.querySelector('input[type="number"]');
+            const fileInput = container.querySelector('input[type="file"]');
+            const existingImages = container.querySelectorAll('.current-image img');
+            
+            if (versionInput && quantityInput) {
+                const versionData = {
+                    version: versionInput.value,
+                    quantity: parseInt(quantityInput.value),
+                    image: [], // Existing images
+                    deletedImages: deletedVersionImages[index] || [] // Track deleted version images
+                };
+
+                // Handle images
+                if (fileInput && fileInput.files.length > 0) {
+                    // If new images are selected
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        formData.append(`versionImages_${index}`, fileInput.files[i]);
+                    }
+                } else {
+                    // Keep existing images
+                    versionData.image = Array.from(existingImages).map(img => {
+                        // Extract the path from the src attribute
+                        const src = img.getAttribute('src');
+                        return src.startsWith('http') ? src.split(window.location.origin)[1] : src;
+                    });
+                }
+
+                productData.versions.push(versionData);
+            }
+        });
+
+        // Add the product data as JSON
+        formData.append('productData', JSON.stringify(productData));
+
+        try {
+            const response = await fetch(`/admin/edit-product/${productId}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Product updated successfully!');
+                window.location.href = '/admin/dashboard';
+            } else {
+                alert('Error updating product: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error updating product');
+        }
+    });
 
 // Update the remove functions to actually remove the elements
 function removeVersion(button) {

@@ -218,7 +218,149 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+     function setupTableSearchPagination(sectionId, itemsPerPage = 20) {
+        const section = document.querySelector(`#${sectionId}`);
+        const table = section.querySelector('table tbody');
+        const searchInput = document.createElement('input');
+        const paginationContainer = document.createElement('div');
+        
+        // Create search input
+        searchInput.setAttribute('type', 'text');
+        searchInput.setAttribute('placeholder', `Search ${sectionId}...`);
+        searchInput.classList.add('search-input');
+        section.querySelector('h2').after(searchInput);
+
+        // Create pagination container
+        paginationContainer.classList.add('pagination-container');
+        table.parentElement.after(paginationContainer);
+
+        // Get all rows except empty message row
+        const allRows = Array.from(table.querySelectorAll('tr:not(.empty-message)'));
+        let filteredRows = allRows;
+        let currentPage = 1;
+
+        function createPaginationControls() {
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            
+            paginationContainer.innerHTML = `
+                <div class="pagination-info">
+                    <button id="${sectionId}PrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+                    <span>Page ${currentPage} of ${totalPages}</span>
+                    <button id="${sectionId}NextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+                </div>
+            `;
+
+            // Add event listeners for pagination
+            const prevButton = paginationContainer.querySelector(`#${sectionId}PrevPage`);
+            const nextButton = paginationContainer.querySelector(`#${sectionId}NextPage`);
+
+            prevButton?.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+
+            nextButton?.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+        }
+
+        function renderTable() {
+            // Clear existing rows
+            table.innerHTML = '';
+
+            // Calculate start and end indices for current page
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageRows = filteredRows.slice(startIndex, endIndex);
+
+            // Render rows for current page
+            if (pageRows.length > 0) {
+                pageRows.forEach(row => table.appendChild(row));
+                createPaginationControls();
+            } else {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `<td colspan="${table.querySelector('tr')?.querySelectorAll('td').length || 7}" class="empty-message">No ${sectionId} found.</td>`;
+                table.appendChild(emptyRow);
+                paginationContainer.innerHTML = '';
+            }
+        }
+
+        function searchTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            // Filter rows based on search term
+            filteredRows = allRows.filter(row => {
+                const cells = row.querySelectorAll('td');
+                return Array.from(cells).some(cell => 
+                    cell.textContent.toLowerCase().includes(searchTerm)
+                );
+            });
+
+            // Reset to first page
+            currentPage = 1;
+            
+            // Render filtered results
+            renderTable();
+        }
+
+        // Initial render
+        renderTable();
+
+        // Add search event listener
+        searchInput.addEventListener('input', searchTable);
+
+        // If it's the orders table, handle order status filtering together with search
+        if (sectionId === 'orders') {
+            const orderStatusButtons = document.querySelectorAll('.order-status-btn');
+            
+            orderStatusButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Trigger status filter
+                    const status = button.dataset.status;
+                    
+                    // Update active button
+                    orderStatusButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // Filter rows based on status and current search
+                    const searchTerm = searchInput.value.toLowerCase().trim();
+                    
+                    filteredRows = allRows.filter(row => {
+                        const rowStatus = row.dataset.status;
+                        const matchesStatus = status === 'all' || rowStatus === status;
+                        
+                        // If search term exists, also check text content
+                        if (searchTerm) {
+                            const cellsMatch = Array.from(row.querySelectorAll('td')).some(cell => 
+                                cell.textContent.toLowerCase().includes(searchTerm)
+                            );
+                            return matchesStatus && cellsMatch;
+                        }
+                        
+                        return matchesStatus;
+                    });
+
+                    // Reset to first page
+                    currentPage = 1;
+                    
+                    // Render filtered results
+                    renderTable();
+                });
+            });
+        }
+    }
+
+    // Setup search and pagination for both products and orders
+    setupTableSearchPagination('products');
+    setupTableSearchPagination('orders');
 });
+
 
 // Global delete functions
 window.deleteProduct = async function(productId) {

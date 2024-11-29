@@ -1,8 +1,8 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat'!important;
     margin: 0;
     padding: 0;
-    background-color: #fff5f5;
+    background-color: #fff7f7;
 }
 
 header {
@@ -25,26 +25,25 @@ header {
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
     padding: 20px;
+    margin-left: 30px;
+    margin-right: 30px;
     display: flex;
     flex-wrap: nowrap; /* Prevents the containers from wrapping */
-    gap: 20px;
+    gap:30px;
     align-items: flex-start; /* Aligns containers at the top */
 }
 
-
 .checkout-form {
     flex: 1;
-    min-width: 550px;
+    min-width: 600px;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Keeps content and button aligned */
+    justify-content: center; /* Keeps content and button aligned */
     height: 100%;
 }
 
@@ -55,17 +54,42 @@ header {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    justify-content: center;
 }
+
+.order-summary h3 {
+
+    font-size: 35px;  /* Larger font size for the heading */
+    color: #333;  /* Dark gray color for the heading */
+    margin-bottom: 20px;  
+    margin-top: 10px;/* Add space below the heading */
+    text-align: center;  /* Center-align the heading */
+}
+
 
 .form-section {
     margin-bottom: 20px;
 }
+.form-control {
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 30px;
+    transition: border-color 0.3s ease;
+}
 
 h2 {
     color: #333;
+    font-size: 25px;
     margin-bottom: 10px;
 }
 
+.h3{
+    font-size: 40px;
+    text-align: center;
+
+}
 .radio-group {
     display: flex;
     flex-direction: column;
@@ -75,20 +99,64 @@ h2 {
 .radio-option {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 30px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    width: 90%;  /* Ensure it stretches fully to the container's width */
+    transition: border-color 0.3s ease;
 }
 
 .radio-option input[type="radio"] {
-    margin-right: 10px;
+    margin-right: 30px;
+    border: 2px solid #da9e9f; 
+    appearance: none; /* Removes default appearance */
+    -webkit-appearance: none; /* For Safari */
+    -moz-appearance: none; /* For Firefox */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%; /* Circle shape */
+    background-color: #fff;
+    transition: all 0.3s ease;
 }
+
+
+.radio-option input[type="radio"]:checked {
+    background-color: #da9e9f;
+    border: 2px solid #d07a7c;
+    box-shadow: 0 0 0 5px rgba(218, 158, 159, 0.5); /* Optional: adds glow effect */
+    transition: all 0.3s ease;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 30px;
+    transition: border-color 0.3s ease; /* Smooth transition for border color */
+}
+
+/* When the radio button is selected, change the border color */
+.radio-option input[type="radio"]:checked + label {
+    border: 2px solid #da9e9f; /* Set border color for selected radio option */
+}
+
+/* Optional: add hover effect to the radio option */
+.radio-option:hover {
+    border: 2px solid #d07a7c; /* Change border color on hover */
+}
+
+
+
 
 .order-item {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
 }
+
+
 
 .order-item img {
     width: 80px;
@@ -112,6 +180,12 @@ h2 {
     padding-top: 20px;
 }
 
+.form-section h2 i {
+    font-size: 25px;  /* Increase the size of the icon */
+    color: #da9e9f;  /* Set the color of the icon (blue in this case) */
+    margin-right: 15px;  /* Add space between the icon and the text */
+    vertical-align: middle;  /* Align the icon vertically with the text */
+}
 .total-row {
     display: flex;
     justify-content: space-between;
@@ -119,7 +193,9 @@ h2 {
 }
 
 .pay-button {
-    background-color: #ffa5b4;
+    background-color: #da9e9f;
+    font-weight: bold;
+    font-family: 'Montserrat';
     color: white;
     border: none;
     padding: 15px;
@@ -131,42 +207,52 @@ h2 {
 
 
 .pay-button:hover {
-    background-color: #ff8da1;
+    background-color: #d07a7c;
 }
 
 .edit-btn, .delete-btn {
-    background-color: #f0f0f0;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 10px;
+    font-family: 'Montserrat';
 }
 
+.edit-btn{
+    font-size: 15px;
+    color: white;
+    margin-right: 5px;
+    text-decoration: none;
+    background-color: #da9e9f;
+    border: none;
+    font-weight: bold; /* Corrected font-weight */
+    padding: 0 20px;
+    margin-left: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    border-radius: 20px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.delete-btn {
+    font-size: 15px;
+    text-decoration: none;
+    margin-top: 15px;
+    color: white;
+    background-color: rgb(190, 6, 6);
+    font-weight: bold;
+    padding: 0 20px;
+    border: none;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+   
+
 .edit-btn:hover {
-    background-color: #ddd;
+    background-color: #c67f7f;
+    transform: scale(1.05);
 }
 
 .delete-btn:hover {
-    background-color: #ddd;
-}
-.gcash-input {
-    margin-top: 10px;
-}
-
-.gcash-input input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.gcash-input input:focus {
-    outline: none;
-    border-color: #da9e9f;
-}
-
-.gcash-input input::placeholder {
-    color: #999;
+    background-color: rgb(153, 5, 5);
+    transform: scale(1.05);
 }

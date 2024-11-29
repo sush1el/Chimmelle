@@ -378,6 +378,8 @@ class CheckoutHandler {
     }
   }
 
+  
+
   static async processPayment(totalAmount) {
     try {
       // Create loading overlay
@@ -751,6 +753,33 @@ class CheckoutHandler {
       }
     }
 
+    static validateGcashNumber(gcashNumber) {
+      // GCash number validation rules:
+      // 1. Must start with "09" or "+639"
+      // 2. Total length of 11 digits (when start with "09")
+      // 3. Total length of 13 digits (when start with "+639")
+      const gcashRegexWithoutCountryCode = /^09\d{9}$/;
+      const gcashRegexWithCountryCode = /^\+639\d{9}$/;
+  
+      // Trim and remove any spaces or dashes
+      const cleanedNumber = gcashNumber.replace(/[\s-]/g, '');
+  
+      if (gcashRegexWithoutCountryCode.test(cleanedNumber) || 
+          gcashRegexWithCountryCode.test(cleanedNumber)) {
+        return {
+          valid: true,
+          formattedNumber: cleanedNumber.startsWith('+639') 
+            ? cleanedNumber 
+            : `+639${cleanedNumber.slice(2)}`
+        };
+      }
+  
+      return {
+        valid: false,
+        error: 'Invalid GCash number. Must start with 09 and be 11 digits long. Example: 0901234567'
+      };
+    }
+
     static setupEventListeners() {
       document.querySelectorAll('input[name="delivery"]').forEach(radio => {
         radio.addEventListener('change', () => {
@@ -783,11 +812,17 @@ class CheckoutHandler {
               throw new Error('Please enter your GCash number');
             }
     
+            // Validate GCash number
+            const gcashValidation = this.validateGcashNumber(gcashNumberInput.value);
+            if (!gcashValidation.valid) {
+              throw new Error(gcashValidation.error);
+            }
+    
             // Store payment data in session storage
             const paymentData = {
               selectedAddressIndex: parseInt(selectedAddress.value),
               deliveryMethod: selectedDelivery.value,
-              gcashNumber: gcashNumberInput.value,
+              gcashNumber: gcashValidation.formattedNumber,
               timestamp: new Date().toISOString()
             };
             sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
@@ -806,6 +841,7 @@ class CheckoutHandler {
         });
       }
     }
+
   
   static async fetchLocations(type, parentCode = '') {
     let url = 'https://psgc.gitlab.io/api/';

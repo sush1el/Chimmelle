@@ -181,8 +181,20 @@ router.put('/edit-product/:id', requireAdmin, upload.any(), async (req, res) => 
             });
         }
 
-        // Handle main image
-        if (req.files && req.files.find(file => file.fieldname === 'imageH')) {
+        // Handle main image deletion or update
+        if (req.body.mainImageDeleted === 'true') {
+            // Delete old main image if it exists
+            if (oldProduct.imageH) {
+                try {
+                    await fs.unlink('public' + oldProduct.imageH);
+                } catch (err) {
+                    console.error('Error deleting old main image:', err);
+                }
+                // Set main image to null or empty string
+                productData.imageH = '';
+            }
+        } else if (req.files && req.files.find(file => file.fieldname === 'imageH')) {
+            // If a new main image is uploaded
             const mainImage = req.files.find(file => file.fieldname === 'imageH');
             // Delete old image if it exists
             if (oldProduct.imageH) {
@@ -193,35 +205,40 @@ router.put('/edit-product/:id', requireAdmin, upload.any(), async (req, res) => 
                 }
             }
             productData.imageH = '/resources/' + mainImage.filename;
-        } else {
-            // Keep existing main image
-            productData.imageH = oldProduct.imageH;
         }
 
-        // Handle version images
+        // Handle version images 
         productData.versions = await Promise.all(productData.versions.map(async (version, index) => {
-            // Check if new images were uploaded for this version
+            const oldVersion = oldProduct.versions[index];
+            
+            // Check if version exists in old product
+            if (!oldVersion) return version;
+
+            // Check if specific images were deleted
+            const versionDeletedImages = req.body[`versions[${index}][deletedImages]`];
+            
+            if (versionDeletedImages) {
+                // Delete specific images from the version
+                await Promise.all(oldVersion.image.map(async (img) => {
+                    try {
+                        await fs.unlink('public' + img);
+                    } catch (err) {
+                        console.error('Error deleting old version image:', err);
+                    }
+                }));
+                
+                // Reset version images
+                version.image = [];
+            }
+
+            // Check for new images uploaded
             const newImages = req.files ? req.files.filter(file => file.fieldname === `versionImages_${index}`) : [];
 
             if (newImages.length > 0) {
-                // If we have new images, delete the old ones
-                const oldVersion = oldProduct.versions[index];
-                if (oldVersion && oldVersion.image) {
-                    await Promise.all(oldVersion.image.map(async (img) => {
-                        try {
-                            await fs.unlink('public' + img);
-                        } catch (err) {
-                            console.error('Error deleting old version image:', err);
-                        }
-                    }));
-                }
-                // Use new images
-                return {
-                    ...version,
-                    image: newImages.map(file => '/resources/' + file.filename)
-                };
+                // Add new images
+                version.image = newImages.map(file => '/resources/' + file.filename);
             }
-            // If no new images, keep the existing image array from the version
+
             return version;
         }));
 
@@ -245,6 +262,7 @@ router.put('/edit-product/:id', requireAdmin, upload.any(), async (req, res) => 
         });
     }
 });
+
 // PUT /edit-product/:id
 router.put('/edit-product', requireAdmin, upload.fields([
     { name: 'imageH', maxCount: 1 },

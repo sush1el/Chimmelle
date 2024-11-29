@@ -1,153 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BABYMONSTER Album Pre-order</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    
+    <title>Product Page</title>
+
+    
     <link rel="stylesheet" href="/styles/navbar.css">
     <link rel="stylesheet" href="/styles/product-page.css">
     <link rel="stylesheet" href="/styles/details.css">
+    <link rel="stylesheet" href="/styles/Footer.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/">HOME</a>
-            <a href="#">ARTISTS</a>
-            <div class="dropdown">
-                <a href="shop" class="dropdown-toggle">SHOP</a>
-                <div class="dropdown-menu">
-                    <a href="/albums">Albums</a>
-                    <a href="/merchandise">Pre-order</a>
-                    <a href="/collectibles">Onhand</a>
-                    <a href="/accessories">Lightsticks</a>
-                    <a href="/accessories">Merchandise</a>
-                    <a href="/shop">All Products</a>
+    
+    <%- include('partials/navbar') %>
+  
+    <div class ="main-content-bg">
+        <div class="main-content">
+            <div class="product-images">
+                <div class="main-image-wrapper">
+                    
+                    <img src="<%= product.imageH %>" alt="Main Product Image" class="main-image" id="mainImage">
+                    <button class="nav-button prev" id="prevButton">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-button next" id="nextButton">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="thumbnail-container">
+                    <!-- Initial header thumbnail -->
+                    <img src="<%= product.imageH %>" alt="Header Thumbnail" class="thumbnail">
+                    
+                    <!-- All version images as thumbnails -->
+                    <% product.versions.forEach(version => { %>
+                        <% version.image.forEach((img, imgIndex) => { %>
+                            <img src="<%= img %>" 
+                                 alt="<%= version.version %> Image <%= imgIndex + 1 %>" 
+                                 class="thumbnail">
+                        <% }); %>
+                    <% }); %>
                 </div>
             </div>
-            <div class="dropdown">
-                <a href="#">SUPPORT</a>
-                <div class="dropdown-menu">
-                    <a href="/contact">Contanct Us</a>
-                    <a href="/faqs">FAQS</a>
-                    <a href="/tc">Terms and Conditions</a>
-                    <a href="/privacy">Privacy Policy</a>
-                    <a href="/return">Return & Exchange</a>
-                    <a href="/payment">Shipping & Payment</a>
-                </div>
-            </div>
-        </div>
-        <div class="nav-center">
-            <img class= "logo" src="/resources/logo.jpg" alt="Logo" class="logo">
-        </div>
-        <div class="search-container">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" placeholder="Search for...">
-            <% if (user) { %>
-                <div class="dropdown">
-                    <a href="#">
-                        <img class="profile-user" src="/resources/profile.png" alt="Profile">
-                    </a>
-                    <div class="dropdown-menu">
-                        <a style="font-weight: bold;" href="/account">Account</a>
-                        <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+            <div class="product-info">
+                <p class="product-artist"><%= product.artist %></p>
+                <h1 class="product-title"><%= product.name %></h1>
+                <p class="product-price">₱<%= product.price.toFixed(2) %></p>
+                
+                <p class="version">Version</p>
+                <select id="versionSelect" class="version-select">
+                    <% product.versions.forEach((version, index) => { %>
+                        <option value="<%= index %>"><%= version.version %></option>
+                    <% }) %>
+                </select>
+                <div class="expandable-section">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-info-circle"></i> Product Information</span>
+                        <span class="expand-icon">+</span>
+                    </div>
+                    <div class="expandable-content">
+                        <ul>
+                            <% product.description.forEach(item => { %>
+                                <li><%= item %></li>
+                            <% }) %>
+                        </ul>
                     </div>
                 </div>
-                <a href="/cart">
-                    <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                    </button>
-                </a>
-            <% } else { %>   
-                <div class="dropdown">
-                <a href="/login-page">
-                    <img class="profile-user" src="/resources/profile.png" alt="Profile">
-                </a>
+                
+                <div class="expandable-section">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-box-open"></i> Inclusions</span>
+                        <span class="expand-icon">+</span>
+                    </div>
+                    <div class="expandable-content">
+                        <ul>
+                            <% product.inclusions.forEach(inclusion => { %>
+                                <li><%= inclusion %></li>
+                            <% }) %>
+                        </ul>
+                    </div>
                 </div>
-                <a class ="hidden" href="/cart">
-                    <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                    </button>
-                </a>
-            <% } %>
+                <p class="stock-info" id="stockInfo"><%= product.totalQuantity %> items left in stock</p>
+                <div class="quantity-selector">
+                    <button class="quantity-btn" id="decrementBtn">-</button>
+                    <input type="number" id="quantity-input" class="quantity-input" value="1" min="1" readonly>
+                    <button class="quantity-btn" id="incrementBtn">+</button>
+                </div>
+                <button class="add-to-cart-btn" data-product-id="<%= product._id %>">
+                    <%= product.availability === 'pre-order' ? 'Pre-order' : 'Add to Cart' %>
+                </button>
+            </div>
         </div>
-    </nav>
-  
-<div class="main-content">
-    <div class="product-images">
-        <div class="main-image-wrapper">
-            <img src="<%= product.imageH %>" alt="Main Product Image" class="main-image" id="mainImage">
-            <button class="nav-button prev" id="prevButton">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button class="nav-button next" id="nextButton">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="thumbnail-container">
-            <!-- Initial header thumbnail -->
-            <img src="<%= product.imageH %>" alt="Header Thumbnail" class="thumbnail">
+</div>
+<div class ="details-wrapper">
+    <div class="details-container">
+
+        <h1 class = "h1"> Details </h1>
+        </header>
+        
+        
+                <h2>Albums (CD, DVD, LP, QR)</h2>
+                <p> <b> Album Production Timing: </b></p>
+                <ul>
+                    <li><b>First Press:</b> Albums bought during the pre-order period in South Korea.</li>
+                    <li><b>Restock:</b> Albums made after the release date.</li>
+                </ul>
+                <p> <b> Album Availability:</b></p>
+        
+                <ul>
+                    <li><b>Pre-Order:</b> Albums that have not been released yet or are in the process of being sent to our warehouse or going through customs. Shipping typically starts 1 to 3 weeks after the release date in South Korea.</li>
+                    <li><b>Onhand:</b> Albums that are in our warehouse in the Philippines and ready to be shipped.</li>
+                </ul>
+        
+                <p> <b> Special Add-ons:</b></p>
+        
+                <ul>
+                    <li><b>First-Press Benefits: </b>  Only for albums bought during the pre-order period. These may include posters, photocards, etc. If an album comes with a poster, it will include a poster tube.</li>
+                    <li><b>Pre-order Benefits:</b> Available at some stores like Makestar, WITHMUU, and Weverse Shop. They may include photocards, postcards, stamps, etc. Keep in mind that albums with these extra benefits might not come with first-press items.</li>
+                </ul>
+        
+            <h2>Merchandise (Concert MD, etc.)</h2>
+            <ul>
+                <li><b>Shipping Timeline:</b> Merchandise is usually shipped 3 to 4 weeks after the release date in South Korea. </li>
+                <li><b>Stock Availability:</b>  Items can sell out before the pre-order period ends.</li>
+                <li><b>Packaging Details:</b> The packaging may vary and may not have an official seal. The plastic and box protect the product, so small marks or discolorations from manufacturing are not reasons for return or exchange.</li>
+            </ul>
+        
+            <h2>Lightstick Safety Tips</h2>
+            <ul>
+                <li> The box protects the lightstick inside, and small scratches or marks are not valid reasons for return. </li>
+                <li> If the battery runs low, the lightstick will turn off automatically. Use 3 AAA alkaline batteries (not included). Insert batteries correctly to avoid overheating or leaks.</li>
+                <ul style="margin-left: 20px;">
+                <li> Remove the battery if it overheats. </span></li>
+                <li> Only use real AAA alkaline batteries to prevent damage. </li>
+                <li> Take out batteries when not using the lightstick. </li>
+                <li> Do not mix old and new batteries or different types. </li>
+                </ul>
+            </ul>
+        
+            <h2>Return and Exchange Policy</h2>
+            <ul>
+                <li> Only items with serious damage, major defects, or missing parts due to the manufacturer can be reviewed for return or exchange. </li>
+            </ul>
             
-            <!-- All version images as thumbnails -->
-            <% product.versions.forEach(version => { %>
-                <% version.image.forEach((img, imgIndex) => { %>
-                    <img src="<%= img %>" 
-                         alt="<%= version.version %> Image <%= imgIndex + 1 %>" 
-                         class="thumbnail">
-                <% }); %>
-            <% }); %>
+            <h2>Unboxing Video</h2>
+            <ul>
+                <li> Always record an unboxing video from opening the pouch to the item itself. This video is required if you need to process a return or refund. </li>
+            </ul>
+            
+            <h2>Packing and Delivery </h2>
+            <ul>
+                <li> All orders are packed carefully with bubble wrap and cardboard if needed and sent on time. After the package is handed to the delivery service, the delivery time is out of our control. If you notice any visible damage to your package (opened pouch, damaged box, torn label), do not accept it and report it to us right away. </li>
+            </ul>
+        
+            <ul>
+<li> <b>Important: </b> We guarantee that items are sealed and imported from Korea. Missing or damaged items inside the box are considered manufacturer errors and are not covered by our liability. </li>
+            </ul>
+        
+            </div>
+
+            
         </div>
     </div>
-    <div class="product-info">
-        <p class="product-artist"><%= product.artist %></p>
-        <h1 class="product-title"><%= product.name %></h1>
-        <p class="product-price">₱<%= product.price.toFixed(2) %></p>
-        
-        <p class="version">Version</p>
-        <select id="versionSelect" class="version-select">
-            <% product.versions.forEach((version, index) => { %>
-                <option value="<%= index %>"><%= version.version %></option>
-            <% }) %>
-        </select>
-        <div class="expandable-section">
-            <div class="expandable-header">
-                <span><i class="fas fa-info-circle"></i> Product Information</span>
-                <span class="expand-icon">+</span>
-            </div>
-            <div class="expandable-content">
-                <ul>
-                    <% product.description.forEach(item => { %>
-                        <li><%= item %></li>
-                    <% }) %>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h2>Support</h2>
+                <ul class="footer-links">
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faqs">FAQs</a></li>
+                    <li><a href="/tc" >Terms and Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/return">Return & Exchange</a></li>
+                    <li><a href="/payment">Shipping & Payment </a></li>
                 </ul>
             </div>
-        </div>
-        
-        <div class="expandable-section">
-            <div class="expandable-header">
-                <span><i class="fas fa-box-open"></i> Inclusions</span>
-                <span class="expand-icon">+</span>
-            </div>
-            <div class="expandable-content">
-                <ul>
-                    <% product.inclusions.forEach(inclusion => { %>
-                        <li><%= inclusion %></li>
-                    <% }) %>
+    
+            <div class="footer-section">
+                <h2>Quick Links</h2>
+                <ul class="footer-links">
+                    <li><a href="/shop">Products</a></li>
+                    <li><a href="/artists">Artists</a></li>
                 </ul>
+                <div class="social-links">
+                    <a href="https://facebook.com" aria-label="Visit our Facebook page">
+                        <i class="fa-brands fa-facebook social-icon"></i>
+                    </a>
+                    <a href="https://twitter.com" aria-label="Visit our Twitter page">
+                        <i class="fa-brands fa-twitter social-icon"></i>
+                    </a>
+                </div>
             </div>
-        </div>
-        <p class="stock-info" id="stockInfo"><%= product.totalQuantity %> items left in stock</p>
-        <div class="quantity-selector">
-            <button class="quantity-btn" id="decrementBtn">-</button>
-            <input type="number" id="quantity-input" class="quantity-input" value="1" min="1" readonly>
-            <button class="quantity-btn" id="incrementBtn">+</button>
-        </div>
-        <button class="add-to-cart-btn" data-product-id="<%= product._id %>">
-            <%= product.availability === 'pre-order' ? 'Pre-order' : 'Add to Cart' %>
-        </button>
-    </div>
+    
+            <div class="footer-section">
+                <!-- Replace /placeholder.svg with your mascot image URL -->
+                <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
+                
+            </div>
+            </div>
+                
+            <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
+        </footer>
 </div>
 
 
@@ -233,6 +294,7 @@ document.querySelectorAll('.expandable-header').forEach(header => {
     <script id="productData" type="application/json">
     <%- JSON.stringify(product) %>
     </script>
+    <script src="scripts/cartButtonCount.js"></script>
     <script src="/public/scripts/Footer.js"></script>
     <script src="/public/scripts/Cart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

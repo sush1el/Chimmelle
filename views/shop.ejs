@@ -10,79 +10,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700;900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="/styles/details.css">
     <link rel="stylesheet" href="/styles/navbar.css">
     <link rel="stylesheet" href="/styles/shop.css">
     <link rel="stylesheet" href="/styles/Footer.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/">HOME</a>
-            <a href="#">ARTISTS</a>
-            <div class="dropdown">
-                <a href="shop" class="dropdown-toggle">SHOP</a>
-                <div class="dropdown-menu">
-                    <a href="/albums">Albums</a>
-                    <a href="/merchandise">Pre-order</a>
-                    <a href="/collectibles">Onhand</a>
-                    <a href="/accessories">Lightsticks</a>
-                    <a href="/accessories">Merchandise</a>
-                    <a href="/shop">All Products</a>
-                </div>
-            </div>
-            <div class="dropdown">
-                <a href="#">SUPPORT</a>
-                <div class="dropdown-menu">
-                    <a href="/contact">Contanct Us</a>
-                    <a href="/faqs">FAQS</a>
-                    <a href="/tc">Terms and Conditions</a>
-                    <a href="/privacy">Privacy Policy</a>
-                    <a href="/return">Return & Exchange</a>
-                    <a href="/payment">Shipping & Payment</a>
-                </div>
-            </div>
-        </div>
-        <div class="nav-center">
-            <img class= "logo" src="resources/logo.jpg" alt="Logo" class="logo">
-        </div>
-        <div class="search-container">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" placeholder="Search for...">
-            <% if (user) { %>
-                <div class="dropdown">
-                    <a href="#">
-                        <img class="profile-user" src="resources/profile.png" alt="Profile">
-                    </a>
-                    <div class="dropdown-menu">
-                        <a style="font-weight: bold;" href="/account">Account</a>
-                        <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
-                    </div>
-                </div>
-                <a href="/cart">
-                    <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                    </button>
-                </a>
-            <% } else { %>   
-                <div class="dropdown">
-                <a href="/login-page">
-                    <img class="profile-user" src="resources/profile.png" alt="Profile">
-                </a>
-                </div>
-                <a class ="hidden" href="/cart">
-                    <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
-                    </button>
-                </a>
-            <% } %>
-        </div>
-    </nav>
+
+    <%- include('partials/navbar') %>
 
     <div class="main-content">
         <aside class="filters">
-
-            <div class="filter-section">
+<div class="filter-section">
                 <h3>Availability</h3>
                 <div class="filter-option">
                     <input type="checkbox" id="onhand">
@@ -156,8 +96,7 @@
     
 <div class ="details-wrapper">
     <div class="details-container">
-
-        <h1 class = "h1"> Details </h1>
+<h1 class = "h1"> Details </h1>
         </header>
         
         
@@ -220,52 +159,52 @@
             </ul>
         
             </div>
+</div>
+    </div>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h2>Support</h2>
+                <ul class="footer-links">
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faqs">FAQs</a></li>
+                    <li><a href="/tc" >Terms and Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/return">Return & Exchange</a></li>
+                    <li><a href="/payment">Shipping & Payment </a></li>
+                </ul>
+            </div>
+    
+            <div class="footer-section">
+                <h2>Quick Links</h2>
+                <ul class="footer-links">
+                    <li><a href="/shop">Products</a></li>
+                    <li><a href="/artists">Artists</a></li>
+                </ul>
+                <div class="social-links">
+                    <a href="https://facebook.com" aria-label="Visit our Facebook page">
+                        <i class="fa-brands fa-facebook social-icon"></i>
+                    </a>
+                    <a href="https://twitter.com" aria-label="Visit our Twitter page">
+                        <i class="fa-brands fa-twitter social-icon"></i>
+                    </a>
+                </div>
+            </div>
+    
+            <div class="footer-section">
+                <!-- Replace /placeholder.svg with your mascot image URL -->
+                <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
+                
+            </div>
+            </div>
+                
+            <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
+        </footer>
+</div>
 
-            
-        </div>
 
-        <footer class="footer">
-            <div class="footer-container">
-                <div class="footer-section">
-                    <h2>Support</h2>
-                    <ul class="footer-links">
-                        <li><a href="/contact">Contact Us</a></li>
-                        <li><a href="/faqs">FAQs</a></li>
-                        <li><a href="/tc" >Terms and Conditions</a></li>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/return">Return & Exchange</a></li>
-                        <li><a href="/payment">Shipping & Payment </a></li>
-                    </ul>
-                </div>
-        
-                <div class="footer-section">
-                    <h2>Quick Links</h2>
-                    <ul class="footer-links">
-                        <li><a href="/shop">Products</a></li>
-                        <li><a href="/artists">Artists</a></li>
-                    </ul>
-                    <div class="social-links">
-                        <a href="https://facebook.com" aria-label="Visit our Facebook page">
-                            <i class="fa-brands fa-facebook social-icon"></i>
-                        </a>
-                        <a href="https://twitter.com" aria-label="Visit our Twitter page">
-                            <i class="fa-brands fa-twitter social-icon"></i>
-                        </a>
-                    </div>
-                </div>
-        
-                <div class="footer-section">
-                    <!-- Replace /placeholder.svg with your mascot image URL -->
-                    <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
-                    
-                </div>
-                </div>
-                    
-                <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
-            </footer>
-            
-        <script src="scripts/Footer.js"></script>
-        
+    <script src="scripts/Footer.js"></script>
+    <script src="scripts/cartButtonCount.js"></script>   
     <script src="scripts/Shop.js"></script>`
     <script src="scripts/Cart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

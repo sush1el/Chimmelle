@@ -32,13 +32,16 @@ const cartController = {
 
         // If product has versions, verify the version selection
         if (product.versions && product.versions.length > 0) {
-            if (!version) {
-                return res.status(400).json({ 
-                    message: 'Version selection is required for this product',
-                    versions: product.versions
-                });
-            }
-
+          if (!version) {
+            return res.status(400).json({
+              message: 'Version selection is required for this product',
+              versions: product.versions.map(v => ({
+                version: v.version,
+                quantity: v.quantity,
+                image: v.image[0] // Assuming the first image in the array
+              }))
+            });
+          }
             const selectedVersion = product.versions.find(v => v.version === version);
             if (!selectedVersion) {
                 return res.status(400).json({ message: 'Invalid version selected' });
@@ -183,7 +186,6 @@ const cartController = {
           message: 'Product ID, current version, and new version are required' 
         });
       }
-
       const user = await User.findById(req.user._id);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });

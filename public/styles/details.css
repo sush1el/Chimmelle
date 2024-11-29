@@ -12,122 +12,6 @@ body {
     background-color: #fff7f7 !important;
 }
 
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 30px;
-    background-color: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-}
-
-.nav-left {
-    display: flex;
-    align-items: center;
-}
-
-.nav-left a {
-    text-decoration: none;
-    color: black;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px;
-    margin-right: 15px;
-    transition: all 0.3s ease;
-}
-
-.nav-left a:hover {
-    background-color: #da9e9f;
-    color: white;
-    border-radius: 20px;
-    padding: 10px 20px;
-}
-
-.logo {
-    width: 70px;
-    height: auto;
-    display: inline-block;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.logo:hover {
-    transform: scale(1.1);
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-}
-
-.nav-right input {
-    padding: 5px;
-    margin-right: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.profile-user {
-    width: 60px;
-    height: 50px;
-    transition: transform 0.3s ease;
-}
-
-.profile-user:hover {
-    transform: scale(1.2);
-}
-
-.cart-button {
-    background-color: #da9e9f;
-    color: #fbfbf5;
-    margin-left: 5px;
-    border: none;
-    padding: 10px 10px;
-    font-size: 15px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.cart-button i {
-    margin-right: 10px;
-    font-size: 20px;
-}
-
-.cart-button:hover {
-    opacity: 0.7;
-}
-
-.search-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    margin-right: 15px;
-}
-
-.search-container input {
-    padding: 10px 35px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 15px;
-    width: 200px;
-}
-
-.search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
-    color: #333;
-}
-
-
-
-
 
   header {
     background-color: #da9e9f;
@@ -282,3 +166,7 @@ p {
 li {
     line-height: 2; /* Adjust the value to control the spacing */
 }
+
+  .hidden {
+    display: none;
+  }

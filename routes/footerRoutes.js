@@ -26,4 +26,18 @@ router.get('/return', authenticateUser, (req, res) => {
   });
 });
 
+router.get('/payment', authenticateUser, (req, res) => {
+  res.render('shipping-payment', { 
+    user: req.user || null 
+  });
+});
+
+router.get('/faqs', authenticateUser, (req, res) => {
+  res.render('FAQS', { 
+    user: req.user || null 
+  });
+});
+
+
+
 module.exports = router;

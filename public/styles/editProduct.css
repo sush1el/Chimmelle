@@ -1,0 +1,254 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+body {
+  background-color: #fff7f7;
+  color: #333;
+  padding: 20px;
+}
+
+.admin-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 28px;
+  color: #da9e9f;
+  margin-bottom: 20px;
+  text-align: center;
+}
+h2 {
+  font-size: 28px;
+  color: #da9e9f;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  text-align: center;
+
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.version-container, .description-container, .inclusion-container {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.version-header, .description-header, .inclusion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-version-btn,
+.add-description-btn,
+.add-inclusion-btn,
+.submit-btn {
+  background-color: #da9e9f;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+}
+
+
+
+
+.add-version-btn:hover,
+.add-description-btn:hover,
+.add-inclusion-btn:hover,
+.submit-btn:hover {
+  background-color: #c78081;
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.image-preview {
+  max-width: 20px;
+  max-height: 20px;
+  margin-top: 10px;
+}
+
+.remove-btn {
+  font-size: 15px;
+text-decoration: none;
+margin-top: 15px;
+color: white;
+background-color: rgb(190, 6, 6);
+font-weight: bold;
+padding: 0 20px;
+border: none;
+padding-bottom: 5px;
+padding-top: 5px;
+border-radius: 5px;
+cursor: pointer;
+transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.remove-btn:hover {
+  background-color: #ff3333;
+}
+.back-btn {
+background-color: #da9e9f;
+color: white;
+border: none;
+padding: 10px 20px;
+border-radius: 5px;
+cursor: pointer;
+font-size: 16px;
+transition: background-color 0.3s ease;
+text-decoration: none;
+display: inline-block;
+margin-bottom: 20px;
+}
+
+.back-btn:hover {
+background-color: #c78081;
+}
+
+
+
+.form-select {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+font-size: 16px;
+background-color: white;
+cursor: pointer;
+}
+
+.form-select:focus {
+outline: none;
+border-color: #da9e9f;
+}
+
+.description-container{
+margin-top: 10px;
+}
+
+h2 i{
+margin-right: 5px;
+}
+
+.add-inclusion-btn i, .add-description-btn i, .add-version-btn i {
+margin-right: 5px;
+}
+.mainImage{
+max-width: 20px;
+max-height: 20px;
+}
+
+.current-image img {
+max-width: 100px;  /* Limit width */
+max-height: 100px; /* Limit height */
+object-fit: contain; /* Maintain aspect ratio */
+margin: 10px 0;
+border: 1px solid #ddd;
+}
+
+.current-image {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.current-image span {
+margin-left: 10px;
+color: #666;
+}
+
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.image-preview-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.image-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+  text-align: center;
+}
+.delete-image-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 10;
+}
+.image-container img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+

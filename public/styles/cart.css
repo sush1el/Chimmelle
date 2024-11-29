@@ -10,106 +10,11 @@ body {
   color: #333;
 }
 
-.nav-left a {
-  text-decoration: none;
-  color: black;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 10px;
-  margin-right: 15px;
-  transition: all 0.3s ease;
-}
 
-.nav-left a:hover {
-  background-color: #da9e9f;
-  color: white;
-  border-radius: 20px;
-  padding: 10px 20px;
-}
-
-.logo {
-  width: 70px;
-  height: auto;
-  display: inline-block;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.logo:hover {
-  transform: scale(1.1);
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-}
-
-.search-container {
-  display: flex;
-  align-items: center;
-  position: relative;
-  margin-right: 15px;
-}
-
-.search-container input {
-  padding: 10px 35px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 15px;
-  width: 200px;
-  margin-right: 20px;
-}
 a{
   text-decoration: none;
 }
 
-.search-container .search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: #333;
-}
-
-
-.cart-button {
-  background-color: #da9e9f;
-  color: #fbfbf5;
-  margin-left: 5px;
-  border: none;
-  padding: 10px 10px;
-  font-size: 15px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.cart-button i {
-  margin-right: 10px;
-  margin-left: 0px;
-  font-size: 20px;
-}
-
-
-.cart-button:hover {
-  opacity: 0.7;
-}
-
-.profile-user {
-  margin-right: 0px;
-  margin-left: 0px;
-  width: 60px;
-  height: 50px;
-  transition: transform 0.3s ease;
-}
-
-.profile-user:hover {
-  transform: scale(1.2);
-}
 
 /* Cart Section */
 .cart-page {
@@ -194,11 +99,15 @@ d
 
 
 .cart-item img {
-  width: 100%;
+  width: 130px; /* Adjust the width as needed */
   height: 100%;
+  max-width: 100%; /* Ensure it doesn't exceed the container width */
   object-fit: cover; /* Make the image cover the container while maintaining aspect ratio */
   object-position: center; /* Center the image within the container */
+  border-radius: 8px;
+  margin-right: 30px; /* Optional: rounded corners */
 }
+
 
 .item-details {
   flex: 1;
@@ -279,15 +188,6 @@ d
   border-width: 0 3px 3px 0; /* Bold checkmark */
   transform: translate(-50%, -50%) rotate(45deg); /* Center and rotate */
 }
-
-.cart-item img {
-  width: 130px; /* Adjust the width as needed */
-  height: auto; /* Maintain aspect ratio */
-  max-width: 100%; /* Ensure it doesn't exceed the container width */
-  border-radius: 8px;
-  margin-right: 30px; /* Optional: rounded corners */
-}
-
 
 
 /* Quantity Control Styles */
@@ -432,7 +332,7 @@ h1  {
 
 .note-box textarea {
   width: 100%;
-  height: 100px;
+  height: 150px;
   border-radius: 10px;
   border: 1px solid #ccc;
   padding: 10px;
@@ -469,6 +369,7 @@ h1  {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 450px;
 }
 
 .cart-summary h2 {
@@ -608,64 +509,6 @@ h1  {
   cursor: not-allowed;
 }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-  padding: 20px;
-}
-
-
-.dropdown:hover .dropdown-toggle {
-  background-color: #da9e9f;
-  color: white;
-  border-radius: 20px;
-  padding: 10px 20px;
-}
-
-.dropdown:hover .dropdown-menu {
-  display: block;
-  background-color: #da9e9f;
-}
-
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  text-align: center;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  min-width: 150px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  border-radius: 8px;
-  padding: 20px 0;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.dropdown:hover .dropdown-menu {
-  display: block;
-  visibility: visible;
-  opacity: 1;
-}
-
-.dropdown-menu a {
-  display: block;
-  color: white;
-  text-decoration: none;
-  padding: 8px 20px;
-  text-align: center;
-}
-
-.dropdown-menu a:hover {
-  background-color: #EDE9E9;
-  color: #da9e9f;
-  border-radius: 20px;
-  margin: 0 10px;
-}
-
 
 .empty-cart-container {
   display: flex;
@@ -719,4 +562,5 @@ h1  {
 .empty-cart-container + .continue-shopping-btn {
   display: none;
 }
+
 

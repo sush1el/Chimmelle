@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="styles/homepage.css">
     <link rel="stylesheet" href="styles/search.css">
     <link rel="stylesheet" href="styles/Footer.css"> 
+    <link rel="stylesheet" href="styles/navbar.css"> 
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+<script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 </head>
 <body>
     <div class="welcome-message">
@@ -35,7 +38,7 @@
             <div class="dropdown">
                 <a href="#">SUPPORT</a>
                 <div class="dropdown-menu">
-                    <a href="/contact">Contanct Us</a>
+                    <a href="/contact">Contact Us</a>
                     <a href="/faqs">FAQS</a>
                     <a href="/tc">Terms and Conditions</a>
                     <a href="/privacy">Privacy Policy</a>
@@ -53,27 +56,29 @@
             <% if (user) { %>
                 <div class="dropdown">
                     <a href="#">
-                        <img class="profile-user" src="resources/profile.png" alt="Profile">
+                        <i class="fas fa-user-circle profile-user"></i>
                     </a>
                     <div class="dropdown-menu">
-                        <a style="font-weight: bold;" href="/account">Account</a>
-                        <a style="font-weight: bold;" href="/api/auth/logout">Logout</a>
+                        <a href="/account">Account</a>
+                        <a href="/api/auth/logout">Logout</a>
                     </div>
                 </div>
-                <a href="/cart">
+                <a href="/cart" class="cart-link">
                     <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="cart-item-count">0</span>
                     </button>
                 </a>
             <% } else { %>   
                 <div class="dropdown">
                 <a href="/login-page">
-                    <img class="profile-user" src="resources/profile.png" alt="Profile">
+                    <i class="fas fa-user-circle profile-user"></i>
                 </a>
                 </div>
-                <a class ="hidden" href="/cart">
-                    <button class="cart-button">
-                        <i class="fa-solid fa-cart-shopping" style="color: #fbfbf5;"></i> Cart
+                <a href="/cart" class="cart-link">
+                    <button class="cart-button hidden ">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="cart-item-count">0</span>
                     </button>
                 </a>
             <% } %>
@@ -85,7 +90,7 @@
             <img style ="border-radius: 10px;" src="resources/rose.jpg" alt="Album Cover">
         </div>
         <div class="announcement-text">
-            <h2>ROSÉ First Studio Album</h2>
+<h2>ROSÉ First Studio Album</h2>
             <a href="#" class="pre-order-btn">Pre-order →</a>
         </div>
     </section>
@@ -146,7 +151,7 @@
             <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
         </footer>
 </div>
-
+    <script src="scripts/cartButtonCount.js"></script>
     <script src="scripts/Search.js"></script>
     <script src="scripts/Footer.js"></script>
     <script src="scripts/Homepage.js"></script>
@@ -154,4 +159,4 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 </body>
-</html> 
+</html>

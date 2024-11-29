@@ -122,31 +122,54 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateMainImage(index, src = null) {
         if (!isTransitioning) {
             isTransitioning = true;
-            mainImage.style.opacity = '0';
+            mainImage.classList.add('image-transition');
             
             setTimeout(() => {
                 mainImage.src = src || thumbnails[index].src;
-                mainImage.style.opacity = '1';
                 currentImageIndex = index;
                 isTransitioning = false;
                 
-                // Update active thumbnail
-                thumbnails.forEach(thumb => thumb.classList.remove('active'));
+                // Update active thumbnail and main image border
+                thumbnails.forEach(thumb => {
+                    thumb.classList.remove('active');
+                    thumb.classList.remove('current-main-image');
+                });
                 thumbnails[index].classList.add('active');
+                thumbnails[index].classList.add('current-main-image');
+
+                // Update navigation button states
+                updateNavigationButtons();
             }, 300);
         }
     }
 
+    function updateNavigationButtons() {
+        // Disable prev button if at the first image
+        if (prevButton) {
+            prevButton.disabled = currentImageIndex === 0;
+            prevButton.classList.toggle('disabled', currentImageIndex === 0);
+        }
+
+        // Disable next button if at the last image
+        if (nextButton) {
+            nextButton.disabled = currentImageIndex === thumbnails.length - 1;
+            nextButton.classList.toggle('disabled', currentImageIndex === thumbnails.length - 1);
+        }
+    }
+
     function showNextImage() {
-        const nextIndex = (currentImageIndex + 1) % thumbnails.length;
-        updateMainImage(nextIndex);
+        if (currentImageIndex < thumbnails.length - 1) {
+            const nextIndex = currentImageIndex + 1;
+            updateMainImage(nextIndex);
+        }
     }
 
     function showPrevImage() {
-        const prevIndex = (currentImageIndex - 1 + thumbnails.length) % thumbnails.length;
-        updateMainImage(prevIndex);
+        if (currentImageIndex > 0) {
+            const prevIndex = currentImageIndex - 1;
+            updateMainImage(prevIndex);
+        }
     }
-
     function setButtonState(state) {
         if (buttonResetTimeout) {
             clearTimeout(buttonResetTimeout);
@@ -353,4 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStockDisplay(initialVersion);
         updateThumbnails(parseInt(versionSelect.value));
     }
+
+    updateNavigationButtons();
 });

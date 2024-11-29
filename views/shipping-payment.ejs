@@ -9,57 +9,70 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
-    <title>Contact Us</title>
+    
+    <title>Shipping & Payment </title>
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/styles/navbar.css"> <!-- Account page CSS -->
-    <link rel="stylesheet" href="/styles/Contact-us.css"> <!-- Account page CSS -->
-    <link rel="stylesheet" href="/styles/Footer.css"> <!-- Footer CSS -->
+    <!-- Stylesheets -->      
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link rel="stylesheet" href="styles/shipping-payment.css"> <!-- Account page CSS -->
+    <link rel="stylesheet" href="styles/Footer.css">
    
 </head>
 <body>
 
     <%- include('partials/navbar') %>
 
-<h1 class = "h1">Contact Us</h1>
+<h1 class = "h1"> Shipping & Payment </h1>
 </header>
 
 <main class="container">
     <section class="card">
-        <h2> Address:</h2>
-        <p>
-            604-A Bagong Lipunan Condominium Rawis 2, Brgy. 118, Chesa St., Tondo, Manila, Barangay 118, Manila, Metro Manila.
-        </p>
+        <h2>Same-Day Delivery</h2>
+        <p><b>Same-day delivery is available under the following conditions:</b></p>
+        <ul>
+            <li>The purchased items are ON HAND.</li>
+            <li>The order is successfully paid.</li>
+            <li>The delivery address is within Metro Manila.</li>
+            
+        </ul>
+        <p><b>Orders that do not meet these conditions will be processed as standard delivery.</b></p>
+        <h2>Process:</h2>
+        <ul>
+            <li>Customers must book a delivery service at their own expense.</li>
+            <li>Booking is available until 5:00 PM.</li>
+            <li>Use your preferred delivery app and input the provided pickup information.</li>
+           <li>Include your name or order number in the rider notes.</li>
+            
+        </ul>
     </section>
 
     <section class="card">
-        <h2> Email: </h2>
+        <h2>Standard Delivery</h2>
         <div class="info-group">
-        
-            <p>
-                chimelleshopcs@gmail.com
-            </p>
-       
+            <ul>
+                <li><b>Metro Manila:</b> 2-7 working days</li>
+                <li><b>Provincial Areas:</b> 3-12 business days</li>
+                <li><b>Pre-order items:</b> 30 days</li>
+               <li>Delivery costs are paid by the customer and depend on the delivery location and items in the order.</li>
+               <li>Orders with multiple items will be shipped together once all items are available.</li>
+               <li>Processing is done Monday to Friday, from 9:00 AM to 3:00 PM.</li>
+               <li>Delivery times may be delayed due to high order volumes or stock availability.</li>
+                
+            </ul>
     </section>
+        
 
     <section class="card">
-        <h2>Phone:</h2>
-        <p> +63-999-860-2146 / +63-949-343-8088 </p>
+        <h2>Payment Options</h2>
+        <p><b>The following payment methods are available depending on the product's condition:</b></p>
+        <li>E-Wallet.(GCASH)</li>
+        <li><b>Note:</b> Cash-on-Delivery (COD) is not accepted.</li>
         
     </section>
 
-    <section class="card">
-        <h2>Follow Us:</h2>
-        
-        <div class="contact-info">
-            <p>Main Twitter Account: <a href="https://x.com/chimelleshop" target="_blank">@chimelleshop</a></p>
-            <p>Customer Service Account: <a href="https://x.com/chimelleshopcs" target="_blank">@chimelleshopcs</a></p>
-            <p>Facebook: <a href="https://www.facebook.com/chimelleshop" target="_blank"> Chimelle Shop </a></p>
-           
-        </div>
-    </section>
+   
+    
 </main>
-
 <!-- Footer Section -->
 <footer class="footer">
     <div class="footer-container">
@@ -68,7 +81,7 @@
             <ul class="footer-links">
                 <li><a href="/contact">Contact Us</a></li>
                 <li><a href="/faqs">FAQs</a></li>
-                <li><a href="/tc" >Terms and Conditions</a></li>
+                <li><a href="TC.html" >Terms and Conditions</a></li>
                 <li><a href="/privacy">Privacy Policy</a></li>
                 <li><a href="/return">Return & Exchange</a></li>
                 <li><a href="/payment">Shipping & Payment </a></li>
@@ -78,7 +91,7 @@
         <div class="footer-section">
             <h2>Quick Links</h2>
             <ul class="footer-links">
-                <li><a href="/shop">Products</a></li>
+                <li><a href="/products">Products</a></li>
                 <li><a href="/artists">Artists</a></li>
             </ul>
             <div class="social-links">
@@ -94,13 +107,15 @@
         <div class="footer-section">
             <!-- Replace /placeholder.svg with your mascot image URL -->
             <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
-            
+       
         </div>
-        </div>
-            
-        <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
-    </footer>
+    </div>
+    <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>
+
     <script src="scripts/cartButtonCount.js"></script>
     <script src="scripts/Footer.js"></script>
+
+
 </body>
+
 </html>

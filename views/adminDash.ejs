@@ -72,7 +72,8 @@
                 </tbody>
             </table>
         </section>
-        
+
+      
         <!-- New Manage Admins section -->
         <% if (admin.role === 'super_admin') { %>
             <section id="manage-admins" class="section">
@@ -109,57 +110,69 @@
             </section>
             <% } %>
 
-        <section id="orders" class="section">
-            <h2>Orders</h2>
+            <section id="orders" class="section">
+                <h2>Orders</h2>
+                
+                <div class="order-status-nav">
+                    <button class="order-status-btn active" data-status="all">All Orders</button>
+                    <button class="order-status-btn" data-status="preparing">Preparing</button>
+                    <button class="order-status-btn" data-status="shipped">Shipped</button>
+                    <button class="order-status-btn" data-status="completed">Completed</button>
+                </div>
             
-            <div class="order-status-nav">
-                <button class="order-status-btn active" data-status="all">All Orders</button>
-                <button class="order-status-btn" data-status="preparing">Preparing</button>
-                <button class="order-status-btn" data-status="shipped">Shipped</button>
-                <button class="order-status-btn" data-status="completed">Completed</button>
-            </div>
-        
-            <% if (orders && orders.length > 0) { %>
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Total Amount</th>
-                            <th>Items</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% orders.forEach(order => { %>
-                            <tr data-status="<%= order.shippingStatus === 'received' ? 'completed' : order.shippingStatus %>">
-                                <td>#<%= order._id.toString().slice(-6) %></td>
-                                <td><%= order.customerName.firstName %> <%= order.customerName.lastName %></td>
-                                <td>₱ <%= order.totalAmount.toLocaleString() %></td>
-                                <td><%= order.items.length %> items</td>
-                                <td>
-                                    <span class="order-status-badge <%= order.shippingStatus %>" 
-                                          style="<%= order.shippingStatus === 'received' ? 'background-color: green;' : '' %>">
-                                        <%= order.shippingStatus %>
-                                    </span>
-                                </td>
-                                <td class="order-actions">
-                                    <button 
-                                        class="order-details-btn" 
-                                        data-orderid="<%= order._id %>"
-                                    >
-                                        View Details
-                                    </button>
-                                </td>
+                <% if (orders && orders.length > 0) { %>
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Total Amount</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            <% } else { %>
-                <p class="empty-message">No orders available at the moment.</p>
-            <% } %>
-        </section>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <tr data-status="<%= order.shippingStatus === 'received' ? 'completed' : order.shippingStatus %>">
+                                    <td>#<%= order._id.toString().slice(-6) %></td>
+                                    <td><%= order.customerName.firstName %> <%= order.customerName.lastName %></td>
+                                    <td>₱ <%= order.totalAmount.toLocaleString() %></td>
+                                    <td><%= order.items.length %> items</td>
+                                    <td>
+                                        <span class="order-status-badge <%= order.shippingStatus %>" 
+                                              style="<%= order.shippingStatus === 'received' ? 'background-color: green;' : '' %>">
+                                            <%= order.shippingStatus %>
+                                        </span>
+                                    </td>
+                                    <td class="order-actions">
+                                        <button 
+                                            class="order-details-btn" 
+                                            data-orderid="<%= order._id %>"
+                                        >
+                                            View Details
+                                        </button>
+                                        <select 
+                                        class="shipping-status-select" 
+                                        onchange="updateShippingStatus('<%= order._id %>', this.value)"
+                                        <%= order.shippingStatus === 'received' ? 'disabled' : '' %>
+                                    >
+                                        <option value="" disabled <%= order.shippingStatus === 'received' ? '' : 'selected' %>>Update Status</option>
+                                        <option value="preparing" <%= order.shippingStatus === 'preparing' ? 'selected' : '' %>>Preparing</option>
+                                        <option value="shipped" <%= order.shippingStatus === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                        <% if (order.shippingStatus === 'received') { %>
+                                            <option value="received" selected>Completed</option>
+                                        <% } %>
+                                    </select>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="empty-message">No orders available at the moment.</p>
+                <% } %>
+            </section>
         
         <!-- Order Details Modal -->
         <div id="orderDetailsModal" class="order-details-modal">
@@ -188,64 +201,33 @@
                     <h4>Order Items</h4>
                     <% order.items.forEach(item => { %>
                         <div class="order-item-detail">
-                            <p><strong><%= item.product.name %></strong></p>
+                            <p><strong><%= item.product ? item.product.name : 'Unknown Product' %></strong></p>
                             <p>Quantity: <%= item.quantity %></p>
                             <p>Price: ₱ <%= item.price.toLocaleString() %></p>
+                            <% if (item.version) { %>
+                                <p>Version: <%= item.version %></p>
+                            <% } %>
                         </div>
                     <% }); %>
+                </div>
+                <div class="order-payment-details">
+                    <% if (order.paymentDetails && order.paymentDetails.paidAt) { %>
+                        <p><strong>Payment Date:</strong> <%= new Date(order.paymentDetails.paidAt).toLocaleString() %></p>
+                    <% } %>
+                    <% if (order.receivedAt) { %>
+                        <p><strong>Order Received Date:</strong> <%= new Date(order.receivedAt).toLocaleString() %></p>
+                    <% } %>
                 </div>
                 <!-- In the hidden order details section -->
                 <div class="order-shipping-details">
                     <p><strong>Shipping Status:</strong> <%= order.shippingStatus %></p>
-                    <% if (order.shippingStatus !== 'received') { %>
-                        <select 
-                            class="shipping-status-select" 
-                            onchange="updateShippingStatus('<%= order._id %>', this.value)"
-                        >
-                            <option value="preparing" <%= order.shippingStatus === 'preparing' ? 'selected' : '' %>>Preparing</option>
-                            <option value="shipped" <%= order.shippingStatus === 'shipped' ? 'selected' : '' %>>Shipped</option>
-                        </select>
-                    <% } else { %>
+                    <% if (order.shippingStatus == 'received') { %>
                         <p class="completed-status">Order Completed</p>
                     <% } %>
                 </div>
         <% }); %>
 
-         <!-- New Manage Admins section -->
-         <% if (admin.role === 'super_admin') { %>
-            <section id="manage-admins" class="section">
-                <div class="admin-header">
-                    <h2>Manage Administrators</h2>
-                    <button id="createAdminBtn" class="btn btn-add">
-                        <i class="fas fa-user-plus"></i> Create New Admin
-                    </button>
-                </div>
-                
-                <div class="admin-grid">
-                    <% admins.forEach(adminUser => { %>
-                        <div class="admin-card">
-                            <div class="admin-info">
-                                <h3><%= adminUser.username %></h3>
-                                <p><i class="fas fa-envelope"></i> <%= adminUser.email %></p>
-                                <p><i class="fas fa-user-shield"></i> <%= adminUser.role %></p>
-                                <p><i class="fas fa-clock"></i> Last Login: 
-                                    <%= adminUser.lastLogin ? new Date(adminUser.lastLogin).toLocaleString() : 'Never' %>
-                                </p>
-                            </div>
-                            <div class="admin-actions">
-                                <% if (admin._id.toString() !== adminUser._id.toString()) { %>
-                                    <button 
-                                    onclick="deleteAdmin('<%= adminUser._id %>')" 
-                                    class="btn delete-admin-btn">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                                <% } %>
-                            </div>
-                        </div>
-                    <% }); %>
-                </div>
-            </section>
-            <% } %>
+
     </main>
     <script src="/scripts/AdminDash.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
