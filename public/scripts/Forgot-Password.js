@@ -2,11 +2,12 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async f
   e.preventDefault();
   
   const email = document.getElementById('email').value;
-  const messageDiv = document.createElement('div');
-  messageDiv.style.marginTop = '10px';
-  messageDiv.style.padding = '10px';
-  messageDiv.style.borderRadius = '5px';
+  const submitButton = document.querySelector('.reset-password-btn');
   
+  // Disable submit button to prevent spam
+  submitButton.disabled = true;
+  submitButton.classList.add('disabled');
+
   try {
     const response = await fetch('/api/auth/forgot-password', {
       method: 'POST',
@@ -19,21 +20,35 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async f
     const data = await response.json();
 
     if (response.ok) {
-      messageDiv.style.backgroundColor = '#d4edda';
-      messageDiv.style.color = '#155724';
-      messageDiv.textContent = 'Password reset email sent. Please check your inbox.';
+      Swal.fire({
+        icon: 'success',
+        title: 'Password Reset Email Sent',
+        text: 'Please check your inbox for the reset link.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'OK'
+      });
     } else {
-      messageDiv.style.backgroundColor = '#f8d7da';
-      messageDiv.style.color = '#721c24';
-      messageDiv.textContent = data.msg || 'Error sending reset email';
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: data.msg || 'Error sending reset email',
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Try Again'
+      });
     }
   } catch (error) {
-    messageDiv.style.backgroundColor = '#f8d7da';
-    messageDiv.style.color = '#721c24';
-    messageDiv.textContent = 'Error connecting to server';
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Error connecting to server. Please try again later.',
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Close'
+    });
+  } finally {
+    // Re-enable submit button after a delay to prevent rapid successive requests
+    setTimeout(() => {
+      submitButton.disabled = false;
+      submitButton.classList.remove('disabled');
+    }, 5000); // 5 seconds cooldown
   }
-
-  // Add message to the form
-  const form = document.getElementById('forgotPasswordForm');
-  form.appendChild(messageDiv);
 });

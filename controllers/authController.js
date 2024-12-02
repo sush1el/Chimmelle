@@ -77,15 +77,163 @@ const sendVerificationEmail = async (user, res) => {
     console.log('Verification URL:', verificationUrl);
 
     const mailOptions = {
-      from: process.env.MAILTRAP_USER,
+      from: 'Chimelle Shop <noreply@chimelleshop.com',
       to: user.email,
       subject: 'Verify Your Email',
       html: `
-        <h2>Email Verification</h2>
-        <p>Please click the link below to verify your account:</p>
-        <a href="${verificationUrl}">Verify Account</a>
-        <p>This link will expire in 1 hour.</p>
-        <p>If you didn't create this account, please ignore this email.</p>
+        <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+  
+    <title>Password Reset - Chimelle Shop</title>
+         <style>
+
+        body {
+            font-family: 'Montserrat';
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .email-container {
+            background-color: white;
+            padding: 40px;
+            width: 450px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: solid 2px #da9e9f;
+        }
+
+        .logo img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #da9e9f;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #666;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .button {
+            display: inline-block;
+            background-color:#da9e9f;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            text-align: center;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .button:hover {
+            background-color: #c47e7f
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .footer p {
+            text-align: center !important;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #da9e9f;
+        }
+
+        .social-links {
+    margin: 20px 0;
+    text-align: center !important;
+}
+
+.social-links a {
+    margin: 0 10px;
+    color: #da9e9f;
+    text-decoration: none;
+}
+
+.social-icon {
+    font-size: 24px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #da9e9f;
+    transform: scale(1.2); /* Enlarges the logo */
+}
+
+.button-container i {
+margin-right: 10px;
+}
+
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .email-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h1>Email Verification</h1>
+
+        <p>You're receiving this message because you registered an account with Chimelle Shop. Please click the button below to verify your email address and activate your</p>
+
+        <div class="button-container">
+            <a href="${verificationUrl}" class="button"><i class="fa-solid fa-envelope"></i>Verify Email</a>
+        </div>
+
+        <p>This verification link will expire in 1 hour. If you did not create an account with us, please ignore this email or contact our support team if you have concerns.</p>
+
+        <p>For security reasons, we recommend verifying your email promptly to secure your account.</p>
+
+        <div class="footer">
+            <p>Best regards,<br>The Chimelle Shop Team</p>
+            
+            <div class="social-links">
+                <a href="https://www.facebook.com/chimelleshop" aria-label="Visit our Facebook page" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-facebook social-icon"></i>
+                </a>
+                <a href="https://x.com/chimelleshop" aria-label="Visit our Twitter page" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-twitter social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
       `
     };
 
@@ -278,15 +426,160 @@ exports.forgotPassword = async (req, res) => {
 
     // Send email
     const mailOptions = {
-      from: process.env.MAILTRAP_USER,
+      from: 'Chimelle Shop <noreply@chimelleshop.com>',
       to: user.email,
       subject: 'Password Reset Request',
       html: `
-        <h2>Password Reset</h2>
+        <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+  
+    <title>Password Reset - Chimelle Shop</title>
+         <style>
+
+        body {
+            font-family: 'Montserrat';
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .email-container {
+            background-color: white;
+            padding: 40px;
+            width: 450px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: solid 2px #da9e9f;
+        }
+
+        .logo img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #da9e9f;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #666;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .button {
+            display: inline-block;
+            background-color:#da9e9f;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            text-align: center;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .button:hover {
+            background-color: #c47e7f
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .footer p {
+            text-align: center !important;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #da9e9f;
+        }
+
+        .social-links {
+    margin: 20px 0;
+    text-align: center !important;
+}
+
+.social-links a {
+    margin: 0 10px;
+    color: #da9e9f;
+    text-decoration: none;
+}
+
+.social-icon {
+    font-size: 24px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #da9e9f;
+    transform: scale(1.2); /* Enlarges the logo */
+}
+
+.button-container i {
+margin-right: 10px;
+}
+
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .email-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h1>Password Reset</h1>
         <p>You requested a password reset. Click the link below to reset your password:</p>
-        <a href="${resetUrl}">Reset Password</a>
+
+        <div class="button-container">
+            <a href="${resetUrl}" class="button"><i class="fa-solid fa-envelope"></i>Reset Password</a>
+        </div>
         <p>This link will expire in 1 hour.</p>
         <p>If you didn't request this reset, please ignore this email.</p>
+
+    
+        <div class="footer">
+            <p>Best regards,<br>The Chimelle Shop Team</p>
+            
+            <div class="social-links">
+                <a href="https://www.facebook.com/chimelleshop" aria-label="Visit our Facebook page" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-facebook social-icon"></i>
+                </a>
+                <a href="https://x.com/chimelleshop" aria-label="Visit our Twitter page" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-twitter social-icon"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
       `
     };
 
@@ -511,62 +804,58 @@ exports.adminLogin = async (req, res) => {
 
 exports.createAdmin = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
-    
-    // Check if requester is super_admin (assuming we get this from the JWT token)
-    if (req.admin.role !== 'super_admin') {
-      return res.status(403).json({ msg: 'Only super admins can create admin accounts' });
-    }
+      const { username, email, password } = req.body;
 
-    // Validate required fields
-    if (!username || !email || !password) {
-      return res.status(400).json({ msg: 'All fields are required' });
-    }
+      // Check if requester is a super admin
+      if (req.admin.role !== 'super_admin') {
+          return res.status(403).json({ 
+              success: false, 
+              msg: 'Only super administrators can create admin accounts' 
+          });
+      }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ msg: 'Invalid email format' });
-    }
+            // Check if admin with the email already exists
+      const existingAdmin = await Admin.findOne({ email });
+      if (existingAdmin) {
+          return res.status(400).json({ 
+              success: false, 
+              msg: 'An admin account with this email already exists' 
+          });
+      }
 
-    // Validate password using existing password validation
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      return res.status(400).json({
-        msg: 'Password does not meet requirements',
-        errors: passwordValidation.errors
+      // Check if the email is already used by a regular user
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+          return res.status(400).json({ 
+              success: false, 
+              msg: 'This email is already registered by a user' 
+          });
+      }
+
+      // Hash the password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // Create new admin
+      const newAdmin = new Admin({
+          username,
+          email,
+          password: hashedPassword,
+          role: 'admin'  // Default to regular admin, can be changed later if needed
       });
-    }
 
-    // Check if admin already exists
-    let adminExists = await Admin.findOne({ 
-      $or: [{ email }, { username }] 
-    });
-    
-    if (adminExists) {
-      return res.status(400).json({ 
-        msg: 'An admin with this email or username already exists' 
+      await newAdmin.save();
+
+      res.json({ 
+          success: true, 
+          msg: 'Admin account created successfully' 
       });
-    }
-
-    // Create new admin
-    const newAdmin = new Admin({
-      username,
-      email,
-      password,
-      role: role || 'admin' // Default to 'admin' if not specified
-    });
-
-    await newAdmin.save();
-
-    res.status(201).json({ 
-      success: true,
-      msg: 'Admin account created successfully' 
-    });
-
   } catch (error) {
-    console.error('Create admin error:', error);
-    res.status(500).json({ msg: 'Server error during admin creation' });
+      console.error('Create admin error:', error);
+      res.status(500).json({ 
+          success: false, 
+          msg: 'Server error in creating admin account' 
+      });
   }
-};
+}
 

@@ -378,10 +378,11 @@ static async addToCart(productId, quantityOrOptions) {
                 data-cart-item-id="${item.cartItemId}">
                 <span class="checkmark"></span>
           </label>
-          <div class="product-image-container">
+         <div class="product-image-container">
+          <a href="/product-page/${product._id}">
             <img src="${product.imageH}" alt="${product.name}" class="product-image">
+          </a>
           </div>
-            
             <div class="item-details">
               <h3>${product.name}</h3>
               <p> <span>Price: ₱ ${product.price.toFixed(2)}</span></p>

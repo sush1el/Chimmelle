@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albums</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/styles/details.css">
+    <link rel="stylesheet" href="/styles/navbar.css">
+    <link rel="stylesheet" href="/styles/shop.css">
+    <link rel="stylesheet" href="/styles/Footer.css">
+</head>
+<body>
+
+    <%- include('partials/navbar') %>
+
+    <header class="artist-header">
+    <h1><%= pageTitle %></h1>
+    </header>
+
+    <div class="main-content">
+        <aside class="filters">
+            <div class="filter-section">
+                <h3>Availability</h3>
+                <% let totalOnHand = 0, totalPreorder = 0; %>
+                <% artistCounts.forEach(function(artist) { 
+                    totalOnHand += artist.onHandCount;
+                    totalPreorder += artist.preorderCount;
+                }); %>
+                <div class="filter-option">
+                    <input type="checkbox" id="onhand">
+                    <label for="onhand">On Hand (<%= totalOnHand %>)</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="preorder">
+                    <label for="preorder">Pre-Order (<%= totalPreorder %>)</label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Artist</h3>
+                <% artists.forEach(function(artist) {
+                    const artistCount = artistCounts.find(a => a._id === artist);
+                    const count = artistCount ? artistCount.count : 0; %> 
+                <div class="filter-option">
+                    <input 
+                        type="checkbox" 
+                        class="filter-checkbox artist-checkbox" 
+                        id="<%= artist.replace(/\s+/g, '') %>"
+                        data-artist="<%= artist %>">
+                    <label for="<%= artist.replace(/\s+/g, '') %>">
+                        <%= artist %> (<%= count %>)
+                    </label>
+                </div>  
+                <% }) %>              
+            </div>
+
+            <div class="filter-section">
+                <h3>Price</h3>
+                <div class="price-range">
+                    <input type="number" placeholder="₱" class="price-input min-price" min="<%= priceRange.minPrice %>" max="<%= priceRange.maxPrice %>" value="<%= priceRange.minPrice %>">
+                    <span>to</span>
+                    <input type="number" placeholder="₱" class="price-input max-price" min="<%= priceRange.minPrice %>" max="<%= priceRange.maxPrice %>" value="<%= priceRange.maxPrice %>">
+                </div>
+            </div>
+        </aside>
+
+        <main class="products-section">
+            <div class="products-header">
+                <span><%= totalProducts %> albums</span>
+                <select class="sort-select">
+                    <option value="alphabetAZ">Alphabetically, A-Z</option>
+                    <option value="alphabetZA">Alphabetically, Z-A</option>
+                    <option value="priceLowHigh">Price, low to high</option>
+                    <option value="priceHighLow">Price, high to low</option>
+                </select>
+            </div>
+
+            <div class="products-grid">
+                <% products.forEach(product => { %>
+                    <div class="product-card" 
+                    data-artist="<%= product.artist.toLowerCase() %>" 
+                    data-availability="<%= product.availability.toLowerCase() %>" 
+                    data-price="<%= product.price %>" data-product-id="<%= product._id %>">
+                        <a href="/product-page/<%= product._id %>">
+                        <div class="product-image">
+                            <img src="<%= product.imageH %>" class="product-image">
+                        </div>
+                        <div class="product-info">
+                        <h3 class="product-name"><%= product.name %></h3>
+                    </a>
+                        <p class="product-price">₱<%= product.price.toFixed(2) %></p>
+                        <button class="choose-options-btn" data-product-id="<%= product._id %>"> Add to Cart</button>
+                    </div>
+                    </div>
+                <% }) %>
+            </div>  
+        </main>
+    </div>
+
+    <footer class="footer">
+
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const productCards = Array.from(document.querySelectorAll('.product-card'));
+    const artistCheckboxes = Array.from(document.querySelectorAll('.artist-checkbox'));
+    const onHandCheckbox = document.getElementById('onhand');
+    const preorderCheckbox = document.getElementById('preorder');
+    const minPriceInput = document.querySelector('.min-price');
+    const maxPriceInput = document.querySelector('.max-price');
+    const sortSelect = document.querySelector('.sort-select');
+    const grid = document.querySelector('.products-grid');
+
+    // Event Listeners
+    artistCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFilters));
+    onHandCheckbox.addEventListener('change', applyFilters);
+    preorderCheckbox.addEventListener('change', applyFilters);
+    minPriceInput.addEventListener('input', applyFilters);
+    maxPriceInput.addEventListener('input', applyFilters);
+    sortSelect.addEventListener('change', sortProducts);
+
+    function applyFilters() {
+    const selectedArtists = artistCheckboxes
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.dataset.artist.toLowerCase());
+
+    const isOnHandChecked = onHandCheckbox.checked;
+    const isPreorderChecked = preorderCheckbox.checked;
+    const minPrice = parseFloat(minPriceInput.value) || 0;
+    const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+
+    productCards.forEach(card => {
+        const cardArtist = card.dataset.artist.toLowerCase();
+        const cardAvailability = card.dataset.availability.toLowerCase();
+        const cardPrice = parseFloat(card.dataset.price);
+
+        const matchesArtist = selectedArtists.length === 0 || selectedArtists.includes(cardArtist);
+        const matchesAvailability = 
+            (isOnHandChecked && cardAvailability === 'on-hand') ||
+            (isPreorderChecked && cardAvailability === 'pre-order') ||
+            (!isOnHandChecked && !isPreorderChecked);
+        const matchesPrice = cardPrice >= minPrice && cardPrice <= maxPrice;
+
+        card.style.display = matchesArtist && matchesAvailability && matchesPrice ? 'block' : 'none';
+    });
+}
+
+    function sortProducts() {
+        const sortValue = sortSelect.value;
+
+        const sortedCards = [...productCards].sort((a, b) => {
+            const aName = a.querySelector('.product-name').textContent.trim();
+            const bName = b.querySelector('.product-name').textContent.trim();
+            const aPrice = parseFloat(a.dataset.price);
+            const bPrice = parseFloat(b.dataset.price);
+
+            switch (sortValue) {
+                case 'alphabetAZ':
+                    return aName.localeCompare(bName);
+                case 'alphabetZA':
+                    return bName.localeCompare(aName);
+                case 'priceLowHigh':
+                    return aPrice - bPrice;
+                case 'priceHighLow':
+                    return bPrice - aPrice;
+                default:
+                    return 0;
+            }
+        });
+
+        grid.innerHTML = '';
+        sortedCards.forEach(card => grid.appendChild(card));
+    }
+
+    if (typeof CartManager === 'undefined') {
+    console.error('CartManager not loaded');
+    return;
+  }
+    document.querySelectorAll('.choose-options-btn').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      try {
+        const productCard = e.target.closest('.product-card');
+        if (!productCard) return;
+        
+        const productId = productCard.dataset.productId;
+        if (!productId) {
+          console.error('Product ID not found');
+          return;
+        }
+
+        // Disable button to prevent double clicks
+        button.disabled = true;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+        // Try to add to cart
+        try {
+          await CartManager.addToCart(productId);
+        } catch (error) {
+          console.error('Failed to add to cart:', error);
+          
+          // Reset button to original state immediately
+          button.disabled = false;
+          button.innerHTML = originalText;
+          
+          // If error is not a user dismissal, you might want to show an error
+          if (error.message !== 'cancel') {
+            await Swal.fire({
+              title: 'Error!',
+              text: 'Failed to add item to cart',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+          
+          return;
+        }
+
+        // Reset button to original state without "Added!" state
+        button.disabled = false;
+        button.innerHTML = originalText;
+
+      } catch (error) {
+        console.error('Error in click handler:', error);
+        button.disabled = false;
+        button.innerHTML = 'Add to Cart';
+      }
+    });
+  });
+
+    applyFilters();
+});
+    </script>
+    <script src="scripts/Cart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="scripts/Footer.js"></script>
+</body>
+</html>

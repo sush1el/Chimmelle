@@ -124,8 +124,7 @@ th, td {
 }
 
 #createAdminBtn {
-    width: 100%
-    display: inline-block
+    display: inline-block;
     padding: 10px 15px;
     background-color: #da9e9f; /* Green background */
     color: white;

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <title>Artists</title>
+    <link rel="stylesheet" href="styles/navbar.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #fff7f7;
+            color: #333;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 2rem 0;
+            font-size: 2.5rem;
+        }
+
+        .artists-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .artists-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .artists-list li:last-child {
+            border-bottom: none;
+        }
+
+        .artist-name {
+            color: #333;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .artist-name:hover {
+            color: #da9e9f;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <%- include('partials/navbar') %>
+
+  <main class="main-content">
+    <h1>Artists</h1>
+    <ul class="artists-list">
+        <% artists.forEach(function(artist) { %>
+            <li><a href="/shop-artist?artist=<%= encodeURIComponent(artist) %>" class="artist-name"><%= artist %></a></li>
+        <% }); %>
+    </ul>
+</main>
+</body>
+</html>

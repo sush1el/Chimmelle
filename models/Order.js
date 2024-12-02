@@ -36,6 +36,11 @@ const OrderSchema = new mongoose.Schema({
       return this.status === 'confirmed';
     }
   },
+  deliveryMethod: {
+    type: String,
+    enum: ['standard', 'same-day'],
+    default: 'standard'
+  },
   shippingStatus: {
     type: String,
     enum: ['preparing', 'shipped', 'received'],
@@ -59,6 +64,9 @@ const OrderSchema = new mongoose.Schema({
     paymentIntentId: String,
     paymentMethod: String,
     paidAt: Date
+  },
+  customerEmail: {
+    type: String
   },
   receivedAt: {
     type: Date,

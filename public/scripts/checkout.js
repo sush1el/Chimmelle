@@ -564,12 +564,18 @@ class CheckoutHandler {
     // Only run checkout initialization if we're on the checkout page
     if (window.location.pathname === '/checkout') {
       try {
-        const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+      
+      const selectedDelivery = document.querySelector('input[name="delivery"]:checked');
+      const deliveryMethod = selectedDelivery ? selectedDelivery.value : 'standard';
+
+      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+      checkoutData.deliveryMethod = deliveryMethod;
+      sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
         if (!checkoutData) {
           window.location.href = '/cart';
           return;
         }
-
+          
         const checkoutTimestamp = new Date(checkoutData.timestamp);
         const currentTime = new Date();
         if (currentTime - checkoutTimestamp > 30 * 60 * 1000) {
@@ -664,7 +670,7 @@ class CheckoutHandler {
         if (!orderId) {
           throw new Error('No order ID provided');
         }
-  
+    
         const processedPayments = sessionStorage.getItem('processedPayments') ? 
           JSON.parse(sessionStorage.getItem('processedPayments')) : [];
         
@@ -672,21 +678,21 @@ class CheckoutHandler {
           await Swal.close();
           return;
         }
-  
+    
         const paymentData = JSON.parse(sessionStorage.getItem('paymentData'));
         const paymentIntentId = sessionStorage.getItem('currentSourceId');
         const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
-  
+    
         if (!paymentData || !paymentIntentId || !checkoutData) {
           throw new Error('Payment data not found');
         }
-  
+    
         // Get both product IDs and their versions for purchased items
         const purchasedItems = checkoutData.items.map(item => ({
           productId: item.productId,
           version: item.version.version // Include version information
         }));
-  
+    
         const response = await fetch(`/api/payment-success/${orderId}`, {
           method: 'POST',
           headers: {
@@ -696,62 +702,63 @@ class CheckoutHandler {
             paymentIntentId: paymentIntentId,
             selectedAddressIndex: paymentData.selectedAddressIndex,
             gcashNumber: paymentData.gcashNumber,
-            purchasedItems: purchasedItems // Send both product IDs and versions
+            purchasedItems: purchasedItems,
+            deliveryMethod: checkoutData.deliveryMethod // Use deliveryMethod from checkoutData
           }),
           credentials: 'include'
         });
-  
+    
         const result = await response.json();
-  
-        if (result.success) {
-          processedPayments.push(orderId);
-          sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
-  
-          await Swal.close();
-  
-          // Clear only checkout-related data but keep cart data
-          sessionStorage.removeItem('paymentData');
-          sessionStorage.removeItem('checkoutData');
-          sessionStorage.removeItem('currentSourceId');
-          sessionStorage.removeItem('currentOrderId');
-  
-          const loadingElement = document.getElementById('loading');
-          const successContent = document.getElementById('success-content');
-          
-          if (loadingElement) loadingElement.style.display = 'none';
-          if (successContent) successContent.style.display = 'block';
-  
-          // Optional: Show success message with remaining items notification
-          const remainingItemsMessage = result.remainingItems > 0 ? 
-            `\nYou still have ${result.remainingItems} item(s) in your cart.` : '';
-          
-          await Swal.fire({
-            title: 'Payment Successful!',
-            text: `Your order has been confirmed.${remainingItemsMessage}`,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-  
-        } else {
-          throw new Error('Payment confirmation failed');
-        }
-  
-      } catch (error) {
-        console.error('Payment success handling error:', error);
+
+      if (result.success) {
+        processedPayments.push(orderId);
+        sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
+
+        await Swal.close();
+
+        // Clear only checkout-related data but keep cart data
+        sessionStorage.removeItem('paymentData');
+        sessionStorage.removeItem('checkoutData');
+        sessionStorage.removeItem('currentSourceId');
+        sessionStorage.removeItem('currentOrderId');
+
+        const loadingElement = document.getElementById('loading');
+        const successContent = document.getElementById('success-content');
+        
+        if (loadingElement) loadingElement.style.display = 'none';
+        if (successContent) successContent.style.display = 'block';
+
+        // Optional: Show success message with remaining items notification
+        const remainingItemsMessage = result.remainingItems > 0 ? 
+          `\nYou still have ${result.remainingItems} item(s) in your cart.` : '';
         
         await Swal.fire({
-          title: 'Error',
-          text: error.message || 'Failed to complete order. Please contact support.',
-          icon: 'error',
+          title: 'Payment Successful!',
+          text: `Your order has been confirmed.${remainingItemsMessage}`,
+          icon: 'success',
           confirmButtonText: 'OK'
         });
-  
-        if (error.message === 'Payment data not found' || 
-            error.message === 'Payment session expired') {
-          window.location.href = '/cart';
-        }
+
+      } else {
+        throw new Error('Payment confirmation failed');
+      }
+
+    } catch (error) {
+      console.error('Payment success handling error:', error);
+      
+      await Swal.fire({
+        title: 'Error',
+        text: error.message || 'Failed to complete order. Please contact support.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+
+      if (error.message === 'Payment data not found' || 
+          error.message === 'Payment session expired') {
+        window.location.href = '/cart';
       }
     }
+  }
 
     static validateGcashNumber(gcashNumber) {
       // GCash number validation rules:

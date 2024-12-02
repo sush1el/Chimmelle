@@ -355,3 +355,15 @@
     .filter-option label:hover::before {
         border-color: #da9e9f;
     }
+    .artist-header {
+        background-color: #f0f0f0;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      
+      .artist-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #333;
+      }

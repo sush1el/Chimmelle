@@ -10,6 +10,7 @@ const checkoutRoutes = require('./routes/checkoutRoutes');
 const footerRoutes = require('./routes/footerRoutes');
 const productRoutes = require('./routes/productRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const schedulePendingOrderCleanup = require('./middleware/pendingOrderCleanup');
 const {connectDB} = require('./connection/db');
 const cookieParser = require('cookie-parser');
 
@@ -22,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/public/scripts', express.static('public/scripts'));
 app.use(cookieParser());
+
+schedulePendingOrderCleanup();
 
 
 //Routes

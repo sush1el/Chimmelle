@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    const exportOrdersBtn = document.getElementById('exportOrdersBtn');
+    if (exportOrdersBtn) {
+        exportOrdersBtn.addEventListener('click', exportCompletedOrders);
+    }
+    
     // Get all nav links and sections
     const navLinks = document.querySelectorAll('.sidebar-nav a');
     const sections = document.querySelectorAll('.section');
@@ -33,6 +39,26 @@ document.addEventListener('DOMContentLoaded', function () {
             const href = link.getAttribute('href');
             window.location.hash = href;
             updateActiveSection();
+        });
+    });
+
+    document.querySelectorAll('.homepage-section-toggle').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const productId = e.target.dataset.productId;
+            const section = e.target.dataset.section;
+            try {
+                const response = await fetch(`/admin/update-homepage-section/${productId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ homepageSection: section })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Homepage section updated!');
+                }
+            } catch (error) {
+                console.error('Error updating section:', error);
+            }
         });
     });
 
@@ -102,120 +128,174 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Create admin account functionality
     const createAdminBtn = document.getElementById('createAdminBtn');
-    if (createAdminBtn) {
-        createAdminBtn.addEventListener('click', () => {
-            const passwordRequirements = [
-                { regex: /.{8,}/, text: 'At least 8 characters long' },
-                { regex: /[A-Z]/, text: 'Contains uppercase letter' },
-                { regex: /[a-z]/, text: 'Contains lowercase letter' },
-                { regex: /[0-9]/, text: 'Contains number' },
-                { regex: /[!@#$%^&*(),.?":{}|<>]/, text: 'Contains special character' }
-            ];
+if (createAdminBtn) {
+    createAdminBtn.addEventListener('click', () => {
+        const passwordRequirements = [
+            { regex: /.{8,}/, text: 'At least 8 characters long' },
+            { regex: /[A-Z]/, text: 'Contains uppercase letter' },
+            { regex: /[a-z]/, text: 'Contains lowercase letter' },
+            { regex: /[0-9]/, text: 'Contains number' },
+            { regex: /[!@#$%^&*(),.?":{}|<>]/, text: 'Contains special character' }
+        ];
 
-            let passwordValid = false;
+        let passwordValid = false;
 
-            Swal.fire({
-                title: 'Create Admin Account',
-                html: `
-                    <input id="username" class="swal2-input" placeholder="Username">
-                    <input id="email" class="swal2-input" placeholder="Email">
-                    <div class="password-container">
-                        <input id="password" type="password" class="swal2-input" placeholder="Password">
-                        <ul id="password-requirements" style="text-align: left; margin: 10px auto; width: 80%; list-style: none; padding: 0;">
-                            ${passwordRequirements.map(req => `
-                                <li style="color: red; margin: 5px 0; font-size: 0.9em;">
-                                    × ${req.text}
+        Swal.fire({
+            title: 'Create Admin Account',
+            html: `
+                <input id="username" class="swal2-input" placeholder="Username">
+                <input id="email" class="swal2-input" placeholder="Email">
+                <div class="password-container" style="position: relative;">
+                    <input id="password" type="password" class="swal2-input" placeholder="Password">
+                    <button id="togglePassword" type="button" class="toggle-password" style="
+                        position: absolute !important;
+                        right: 10px !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) !important;
+                        background: none !important;
+                        border: none !important;
+                        cursor: pointer !important;
+                        width: 24px;
+                        height: 24px;
+                        padding: 0;
+                    ">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <ul id="password-requirements" style="text-align: left; margin: 10px auto; width: 80%; list-style: none; padding: 0;">
+                    ${passwordRequirements.map(req => `
+                        <li style="color: red; margin: 5px 0; font-size: 0.9em;">
+                            × ${req.text}
+                        </li>
+                    `).join('')}
+                </ul>
+            `,
+            didOpen: () => {
+                const passwordInput = document.getElementById('password');
+                const togglePasswordBtn = document.getElementById('togglePassword');
+                const eyeIcon = togglePasswordBtn.querySelector('i');
+                const requirementsList = document.getElementById('password-requirements');
+
+                // Toggle password visibility
+                togglePasswordBtn.addEventListener('click', () => {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        eyeIcon.classList.remove('fa-regular', 'fa-eye');
+                        eyeIcon.classList.add('fa-solid', 'fa-eye');
+                    } else {
+                        passwordInput.type = 'password';
+                        eyeIcon.classList.remove('fa-solid', 'fa-eye');
+                        eyeIcon.classList.add('fa-regular', 'fa-eye');
+                    }
+                });
+
+                // Password requirements validation
+                passwordInput.addEventListener('input', (e) => {
+                    const password = e.target.value;
+
+                    // Update requirements list and check if all requirements are met
+                    passwordValid = passwordRequirements.every(req => req.regex.test(password));
+
+                    requirementsList.innerHTML = passwordRequirements
+                        .map(req => {
+                            const isValid = req.regex.test(password);
+                            return `
+                                <li style="color: ${isValid ? '#2ecc71' : '#e74c3c'}; margin: 5px 0; font-size: 0.9em; display: flex; align-items: center;">
+                                    <span style="margin-right: 5px;">${isValid ? '✓' : '×'}</span>
+                                    ${req.text}
                                 </li>
-                            `).join('')}
-                        </ul>
-                    </div>
-                `,
-                didOpen: () => {
-                    const passwordInput = document.getElementById('password');
-                    const requirementsList = document.getElementById('password-requirements');
-
-                    passwordInput.addEventListener('input', (e) => {
-                        const password = e.target.value;
-
-                        // Update requirements list and check if all requirements are met
-                        passwordValid = passwordRequirements.every(req => req.regex.test(password));
-
-                        requirementsList.innerHTML = passwordRequirements
-                            .map(req => {
-                                const isValid = req.regex.test(password);
-                                return `
-                                    <li style="color: ${isValid ? '#2ecc71' : '#e74c3c'}; margin: 5px 0; font-size: 0.9em; display: flex; align-items: center;">
-                                        <span style="margin-right: 5px;">${isValid ? '✓' : '×'}</span>
-                                        ${req.text}
-                                    </li>
-                                `;
-                            })
-                            .join('');
-                    });
-                },
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'Create',
-                showLoaderOnConfirm: true,
-                preConfirm: () => {
-                    const username = document.getElementById('username').value;
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
-
-                    if (!username || !email || !password) {
-                        Swal.showValidationMessage('Please fill in all fields');
-                        return false;
-                    }
-
-                    if (!passwordValid) {
-                        Swal.showValidationMessage('Password does not meet all requirements');
-                        return false;
-                    }
-
-                    // Validate email format
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(email)) {
-                        Swal.showValidationMessage('Please enter a valid email address');
-                        return false;
-                    }
-
-                    return fetch('/admin/create-admin', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            username,
-                            email,
-                            password
+                            `;
                         })
+                        .join('');
+                });
+            },
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Create',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+            
+                if (!username || !email || !password) {
+                    Swal.showValidationMessage('Please fill in all fields');
+                    return false;
+                }
+            
+                if (!passwordValid) {
+                    Swal.showValidationMessage('Password does not meet all requirements');
+                    return false;
+                }
+            
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    Swal.showValidationMessage('Please enter a valid email address');
+                    return false;
+                }
+            
+                return fetch('/admin/create-admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.success) {
-                                throw new Error(data.msg || 'Failed to create admin account');
-                            }
-                            return data;
-                        })
-                        .catch(error => {
-                            Swal.showValidationMessage(error.message);
-                            throw error;
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        // Show an error alert for specific server-side issues
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.msg || 'An error occurred',
+                            confirmButtonText: 'OK'
                         });
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
+                        return Promise.reject(new Error('Handled error'));
+                    }
+            
+                    // Show a success alert and reload the page
                     Swal.fire({
-                        title: 'Success!',
-                        text: 'Admin account created successfully',
                         icon: 'success',
-                        willClose: () => {
-                            // Reload page and show manage-admins section
-                            window.location.href = '/admin/dashboard#manage-admins';
-                            window.location.reload();
-                        }
+                        title: 'Success',
+                        text: 'Admin account created successfully!',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload the page or redirect
+                        location.reload();
                     });
-                }
-            });
+            
+                    return data; // Return the data in case other actions are needed
+                })
+                .catch(error => {
+                    if (error.message !== 'Handled error') {
+                        Swal.showValidationMessage('Unexpected error occurred. Please try again later.');
+                    }
+                    return Promise.reject(error);
+                });
+            }
+        });
+    });
+}
+    function exportCompletedOrders() {
+        Swal.fire({
+            title: 'Export Completed Orders',
+            text: 'Do you want to export all completed orders to an Excel file?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, export!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Trigger the export by redirecting to the export endpoint
+                window.location.href = '/admin/export-orders';
+            }
         });
     }
 
@@ -290,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 paginationContainer.innerHTML = '';
             }
         }
-
+        
         function searchTable() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             
@@ -410,6 +490,84 @@ window.deleteProduct = async function(productId) {
     }
 };
 
+window.cancelOrder = async function(orderId) {
+    // First, get the current order details to check its status
+    try {
+        const orderDetailsElement = document.querySelector(`#orderDetails-${orderId} .order-shipping-details p:first-child`);
+        
+        if (!orderDetailsElement) {
+            Swal.fire('Error!', 'Could not retrieve order details', 'error');
+            return;
+        }
+
+        const shippingStatus = orderDetailsElement.textContent.split(': ')[1].trim();
+        
+        // Prevent cancellation for shipped or received orders
+        if (['shipped', 'received'].includes(shippingStatus.toLowerCase())) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Cannot Cancel Order',
+                text: 'This order cannot be canceled as it has already been shipped or completed.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: 'Emergency Order Cancellation',
+            text: 'This is a restricted action. Enter the emergency password to cancel the order.',
+            input: 'password',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Cancel Order',
+            showLoaderOnConfirm: true,
+            preConfirm: async (emergencyPassword) => {
+                if (!emergencyPassword) {
+                    Swal.showValidationMessage('Please enter the emergency password');
+                    return false;
+                }
+
+                try {
+                    const response = await fetch(`/admin/cancel-order/${orderId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ emergencyPassword })
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to cancel order');
+                    }
+
+                    return data;
+                } catch (error) {
+                    Swal.showValidationMessage(error.message);
+                    return false;
+                }
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        });
+
+        if (result.value) {
+            await Swal.fire(
+                'Order Canceled',
+                'The order has been successfully deleted.',
+                'success'
+            );
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error checking order status:', error);
+        Swal.fire('Error!', 'Could not check order status', 'error');
+    }
+};
+
 window.deleteAdmin = async function(adminId) {
     const result = await Swal.fire({
         title: 'Are you sure?',
@@ -458,7 +616,20 @@ window.deleteAdmin = async function(adminId) {
 };
 
 function logout() {
-    window.location.href = '/api/auth/logout';
+    // Clear local storage and session storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Make a fetch request to logout endpoint
+    fetch('/api/auth/logout', {
+        method: 'GET',
+        credentials: 'same-origin'
+    }).then(() => {
+        // Redirect to login page and replace the current history entry
+        window.location.replace('/login-page');
+    }).catch(error => {
+        console.error('Logout error:', error);
+    });
 }
 
 async function updateShippingStatus(orderId, status) {
@@ -499,3 +670,25 @@ async function updateShippingStatus(orderId, status) {
         Swal.fire('Error!', 'Network error occurred', 'error');
     }
 }
+
+async function updateHomepageSection(productId, section) {
+    try {
+        const response = await fetch(`/admin/update-homepage-section/${productId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ homepageSection: section }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert('Homepage section updated successfully!');
+        } else {
+            alert('Failed to update section: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error updating homepage section:', error);
+        alert('An error occurred. Please try again.');
+    }
+}
+
+

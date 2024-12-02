@@ -1,9 +1,34 @@
 document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const firstName = document.getElementById('firstName').value;
+  const lastName = document.getElementById('lastName').value;
+  const nameRegex = /^[A-Za-z\s'-]+$/; // Allow letters, spaces, hyphens, and apostrophes
+
+  
+  if (!nameRegex.test(firstName)) {
+    await Swal.fire({
+      icon: 'error',
+      title: 'Invalid First Name',
+      text: 'First name can only contain letters, spaces, hyphens, and apostrophes.',
+      confirmButtonText: 'OK'
+    });
+    return;
+  }
+
+  if (!nameRegex.test(lastName)) {
+    await Swal.fire({
+      icon: 'error',
+      title: 'Invalid Last Name',
+      text: 'Last name can only contain letters, spaces, hyphens, and apostrophes.',
+      confirmButtonText: 'OK'
+    });
+    return;
+  }
+
   const formData = {
-    firstName: document.getElementById('firstName').value,
-    lastName: document.getElementById('lastName').value,
+    firstName: firstName,
+    lastName: lastName,
     email: document.getElementById('email').value,
     password: document.getElementById('password').value
   };
@@ -95,6 +120,19 @@ document.getElementById('createAccountForm').addEventListener('submit', async (e
       confirmButtonText: 'OK'
     });
   }
+});
+
+['firstName', 'lastName'].forEach(fieldId => {
+  document.getElementById(fieldId).addEventListener('input', (e) => {
+    const input = e.target;
+    const nameRegex = /^[A-Za-z\s'-]+$/;
+    
+    if (!nameRegex.test(input.value)) {
+      input.setCustomValidity('Name can only contain letters, spaces, hyphens, and apostrophes');
+    } else {
+      input.setCustomValidity('');
+    }
+  });
 });
 
 // Password validation code

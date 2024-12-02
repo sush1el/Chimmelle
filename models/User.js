@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+
 // Updated Cart Item Schema to include version
 const CartItemSchema = new mongoose.Schema({
   cartItemId: { 
     type: mongoose.Schema.Types.ObjectId,
-    // Remove the default function as we'll handle ID generation when actually adding items
-    required: false  // Make it not required for initial user creation
+    default: () => new mongoose.Types.ObjectId(), // Automatically generate a unique ID
+    required: true  // Make it required
   },
   product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
@@ -17,10 +18,10 @@ const CartItemSchema = new mongoose.Schema({
 // Add this index to the CartItemSchema
 CartItemSchema.index({ cartItemId: 1 }, { 
   unique: true, 
-  sparse: true  // This allows multiple null values
+  sparse: true  
 });
 
-// Address Schema remains the same
+// Address Schema
 const AddressSchema = new mongoose.Schema({
   street: { type: String, required: true },
   region: { 
@@ -46,7 +47,7 @@ const AddressSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// User Schema remains the same
+// User Schema
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -64,7 +65,7 @@ const UserSchema = new mongoose.Schema({
   cart: {
     items: { 
       type: [CartItemSchema],
-      default: []  // Initialize as empty array instead of null
+      default: () => [] // Use a function to return a new empty array each time
     },
     updatedAt: { type: Date, default: Date.now }
   }
@@ -72,17 +73,16 @@ const UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Existing middleware remains the same
+// Middleware for hashing password
 UserSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) {
-        return next();
-    }
-    
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
+  if (!this.isModified('password')) return next();
+  
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
+// Middleware for updating timestamps
 UserSchema.pre('save', function(next) {
   this.lastActive = Date.now();
   
@@ -93,39 +93,36 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-// Updated cart methods to handle versions
+// Methods for managing the cart
 UserSchema.methods.addToCart = async function(productId, version, quantity = 1) {
-  const cartItemIndex = this.cart.items.findIndex(item => 
-      item.product.toString() === productId && 
-      (!version || item.version === version)
+  if (quantity < 1) throw new Error('Quantity must be at least 1');
+  
+  const itemIndex = this.cart.items.findIndex(
+    item => item.product.toString() === productId && (!version || item.version === version)
   );
 
-  if (cartItemIndex >= 0) {
-      // If item exists, update quantity
-      this.cart.items[cartItemIndex].quantity += quantity;
+  if (itemIndex >= 0) {
+    this.cart.items[itemIndex].quantity += quantity;
   } else {
-      // If item doesn't exist, add new item with specified quantity
-      const newCartItem = {
-          cartItemId: new mongoose.Types.ObjectId(), // Generate new ID here
-          product: productId,
-          version: version,
-          quantity: quantity,
-          selected: true
-      };
-      this.cart.items.push(newCartItem);
+    this.cart.items.push({
+      cartItemId: new mongoose.Types.ObjectId(),
+      product: productId,
+      version,
+      quantity,
+      selected: true
+    });
   }
-  
-  // Update the cart's updatedAt timestamp
   this.cart.updatedAt = Date.now();
-  
   return this.save();
 };
 
 UserSchema.methods.updateCartItemQuantity = async function(cartItemId, quantity) {
+  if (quantity < 1) throw new Error('Quantity must be at least 1');
+  
   const item = this.cart.items.find(item => item.cartItemId.toString() === cartItemId.toString());
-
   if (item) {
     item.quantity = quantity;
+    this.cart.updatedAt = Date.now();
     return this.save();
   }
   throw new Error('Item not found in cart');
@@ -134,39 +131,31 @@ UserSchema.methods.updateCartItemQuantity = async function(cartItemId, quantity)
 UserSchema.methods.toggleCartItemSelection = async function(productId, version = null) {
   const item = this.cart.items.find(
     item => item.product.toString() === productId.toString() &&
-           item.version === version // Match both product ID and version
+           (!version || item.version === version)
   );
-
-  if (item) {
-    item.selected = !item.selected;
-    return this.save();
-  }
+  if (!item) throw new Error('Item not found in cart');
   
-  throw new Error('Item not found in cart');
-};
-
-UserSchema.methods.toggleCartItemSelection = async function(productId) {
-  const cartItem = this.cart.items.find(
-    item => item.product.toString() === productId.toString()
-  );
-  
-  if (!cartItem) {
-    throw new Error('Item not found in cart');
-  }
-  
-  cartItem.selected = !cartItem.selected;
+  item.selected = !item.selected;
+  this.cart.updatedAt = Date.now();
   return this.save();
 };
 
-// New method to update item version
 UserSchema.methods.updateCartItemVersion = async function(cartItemId, newVersion) {
   const item = this.cart.items.find(item => item.cartItemId.toString() === cartItemId.toString());
-
   if (item) {
     item.version = newVersion;
+    this.cart.updatedAt = Date.now();
     return this.save();
   }
   throw new Error('Item not found in cart');
 };
+
+UserSchema.methods.removeCartItem = async function(cartItemId) {
+  this.cart.items = this.cart.items.filter(item => item.cartItemId.toString() !== cartItemId.toString());
+  this.cart.updatedAt = Date.now();
+  return this.save();
+};
+
+// Model Export
 const User = mongoose.model('User', UserSchema);
 module.exports = User;

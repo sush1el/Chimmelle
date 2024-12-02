@@ -118,12 +118,18 @@ class CheckoutHandler {
     // Only run checkout initialization if we're on the checkout page
     if (window.location.pathname === '/checkout') {
       try {
-        const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+      
+      const selectedDelivery = document.querySelector('input[name="delivery"]:checked');
+      const deliveryMethod = selectedDelivery ? selectedDelivery.value : 'standard';
+
+      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+      checkoutData.deliveryMethod = deliveryMethod;
+      sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
         if (!checkoutData) {
           window.location.href = '/cart';
           return;
         }
-
+          
         const checkoutTimestamp = new Date(checkoutData.timestamp);
         const currentTime = new Date();
         if (currentTime - checkoutTimestamp > 30 * 60 * 1000) {
@@ -173,10 +179,10 @@ class CheckoutHandler {
     }
   }
 
-    static async handlePayment() {
-      try {
-        const totalAmountElement = document.getElementById('total-amount');
-        const totalAmount = parseFloat(totalAmountElement.textContent.replace('₱', '').trim());
+  static async handlePayment() {
+    try {
+      const totalAmountElement = document.getElementById('total-amount');
+      const totalAmount = parseFloat(totalAmountElement.textContent.replace('₱', '').trim());
         
         // Show loading alert
         Swal.fire({
@@ -193,9 +199,17 @@ class CheckoutHandler {
         // Get checkout data for order description
         const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
         const description = `Order payment for ${checkoutData.summary.totalItems} items`;
+    
   
         // Process payment and get checkout URL
-        const checkoutUrl = await PaymongoHandler.processPayment(totalAmount, description);
+        const checkoutUrl = await PaymongoHandler.processPayment(
+          totalAmount, 
+          description,
+          {
+            totalAmount: totalAmount,
+            items: checkoutData.items
+          }
+        );
         
         // Close loading alert
         await Swal.close();
@@ -219,9 +233,15 @@ class CheckoutHandler {
         if (!orderId) {
           throw new Error('No order ID provided');
         }
-  
+
+        const paymentStatus = sessionStorage.getItem('paymentStatus');
+
+        // If payment failed, handle failure
+        if (paymentStatus === 'failed') {
+          await this.handlePaymentFailure();
+          return;
+        }
     
-  
         const processedPayments = sessionStorage.getItem('processedPayments') ? 
           JSON.parse(sessionStorage.getItem('processedPayments')) : [];
         
@@ -229,21 +249,21 @@ class CheckoutHandler {
           await Swal.close();
           return;
         }
-  
+    
         const paymentData = JSON.parse(sessionStorage.getItem('paymentData'));
         const paymentIntentId = sessionStorage.getItem('currentSourceId');
         const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
-  
+    
         if (!paymentData || !paymentIntentId || !checkoutData) {
           throw new Error('Payment data not found');
         }
-  
+    
         // Get both product IDs and their versions for purchased items
         const purchasedItems = checkoutData.items.map(item => ({
           productId: item.productId,
           version: item.version.version // Include version information
         }));
-  
+    
         const response = await fetch(`/api/payment-success/${orderId}`, {
           method: 'POST',
           headers: {
@@ -253,135 +273,139 @@ class CheckoutHandler {
             paymentIntentId: paymentIntentId,
             selectedAddressIndex: paymentData.selectedAddressIndex,
             gcashNumber: paymentData.gcashNumber,
-            purchasedItems: purchasedItems // Send both product IDs and versions
+            purchasedItems: purchasedItems,
+            deliveryMethod: checkoutData.deliveryMethod // Use deliveryMethod from checkoutData
           }),
           credentials: 'include'
         });
-  
+    
         const result = await response.json();
-  
-        if (result.success) {
-          processedPayments.push(orderId);
-          sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
-  
-          await Swal.close();
-  
-          // Clear only checkout-related data but keep cart data
-          sessionStorage.removeItem('paymentData');
-          sessionStorage.removeItem('checkoutData');
-          sessionStorage.removeItem('currentSourceId');
-          sessionStorage.removeItem('currentOrderId');
-  
-          const loadingElement = document.getElementById('loading');
-          const successContent = document.getElementById('success-content');
-          
-          if (loadingElement) loadingElement.style.display = 'none';
-          if (successContent) successContent.style.display = 'block';
-  
-          // Optional: Show success message with remaining items notification
-          const remainingItemsMessage = result.remainingItems > 0 ? 
-            `\nYou still have ${result.remainingItems} item(s) in your cart.` : '';
-          
-          await Swal.fire({
-            title: 'Payment Successful!',
-            text: `Your order has been confirmed.${remainingItemsMessage}`,
-            icon: 'success',
-            confirmButtonText: 'OK'
-          });
-  
-        } else {
-          throw new Error('Payment confirmation failed');
-        }
-  
-      } catch (error) {
-        console.error('Payment success handling error:', error);
+
+      if (result.success) {
+        processedPayments.push(orderId);
+        sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
+
+        await Swal.close();
+
+        // Clear only checkout-related data but keep cart data
+        sessionStorage.removeItem('paymentData');
+        sessionStorage.removeItem('checkoutData');
+        sessionStorage.removeItem('currentSourceId');
+        sessionStorage.removeItem('currentOrderId');
+
+        const loadingElement = document.getElementById('loading');
+        const successContent = document.getElementById('success-content');
+        
+        if (loadingElement) loadingElement.style.display = 'none';
+        if (successContent) successContent.style.display = 'block';
+
+        // Optional: Show success message with remaining items notification
+        const remainingItemsMessage = result.remainingItems > 0 ? 
+          `\nYou still have ${result.remainingItems} item(s) in your cart.` : '';
         
         await Swal.fire({
-          title: 'Error',
-          text: error.message || 'Failed to complete order. Please contact support.',
+          title: 'Payment Successful!',
+          text: `Your order has been confirmed.${remainingItemsMessage}`,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+
+      } else {
+        throw new Error('Payment confirmation failed');
+      }
+
+    } catch (error) {
+      console.error('Payment success handling error:', error);
+      
+      await Swal.fire({
+        title: 'Error',
+        text: error.message || 'Failed to complete order. Please contact support.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+
+      window.location.href = '/cart';
+    }
+  }
+
+  static async handlePaymentFailure() {
+    try {
+      const currentOrderId = sessionStorage.getItem('currentOrderId');
+      
+      if (!currentOrderId) {
+        throw new Error('No order found to cancel');
+      }
+
+      // Cancel the order in the backend
+      const response = await fetch(`/api/payment-failure/${currentOrderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+
+      // Clear all payment-related session storage regardless of backend response
+      sessionStorage.removeItem('currentOrderId');
+      sessionStorage.removeItem('paymentData');
+      sessionStorage.removeItem('currentSourceId');
+      sessionStorage.removeItem('checkoutData');
+      sessionStorage.removeItem('paymentStatus');
+
+      if (result.success) {
+        // Show payment failure message
+        await Swal.fire({
+          title: 'Payment Failed',
+          text: 'Your payment could not be processed. Please try again.',
           icon: 'error',
           confirmButtonText: 'OK'
         });
-  
-        if (error.message === 'Payment data not found' || 
-            error.message === 'Payment session expired') {
-          window.location.href = '/cart';
-        }
+      } else {
+        // Log the error, but still provide user feedback
+        console.error('Order cancellation failed:', result.error);
+        await Swal.fire({
+          title: 'Payment Issue',
+          text: 'There was a problem processing your payment. Please contact support.',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       }
-    }
 
-    static setupEventListeners() {
-      document.querySelectorAll('input[name="delivery"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-          this.updateShippingCost();
-        });
+      // Always redirect to checkout
+      window.location.href = '/checkout';
+
+    } catch (error) {
+      console.error('Payment failure handling error:', error);
+      
+      await Swal.fire({
+        title: 'Error',
+        text: 'An unexpected error occurred. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
       });
-    
-      const checkoutButton = document.getElementById('checkout-button');
-      if (checkoutButton) {
-        checkoutButton.addEventListener('click', async () => {
-          try {
-            const selectedAddress = document.querySelector('input[name="address"]:checked');
-            const selectedDelivery = document.querySelector('input[name="delivery"]:checked');
-            const selectedPayment = document.querySelector('input[name="payment"]:checked');
-            const gcashNumberInput = document.getElementById('gcash-number');
-    
-            if (!selectedAddress) {
-              throw new Error('Please select a delivery address');
-            }
-    
-            if (!selectedDelivery) {
-              throw new Error('Please select a delivery method');
-            }
-    
-            if (!selectedPayment) {
-              throw new Error('Please select a payment method');
-            }
-    
-            if (!gcashNumberInput || !gcashNumberInput.value) {
-              throw new Error('Please enter your GCash number');
-            }
-    
-            // Store payment data in session storage
-            const paymentData = {
-              selectedAddressIndex: parseInt(selectedAddress.value),
-              deliveryMethod: selectedDelivery.value,
-              gcashNumber: gcashNumberInput.value,
-              timestamp: new Date().toISOString()
-            };
-            sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
-    
-            // Process the payment
-            await this.handlePayment();
-    
-          } catch (error) {
-            await Swal.fire({
-              title: 'Error!',
-              text: error.message || 'Failed to process payment',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
-      }
+
+      // Fallback redirect
+      window.location.href = '/cart';
     }
+  }
 }
 
-// Initialize the checkout handler when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   const currentPath = window.location.pathname;
   
   if (currentPath === '/checkout') {
-    CheckoutHandler.init();
+      CheckoutHandler.init();
   } else if (currentPath === '/payment-success') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('orderId');
-    
-    if (orderId) {
-      CheckoutHandler.handlePaymentSuccess(orderId);
-    } else {
-      window.location.href = '/cart';
-    }
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('orderId');
+      
+      if (orderId) {
+          CheckoutHandler.handlePaymentSuccess(orderId);
+      } else {
+          window.location.href = '/cart';
+      }
   }
 });
 

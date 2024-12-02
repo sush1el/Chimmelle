@@ -1,18 +1,17 @@
 <nav class="navbar">
   <div class="nav-left">
       <a href="/">HOME</a>
-      <a href="#">ARTISTS</a>
+      <a href="/artists">ARTISTS</a>
       <div class="dropdown">
-          <a href="/shop" class="dropdown-toggle">SHOP</a>
-          <div class="dropdown-menu">
-              <a href="/albums">Albums</a>
-              <a href="/merchandise">Pre-order</a>
-              <a href="/collectibles">Onhand</a>
-              <a href="/accessories">Lightsticks</a>
-              <a href="/accessories">Merchandise</a>
-              <a href="/shop">All Products</a>
-          </div>
-      </div>
+        <a href="/shop" class="dropdown-toggle">SHOP</a>
+        <div class="dropdown-menu">
+            <a href="/albums">Albums</a>
+            <a href="/preorder">Pre-order</a>
+            <a href="/onhand">Onhand</a>
+            <a href="/lightsticks">Lightsticks</a>
+            <a href="/shop">All Products</a>
+            </div>
+    </div>
       <div class="dropdown">
           <a href="#">SUPPORT</a>
           <div class="dropdown-menu">
@@ -64,3 +63,7 @@
       <% } %>
   </div>
 </nav>
+
+<link rel="stylesheet" href="styles/search.css">
+<script src="scripts/Search.js"></script>
+<script src="scripts/cartButtonCount.js"></script>

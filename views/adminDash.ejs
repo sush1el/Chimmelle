@@ -33,7 +33,7 @@
     <main class="main-content">
         <section id="products" class="section">
             <h2>Products</h2>
-            <a href="/admin/add-product" class="btn btn-add"> <i class="fa-solid fa-plus"></i> Add New Product</a>
+            <a href="/admin/add-product" class="btn btn-add"><i class="fa-solid fa-plus"></i> Add New Product</a>
             <table>
                 <thead>
                     <tr>
@@ -43,6 +43,7 @@
                         <th>Type</th>
                         <th>Artist</th>
                         <th>Availability</th>
+                        <th>Homepage Section</th> <!-- New Column for Section -->
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -59,14 +60,29 @@
                                 <td><%= product.artist %></td>
                                 <td><%= product.availability %></td>
                                 <td>
-                                    <a href="/admin/edit-product/<%= product._id %>" class="edit-btn">Edit</a>
-                                    <button onclick="deleteProduct('<%= product._id %>')" class="delete-btn" >Delete</button>
+                                    <!-- Dropdown for homepage section -->
+                                    <select 
+                                        onchange="updateHomepageSection('<%= product._id %>', this.value)"
+                                        class="homepage-section-dropdown"
+                                    >
+                                        <option value="" <%= product.homepageSection === null ? 'selected' : '' %>>None</option>
+                                        <option value="new arrivals" <%= product.homepageSection === 'new arrivals' ? 'selected' : '' %>>New Arrivals</option>
+                                        <option value="best sellers" <%= product.homepageSection === 'best sellers' ? 'selected' : '' %>>Best Sellers</option>
+                                        <option value="trending" <%= product.homepageSection === 'trending' ? 'selected' : '' %>>Trending</option>
+                                        <option value="featured" <%= product.homepageSection === 'featured' ? 'selected' : '' %>>Featured</option>
+                                    </select>
+
                                 </td>
+                                <td>
+                                    <a href="/admin/edit-product/<%= product._id %>" class="edit-btn">Edit</a>
+                                    <button onclick="deleteProduct('<%= product._id %>')" class="delete-btn">Delete</button>
+                                </td>
+                                
                             </tr>
                         <% }); %>
                     <% } else { %>
                         <tr>
-                            <td colspan="7" class="empty-message">No products available.</td>
+                            <td colspan="8" class="empty-message">No products available.</td>
                         </tr>
                     <% } %>
                 </tbody>
@@ -112,7 +128,9 @@
 
             <section id="orders" class="section">
                 <h2>Orders</h2>
-                
+                <button id="exportOrdersBtn" class="btn btn-add">
+                    <i class="fas fa-file-export"></i> Export Orders
+                </button>
                 <div class="order-status-nav">
                     <button class="order-status-btn active" data-status="all">All Orders</button>
                     <button class="order-status-btn" data-status="preparing">Preparing</button>
@@ -164,6 +182,13 @@
                                             <option value="received" selected>Completed</option>
                                         <% } %>
                                     </select>
+                                    <button 
+                                        onclick="cancelOrder('<%= order._id %>')" 
+                                        class="btn btn-danger emergency-cancel-btn"
+                                        <%= order.shippingStatus === 'shipped' || order.shippingStatus === 'received' ? 'disabled' : '' %>
+                                    >
+                                        Cancel Order
+                                    </button>
                                     </td>
                                 </tr>
                             <% }); %>
@@ -189,16 +214,22 @@
             <div id="orderDetails-<%= order._id %>" style="display: none;">
                 <h3>Order #<%= order._id.toString().slice(-6) %> Details</h3>
                 <div class="order-customer-info">
-                    <h4>Customer Information</h4>
+                    <br>
+                    <h4>Customer Information:</h4>
                     <p><strong>Name:</strong> <%= order.customerName.firstName %> <%= order.customerName.lastName %></p>
                     <p><strong>Shipping Address:</strong> 
                         <%= order.shippingAddress.street %>, 
                         <%= order.shippingAddress.barangay %>, 
                         <%= order.shippingAddress.city %>
                     </p>
+                    <p><strong>Delivery Method:</strong> <%= order.deliveryMethod %></p>
+                    <p><strong>Customer Email:</strong> <%= order.customerEmail %></p>
+                    <p><strong>Customer Phone #:</strong> <%= order.shippingAddress.phone %></p>
+                    <br>
                 </div>
                 <div class="order-items-details">
-                    <h4>Order Items</h4>
+                    
+                    <h4>Order Items:</h4>
                     <% order.items.forEach(item => { %>
                         <div class="order-item-detail">
                             <p><strong><%= item.product ? item.product.name : 'Unknown Product' %></strong></p>
@@ -211,6 +242,7 @@
                     <% }); %>
                 </div>
                 <div class="order-payment-details">
+                    <br>
                     <% if (order.paymentDetails && order.paymentDetails.paidAt) { %>
                         <p><strong>Payment Date:</strong> <%= new Date(order.paymentDetails.paidAt).toLocaleString() %></p>
                     <% } %>

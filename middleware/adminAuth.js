@@ -7,22 +7,23 @@ exports.requireAdmin = async (req, res, next) => {
         const token = req.cookies.token;
 
         if (!token) {
-            return res.redirect('/login?error=Please log in as admin');
+            return res.redirect('/login-page');
         }
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-        // Check if it's an admin token
-        if (!decoded.isAdmin) {
-            return res.redirect('/?error=Unauthorized access');
+        // Extra check: token must be an admin token and not expired
+        if (!decoded.isAdmin || decoded.exp < Date.now() / 1000) {
+            res.clearCookie('token');
+            return res.redirect('/login-page');
         }
 
         // Fetch admin details
         const admin = await Admin.findById(decoded.userId);
         if (!admin) {
             res.clearCookie('token');
-            return res.redirect('/login?error=Admin account not found');
+            return res.redirect('/login-page');
         }
 
         // Attach admin info to request
@@ -32,6 +33,6 @@ exports.requireAdmin = async (req, res, next) => {
     } catch (error) {
         console.error('Admin authentication error:', error);
         res.clearCookie('token');
-        res.redirect('/login?error=Authentication failed');
+        res.redirect('/login-page');
     }
 };

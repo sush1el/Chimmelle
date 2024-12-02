@@ -3,9 +3,220 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 const AddressController = require('../controllers/addressController');
 const { authenticateUser } = require('../middleware/authMiddleware');
 const { checkoutController } = require('../controllers/checkoutController'); // Add this import
+const nodemailer = require('nodemailer');
+
+// Configure Nodemailer transporter using Mailtrap
+const transporter = nodemailer.createTransport({
+  host: process.env.MAILTRAP_HOST,
+  port: process.env.MAILTRAP_PORT,
+  auth: {
+    user: process.env.MAILTRAP_USER,
+    pass: process.env.MAILTRAP_PASS
+  }
+});
+
+
+async function sendOrderReceiptEmail(user, order) {
+  try {
+    // Fetch product details for each item
+    const itemsWithDetails = await Promise.all(order.items.map(async (item) => {
+      const product = await Product.findById(item.product).select('name');
+      return {
+        ...item.toObject(), // Convert mongoose document to plain object
+        productName: product ? product.name : 'Unknown Product'
+      };
+    }));
+
+    // Format order items for email
+    const itemsHtml = itemsWithDetails.map(item => `
+      <tr>
+        <td>${item.productName} (${item.version})</td>
+        <td>${item.quantity}</td>
+        <td>₱ ${item.price.toFixed(2)}</td>
+        <td>₱ ${(item.quantity * item.price).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    const emailHtml = `
+      <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <title>Order Receipt - Chimelle Shop</title>
+    <style>
+        body {
+            font-family: 'Montserrat';
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff0f5;
+        }
+        .receipt-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1, h2, h3 {
+            color: #da9e9f;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 22px;
+            border-bottom: 2px solid #da9e9f;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #da9e9f;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color:#da9e9f;
+            color: #ffffff;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 18px;
+            color: #da9e9f;
+            font-style: italic ;
+            margin-bottom: 40px;
+        
+        }
+        .thank-you {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-style: italic;
+            color:#da9e9f;
+        }
+
+     
+
+.social-links {
+    display: flex; /* Use Flexbox for centering */
+    justify-content: center; /* Horizontally center the icons */
+    align-items: center; /* Vertically center the icons */
+    gap: 20px; /* Space between the icons */
+}
+
+.social-links a {
+    color: #da9e9f;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.social-icon {
+    font-size: 24px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #da9e9f;
+    transform: scale(1.2); /* Enlarges the icon */
+}
+
+    </style>
+</head>
+<body>
+
+  
+    <div class="receipt-container">
+    
+        <h1><i class='fas fa-receipt'></i> Order Receipt</h1>
+        <p>Thank you for your purchase, ${user.firstName} ${user.lastName}!</p>
+        
+        <h2>Order Details</h2>
+        <p><b>Order ID:</b> ${order._id}</p>
+        <p><b>Date:</b> ${new Date().toLocaleString()}</p>
+
+        <h3>Shipping Address</h3>
+        <p>
+            ${order.shippingAddress.street}, 
+            ${order.shippingAddress.barangay}, 
+            ${order.shippingAddress.city}, 
+            ${order.shippingAddress.province} 
+            ${order.shippingAddress.zipCode}
+        </p>
+
+        <h3>Order Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${itemsHtml}
+            </tbody>
+        </table>
+
+        <p class="total">Total Amount: ₱ ${order.totalAmount.toFixed(2)}</p>
+
+        <div class = "footer">
+
+
+        <p class="thank-you"> Thank you for shopping with Chimelle Shop!</p>
+
+        <div class="social-links">
+            <a href="https://www.facebook.com/chimelleshop" aria-label="Visit our Facebook page" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-facebook social-icon"></i>
+            </a>
+            <a href="https://x.com/chimelleshop" aria-label="Visit our Twitter page" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-twitter social-icon"></i>
+            </a>
+        </div>
+    </div>
+    </div>
+</body>
+    `;
+
+    // Send email
+    await transporter.sendMail({
+      from: '"Chimelle Shop" <noreply@chimelleshop.com>',
+      to: user.email,
+      subject: `Order Receipt - Order #${order._id}`,
+      html: emailHtml
+    });
+
+    console.log(`Order receipt email sent to ${user.email}`);
+  } catch (error) {
+    console.error('Error sending order receipt email:', error);
+  }
+}
 
 
 // Main checkout page route
@@ -87,8 +298,7 @@ router.post('/api/create-payment', authenticateUser, async (req, res) => {
   }
 });
 
-// Handle payment success
-// In checkoutRoutes.js, update the payment-success route:
+
 // In checkoutRoutes.js, update the payment-success route:
 router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) => {
   try {
@@ -97,10 +307,11 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       paymentIntentId, 
       selectedAddressIndex,
       gcashNumber,
-      purchasedItems // Array of objects containing productId and version
+      purchasedItems,
+      deliveryMethod // New parameter for delivery method
     } = req.body;
 
-    // Find the order and user
+    // Find the order and user, and populate the product details
     const order = await Order.findById(orderId);
     const user = await User.findById(req.user._id);
 
@@ -124,6 +335,7 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       firstName: user.firstName,
       lastName: user.lastName
     };
+    order.customerEmail = user.email; // Add user's email
     order.shippingAddress = {
       street: selectedAddress.street,
       barangay: selectedAddress.barangay?.name || selectedAddress.barangay,
@@ -134,6 +346,7 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       phone: selectedAddress.phone
     };
     order.gcashNumber = gcashNumber;
+    order.deliveryMethod = deliveryMethod; // Add delivery method
     order.shippingStatus = 'preparing';
     order.status = 'confirmed';
     order.paymentStatus = 'paid';
@@ -144,6 +357,7 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
     };
 
     await order.save();
+    await sendOrderReceiptEmail(user, order);
 
     // Update product stock
     try {

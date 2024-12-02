@@ -9,6 +9,8 @@ const Order = require('../models/Order');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const xlsx = require('xlsx');
+const moment = require('moment');
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -32,6 +34,71 @@ const upload = multer({
     }
 });
 
+router.get('/export-orders', requireAdmin, async (req, res) => {
+    try {
+        // Fetch completed orders with populated product details
+        const completedOrders = await Order.find({ 
+            $or: [
+                { status: 'confirmed' },
+                { paymentStatus: 'paid' }
+            ]
+        }).populate('items.product');
+
+        // Prepare data for Excel export
+        const exportData = completedOrders.map(order => {
+            // Flatten order details for easy Excel export
+            return {
+                'Order ID': order._id.toString(),
+                'Customer Name': order.customerName.firstName + ' ' + order.customerName.lastName,
+                'Email': order.customerEmail,
+                'Total Amount': order.totalAmount,
+                'Payment Status': order.paymentStatus,
+                'Shipping Status': order.shippingStatus,
+                'Order Date': moment(order.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+                'Items': order.items.map(item => 
+                    `${item.product.name} (${item.version}) x ${item.quantity}`
+                ).join('; '),
+                'Shipping Address': [
+                    order.shippingAddress.street,
+                    order.shippingAddress.city,
+                    order.shippingAddress.state,
+                    order.shippingAddress.zipCode,
+                    order.shippingAddress.country
+                ].filter(Boolean).join(', '),
+                'Phone Number': order.shippingAddress.phone
+            };
+        });
+
+        // Create a new workbook and worksheet
+        const worksheet = xlsx.utils.json_to_sheet(exportData);
+        const workbook = xlsx.utils.book_new();
+        
+        // Add the worksheet to the workbook
+        xlsx.utils.book_append_sheet(workbook, worksheet, 'Completed Orders');
+
+        // Generate a filename with current date
+        const filename = `completed_orders_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
+
+        // Set headers for file download
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+
+        // Send the Excel file
+        const excelBuffer = xlsx.write(workbook, { 
+            type: 'buffer', 
+            bookType: 'xlsx' 
+        });
+        res.send(excelBuffer);
+
+    } catch (error) {
+        console.error('Error exporting orders:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error exporting orders to Excel'
+        });
+    }
+});
+
 // Admin dashboard route
 router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
@@ -52,6 +119,8 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
                 { paymentStatus: 'paid' }
             ]
         }).populate('items.product');
+        
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         
         res.render('adminDash', {
             admin: {
@@ -318,6 +387,47 @@ router.put('/edit-product', requireAdmin, upload.fields([
     }
 });
 
+// Add this to the existing routes in adminRoutes.js
+router.delete('/cancel-order/:id', requireAdmin, async (req, res) => {
+    try {
+        const { emergencyPassword } = req.body;
+
+        // Validate emergency password (you should store this securely, 
+        // ideally in an environment variable)
+        const EMERGENCY_PASSWORD = process.env.EMERGENCY_ORDER_CANCEL_PASSWORD;
+
+        if (!emergencyPassword || emergencyPassword !== EMERGENCY_PASSWORD) {
+            return res.status(403).json({
+                success: false,
+                message: 'Invalid emergency password'
+            });
+        }
+
+        // Find the order first to ensure it exists
+        const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: 'Order not found'
+            });
+        }
+
+        // Delete the order
+        await Order.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Order canceled and deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error canceling order:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error canceling order'
+        });
+    }
+});
+
 // Delete product
 router.delete('/delete-product/:id', requireAdmin, async (req, res) => {
     try {
@@ -512,5 +622,40 @@ router.delete('/delete-admin/:id', requireAdmin, async (req, res) => {
         });
     }
 });
+
+router.put('/update-homepage-section/:id', requireAdmin, async (req, res) => {
+    let { homepageSection } = req.body;
+
+    try {
+        // Convert an empty string to null
+        if (homepageSection === '') {
+            homepageSection = null;
+        }
+
+        // Validate the section value
+        const validSections = ['new arrivals', 'best sellers', 'trending', 'featured', null];
+        if (!validSections.includes(homepageSection)) {
+            return res.status(400).json({ success: false, message: 'Invalid homepage section' });
+        }
+
+        // Update the product
+        const product = await Product.findByIdAndUpdate(
+            req.params.id,
+            { homepageSection },
+            { new: true }
+        );
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        res.json({ success: true, product });
+    } catch (error) {
+        console.error('Error updating homepage section:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
 
 module.exports = router;
