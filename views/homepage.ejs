@@ -13,12 +13,24 @@
     <link rel="stylesheet" href="styles/Footer.css"> 
     <link rel="stylesheet" href="styles/navbar.css"> 
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 </head>
 <body>
-    <div class="welcome-message">
-        <p> <i class="fa-solid fa-hand-wave"></i> 안녕 ~ WELCOME TO CHIMELLE SHOP, YOUR ONE-STOP K-POP SHOP!      • WE SELL K-POP ALBUMS, LIGHTSTICKS, AND MERCHANDISES. </p>
-      </div>
+    <div class="scrolling-banner">
+        <div class="banner-content">
+          <p>
+            <i class="fa-solid fa-hand-wave"></i> &nbsp;안녕 ~ WELCOME TO CHIMELLE SHOP, YOUR ONE-STOP K-POP SHOP! &nbsp; • WE SELL K-POP ALBUMS, LIGHTSTICKS, AND MERCHANDISES.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i class="fa-solid fa-truck"></i> Pre-order items ship within 30 days. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fas fa-dolly"></i> Metro Manila: 2-7 business days | Provincial: 3-12 business days | Same-Day Delivery within Metro Manila. &nbsp;
+          </p>
+        </div>
+        <div class="banner-content">
+          <p>
+            <i class="fa-solid fa-hand-wave"></i> &nbsp;안녕 ~ WELCOME TO CHIMELLE SHOP, YOUR ONE-STOP K-POP SHOP! &nbsp; • WE SELL K-POP ALBUMS, LIGHTSTICKS, AND MERCHANDISES.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i class="fa-solid fa-truck"></i> Pre-order items ship within 30 days. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fas fa-dolly"></i> Metro Manila: 2-7 business days | Provincial: 3-12 business days | Same-Day Delivery within Metro Manila. &nbsp;
+          </p>
+        </div>
+    </div>
 
       <%- include('partials/navbar') %>
     
@@ -35,7 +47,13 @@
 <div style ="background-color: #e9aeae;">
 
     <section id="new-arrivals">
-        <h2>New Arrivals</h2>
+        <h2>
+            <span class="section-decoration left">✦</span>
+            <span class="section-icon">🎵</span>
+            New Arrivals
+            <span class="section-icon">🎵</span>
+            <span class="section-decoration right">✦</span>
+        </h2>
         <div class="product-grid">
             <% newArrivals.forEach(product => { %>
                 <div class="product-card" data-product-id="<%= product._id %>">
@@ -55,7 +73,13 @@
     </section>
     
     <section id="best-sellers">
-        <h2>Best Sellers</h2>
+        <h2>
+            <span class="section-decoration left">✦</span>
+            <span class="section-icon">🎧</span>
+            BEST SELLERS
+            <span class="section-icon">🎧</span>
+            <span class="section-decoration right">✦</span>
+        </h2>
         <div class="product-grid">
             <% bestSellers.forEach(product => { %>
                 <div class="product-card" data-product-id="<%= product._id %>">
@@ -75,7 +99,13 @@
     </section>
     
     <section id="trending">
-        <h2>Trending</h2>
+        <h2>
+            <span class="section-decoration left">✦</span>
+    <span class="section-icon">🔥</span>
+    TRENDING NOW
+    <span class="section-icon">🔥</span>
+    <span class="section-decoration right">✦</span>
+        </h2>
         <div class="product-grid">
             <% trending.forEach(product => { %>
                 <div class="product-card" data-product-id="<%= product._id %>">
@@ -95,7 +125,13 @@
     </section>
     
     <section id="featured-products">
-        <h2>Featured Products</h2>
+        <h2>
+            <span class="section-decoration left">✦</span>
+            <span class="section-icon">🌟</span>
+            Featured Products
+            <span class="section-icon">🌟</span>
+            <span class="section-decoration right">✦</span>
+        </h2>
         <div class="product-grid">
             <% featuredProducts.forEach(product => { %>
                 <div class="product-card" data-product-id="<%= product._id %>">
@@ -114,22 +150,7 @@
         </div>
     </section>
 
-    <section class="product-grid" id="product-grid">
-        <% products.forEach(product => { %>
-            <div class="product-card" data-product-id="<%= product._id %>">
-                <a href="/product-page/<%= product._id %>">
-                <div class="product-image">
-                    <img src="<%= product.imageH %>" class="product-image">
-                </div>
-                <div class="product-info">
-                <h3 class="product-name"><%= product.name %></h3>
-            </a>
-                <p class="product-price">₱<%= product.price.toFixed(2) %></p>
-                <button class="choose-options-btn">Add to Cart</button>
-            </div>
-            </div>
-        <% }) %>
-    </section>
+    
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-section">
@@ -162,7 +183,7 @@
     
             <div class="footer-section">
                 <!-- Replace /placeholder.svg with your mascot image URL -->
-                <img src="/resources/bt21-chimmy.png" alt="Cute mascot character" class="mascot">
+                <img src="/resources/chimmy-footer.png" alt="Cute mascot character" class="mascot">
                 
             </div>
             </div>

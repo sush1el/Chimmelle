@@ -232,3 +232,24 @@ h1 {
 #password-match.invalid {
   color: #F44336;
 }
+
+.privacy-policy-consent {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  align-self: center;
+}
+
+.privacy-policy-consent input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.privacy-policy-consent a {
+  color: blue;
+  text-decoration: underline;
+}
+
+.create-account-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

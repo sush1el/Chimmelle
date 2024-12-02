@@ -15,7 +15,7 @@ exports.authenticateUser = async (req, res, next) => {
     } catch (err) {
         console.error('Token verification failed:', err);
         req.user = null; // Invalidate req.user if token verification fails
-    }
+    }   
 
     next(); // Continue even if req.user is null
 };

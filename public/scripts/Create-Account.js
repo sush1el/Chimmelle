@@ -1,6 +1,18 @@
 document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+   // New checkbox validation
+   const privacyPolicyCheckbox = document.getElementById('privacyPolicyCheckbox');
+   if (!privacyPolicyCheckbox.checked) {
+     await Swal.fire({
+       icon: 'error',
+       title: 'Privacy Policy Required',
+       text: 'You must agree to the Privacy Policy to create an account.',
+       confirmButtonText: 'OK'
+     });
+     return;
+   }
+
   const firstName = document.getElementById('firstName').value;
   const lastName = document.getElementById('lastName').value;
   const nameRegex = /^[A-Za-z\s'-]+$/; // Allow letters, spaces, hyphens, and apostrophes
@@ -120,6 +132,11 @@ document.getElementById('createAccountForm').addEventListener('submit', async (e
       confirmButtonText: 'OK'
     });
   }
+});
+
+document.getElementById('privacyPolicyCheckbox').addEventListener('change', (e) => {
+  const submitButton = document.getElementById('submitButton');
+  submitButton.disabled = !e.target.checked;
 });
 
 ['firstName', 'lastName'].forEach(fieldId => {

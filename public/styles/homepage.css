@@ -15,44 +15,37 @@ a{
   color:rgb(0, 0, 0);
 }
 
-.welcome-message {
-  width: 100%;
-  background-color: #da9e9f;
-  color: white;
-  padding: 10px;
-  text-align: center;
+.scrolling-banner {
+  width: 100%; /* Full width of the page */
+  background-color: #da9e9f; /* Banner background color */
+  color: white; /* Text color */
+  overflow: hidden; /* Hide overflowing text */
+  white-space: nowrap; /* Prevent text from wrapping */
+  position: relative; /* For absolute positioning of content */
+  padding: 10px 0;
   font-size: 16px;
   font-weight: bold;
   font-style: italic;
-  padding: 15px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  position: relative;
 }
 
-.welcome-message p {
-  display: inline-block;
-  animation: moveLeftToRight 15s linear infinite;
-  padding-left: 100%;
+.banner-content {
+  display: inline-block; /* Keep content inline */
+  padding-right: 50px; /* Add some space between repeated content */
+  animation: scroll-banner 15s linear infinite; /* Smooth continuous animation */
 }
 
-@keyframes moveLeftToRight {
+@keyframes scroll-banner {
   0% {
-      transform: translateX(0);
+    transform: translateX(0); /* Start at the beginning */
   }
   100% {
-      transform: translateX(-100%);
+    transform: translateX(-100%); /* Scroll out completely */
   }
 }
 
-.welcome-message.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.welcome-message.hidden {
-  opacity: 0;
-  transform: translateY(-100%);
+/* Ensure content is aligned horizontally */
+.scrolling-banner .banner-content:first-child {
+  margin-right: 0;
 }
 
 
@@ -94,6 +87,121 @@ footer {
   transition: transform 0.3s ease;
 
 }
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+
+#new-arrivals h2,
+#best-sellers h2,
+#trending h2,
+#featured-products h2 {
+    width: 100%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    padding: 1.5rem 0;
+    margin: 2rem 0;
+    position: relative;
+    color: #da9e9f;
+    background: linear-gradient(180deg, #ffffff 0%, #fdf3f3 100%);
+    text-shadow: 2px 2px 0px rgba(218, 158, 159, 0.3);
+    border: none;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(218, 158, 159, 0.2);
+}
+
+/* Removed the before/after horizontal lines */
+
+.section-icon {
+    display: inline-block;
+    margin: 0 15px;
+    font-size: 2rem;
+    vertical-align: middle;
+    color: #da9e9f;
+    animation: bounce 2s infinite;
+    position: relative; /* Added position relative */
+    z-index: 2; /* Ensure icons stay above other elements */
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Decorative elements repositioned */
+.section-decoration {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: #da9e9f;
+    opacity: 0.8;
+    animation: twinkle 1.5s infinite alternate;
+}
+
+.section-decoration.left {
+    left: 30px;
+}
+
+.section-decoration.right {
+    right: 30px;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.5; transform: translateY(-50%) scale(0.8); }
+    100% { opacity: 0.8; transform: translateY(-50%) scale(1.2); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #new-arrivals h2,
+    #best-sellers h2,
+    #trending h2,
+    #featured-products h2 {
+        font-size: 2.5rem;
+        padding: 1rem 0;
+    }
+    
+    .section-icon {
+        font-size: 1.5rem;
+        margin: 0 10px;
+    }
+
+    .section-decoration {
+        font-size: 1.25rem;
+    }
+
+    .section-decoration.left {
+        left: 15px;
+    }
+
+    .section-decoration.right {
+        right: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    #new-arrivals h2,
+    #best-sellers h2,
+    #trending h2,
+    #featured-products h2 {
+        font-size: 2rem;
+        padding: 0.75rem 0;
+        letter-spacing: 2px;
+    }
+    
+    .section-icon {
+        font-size: 1.25rem;
+        margin: 0 8px;
+    }
+
+    .section-decoration {
+        font-size: 1rem;
+    }
+}
+
+
 
 .album-cover:hover {
 transform: translateY(-5px);

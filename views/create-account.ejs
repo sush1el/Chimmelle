@@ -47,9 +47,16 @@
             <div id="password-requirements"></div>
             <div id="password-match"></div>
 
+            <div class="privacy-policy-consent">
+                <input type="checkbox" id="privacyPolicyCheckbox">
+                <label for="privacyPolicyCheckbox">
+                    I have read and agree to the <a href="/privacy" target="_blank">Privacy Policy</a>
+                </label>
+            </div>
+            
             <div class="form-buttons">
                 <button type="button" class="back-to-login-btn" onclick="window.location.href= '/login-page' ">Back to Login</button>
-                <button type="submit" class="create-account-btn">Submit</button>
+                <button type="submit" class="create-account-btn" id="submitButton" disabled>Submit</button>
             </div>
         </form>
         <a href="/" class="return-to-store">Return to Store</a>
