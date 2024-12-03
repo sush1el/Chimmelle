@@ -22,7 +22,14 @@ const ProductSchema = new mongoose.Schema({
     enum: ['new arrivals', 'best sellers', 'trending', 'featured', null], // Allow these categories or none
     default: null, // Default to no specific section
   },
+  announcementConfig: {
+    isAnnouncement: { type: Boolean, default: false },
+    message: { type: String },
+    buttonText: { type: String, default: 'Pre-order →' }
+  },
+  isDeleted: { type: Boolean, default: false }
 });
+
 
 const Product = mongoose.model('Product', ProductSchema);
 

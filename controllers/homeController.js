@@ -7,7 +7,7 @@ exports.getHomepage = async (req, res) => {
         const trending = await Product.find({ homepageSection: 'trending' }).limit(10);
         const featuredProducts = await Product.find({ homepageSection: 'featured' }).limit(10);
 
-        const products = await Product.find({});
+        const products = await Product.find({isDeleted: false});
     
         res.render('homepage', { products, newArrivals, bestSellers, trending, featuredProducts, user: req.user });
 

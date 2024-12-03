@@ -102,8 +102,10 @@ router.get('/export-orders', requireAdmin, async (req, res) => {
 // Admin dashboard route
 router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
-        const products = await Product.find({});
+        const products = await Product.find({isDeleted: false});
         const admin = req.admin;
+
+        const blacklistedProducts = await Product.find({isDeleted: true});
         
         let admins = [];
         let orders = [];
@@ -133,6 +135,7 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
             products: products,
             admins: admins,
             orders: orders,
+            blacklistedProducts: blacklistedProducts,
             title: 'Admin Dashboard'
         });
     } catch (error) {
@@ -236,7 +239,8 @@ router.post('/add-product', requireAdmin, upload.any(), async (req, res) => {
         });
     }
 });
-// GET /edit-product/:id
+
+
 // Update/Replace the edit product route
 router.put('/edit-product/:id', requireAdmin, upload.any(), async (req, res) => {
     try {
@@ -431,30 +435,38 @@ router.delete('/cancel-order/:id', requireAdmin, async (req, res) => {
 // Delete product
 router.delete('/delete-product/:id', requireAdmin, async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
-        
-        // Delete main image
-        if (product.imageH) {
-            await fs.unlink('public' + product.imageH).catch(err => console.error('Error deleting main image:', err));
-        }
-
-        // Delete version images
-        for (const version of product.versions) {
-            for (const img of version.image) {
-                await fs.unlink('public' + img).catch(err => console.error('Error deleting version image:', err));
-            }
-        }
-
-        await Product.findByIdAndDelete(req.params.id);
-        res.json({ success: true, message: 'Product deleted successfully' });
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+  
+      product.isDeleted = true;
+      await product.save();
+  
+      res.json({ success: true, message: 'Product blacklisted successfully' });
     } catch (error) {
-        console.error('Error deleting product:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error deleting product'
-        });
+      console.error('Error blacklisting product:', error);
+      res.status(500).json({ success: false, message: 'Error blacklisting product' });
     }
-});
+  });
+
+  router.put('/restore-product/:id', requireAdmin, async (req, res) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+  
+      product.isDeleted = false;
+      await product.save();
+  
+      res.json({ success: true, message: 'Product restored successfully' });
+    } catch (error) {
+      console.error('Error restoring product:', error);
+      res.status(500).json({ success: false, message: 'Error restoring product' });
+    }
+  });
+  
 // Get product for editing
 router.get('/edit-product/:id', requireAdmin, async (req, res) => {
     try {
@@ -652,6 +664,55 @@ router.put('/update-homepage-section/:id', requireAdmin, async (req, res) => {
         res.json({ success: true, product });
     } catch (error) {
         console.error('Error updating homepage section:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// In your admin routes
+router.post('/update-announcement', async (req, res) => {
+    try {
+        const { productId, isEnabled, message, buttonText } = req.body;
+        
+        const product = await Product.findById(productId);
+        
+        if (!product) {
+            return res.json({ success: false, message: 'Product not found' });
+        }
+        
+        product.announcementConfig = {
+            isAnnouncement: isEnabled,
+            message: isEnabled ? message : '',
+            buttonText: isEnabled ? buttonText : 'Pre-order →'
+        };
+        
+        await product.save();
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.post('/remove-announcement', async (req, res) => {
+    try {
+        const { productId } = req.body;
+        
+        const product = await Product.findById(productId);
+        
+        if (!product) {
+            return res.json({ success: false, message: 'Product not found' });
+        }
+        
+        product.announcementConfig = {
+            isAnnouncement: false,
+            message: '',
+            buttonText: 'Pre-order →'
+        };
+        
+        await product.save();
+        
+        res.json({ success: true });
+    } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });

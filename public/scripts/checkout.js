@@ -561,6 +561,11 @@ class CheckoutHandler {
   }
 
   static async init() {
+
+    if (sessionStorage.getItem('orderCompleted') === 'true') {
+    window.location.href = '/cart'; // Redirect to cart or home page
+    return;
+  }
     // Only run checkout initialization if we're on the checkout page
     if (window.location.pathname === '/checkout') {
       try {

@@ -34,14 +34,38 @@
 
       <%- include('partials/navbar') %>
     
-    <section class="announcement">
-        <div class="album-cover">
-            <img style ="border-radius: 10px;" src="resources/rose.jpg" alt="Album Cover">
-        </div>
-        <div class="announcement-text">
-<h2>ROSÉ First Studio Album</h2>
-            <a href="#" class="pre-order-btn">Pre-order →</a>
-        </div>
+      <section class="announcement">
+        <% const announcementProducts = products.filter(p => p.announcementConfig && p.announcementConfig.isAnnouncement) %>
+        <% if (announcementProducts.length > 0) { %>
+            <div class=" prev-announcement">
+                <button class="nav-button prev" id="prevButton">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="announcement-carousel">
+                <% announcementProducts.forEach((product, index) => { %>
+                    <div class="announcement-slide <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
+                        <div class="album-cover">
+                            <img style="border-radius: 10px;" src="<%= product.imageH %>" alt="Album Cover">
+                        </div>
+                        <div class="announcement-text">
+                            <h1 style="color: white;"><%= product.announcementConfig.message || 'Pre-order now!' %></h1>
+                            <h2><%= product.name %></h2>
+                            <a href="/product-page/<%= product._id %>" class="pre-order-btn">
+                                <%= product.announcementConfig.buttonText || 'Pre-order →' %>
+                            </a>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            
+            <div class="next-announcement">
+                 <button class="nav-button next" id="nextButton">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+            </div>
+        <% } %>
     </section>
 
 <div style ="background-color: #e9aeae;">
@@ -191,6 +215,41 @@
             <p class = "copyright-text">&copy; 2024 Chimelle Shop. All rights reserved.</p>    
         </footer>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const carousel = document.querySelector('.announcement-carousel');
+        const slides = carousel.querySelectorAll('.announcement-slide');
+        const prevButton = document.querySelector('.prev-announcement');
+        const nextButton = document.querySelector('.next-announcement');
+        let currentIndex = 0;
+    
+        function updateBackground() {
+    const currentSlide = slides[currentIndex];
+    const backgroundImage = currentSlide.querySelector('img').src;
+    document.querySelector('.announcement').style.setProperty('--background-image', `url('${backgroundImage}')`);
+}
+    
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentIndex);
+            });
+            updateBackground();
+        }
+    
+        nextButton.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % slides.length;
+            updateSlides();
+        });
+    
+        prevButton.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            updateSlides();
+        });
+    
+        // Initial background setup
+        updateBackground();
+    });
+    </script>
     <script src="scripts/cartButtonCount.js"></script>
     <script src="scripts/Search.js"></script>
     <script src="scripts/Footer.js"></script>

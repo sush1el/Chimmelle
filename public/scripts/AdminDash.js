@@ -299,7 +299,7 @@ if (createAdminBtn) {
         });
     }
 
-     function setupTableSearchPagination(sectionId, itemsPerPage = 20) {
+     function setupTableSearchPagination(sectionId, itemsPerPage = 10) {
         const section = document.querySelector(`#${sectionId}`);
         const table = section.querySelector('table tbody');
         const searchInput = document.createElement('input');
@@ -439,19 +439,20 @@ if (createAdminBtn) {
     // Setup search and pagination for both products and orders
     setupTableSearchPagination('products');
     setupTableSearchPagination('orders');
+    setupTableSearchPagination('homepage-sections');
 });
 
 
 // Global delete functions
 window.deleteProduct = async function(productId) {
     const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
+        title: 'Blacklist Product?',
+        text: "This product will be blacklisted. Are you sure?",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Yes'
     });
 
     if (result.isConfirmed) {
@@ -468,7 +469,7 @@ window.deleteProduct = async function(productId) {
             if (data.success) {
                 await Swal.fire(
                     'Deleted!',
-                    'Product has been deleted successfully.',
+                    'Product has been blacklisted successfully.',
                     'success'
                 );
                 location.reload();
@@ -568,6 +569,26 @@ window.cancelOrder = async function(orderId) {
     }
 };
 
+window.restoreProduct = async function(productId) {
+    try {
+      const response = await fetch(`/admin/restore-product/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+  
+      const data = await response.json();
+      if (data.success) {
+        alert('Product restored successfully!');
+        location.reload();
+      } else {
+        alert(data.message || 'Failed to restore product.');
+      }
+    } catch (error) {
+      console.error('Error restoring product:', error);
+      alert('An error occurred while restoring the product.');
+    }
+  };
+
 window.deleteAdmin = async function(adminId) {
     const result = await Swal.fire({
         title: 'Are you sure?',
@@ -632,6 +653,105 @@ function logout() {
     });
 }
 
+function configureAnnouncement(productId, backgroundImage, productName, currentMessage, currentButtonText) {
+    // Escape quotation marks in productName to prevent breaking the JavaScript
+    const escapedProductName = productName.replace(/"/g, '&quot;');
+    
+    Swal.fire({
+        title: 'Create Announcement',
+        html: `
+            <div class="announcement-config">
+                <img src="${backgroundImage}" style="max-width: 200px; max-height: 200px; margin-bottom: 15px;">
+                <p>Creating announcement for: <strong>${escapedProductName}</strong></p>
+                <input type="text" id="announcementMessage" class="swal2-input" placeholder="Announcement Message" value="${currentMessage || ''}">
+                <input type="text" id="announcementButtonText" class="swal2-input" placeholder="Button Text" value="${currentButtonText || ''}">
+            </div>
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+            const message = document.getElementById('announcementMessage').value;
+            const buttonText = document.getElementById('announcementButtonText').value;
+
+            // Validate
+            if (!message) {
+                Swal.showValidationMessage('Please enter an announcement message');
+                return false;
+            }
+
+            return {
+                productId,
+                message,
+                buttonText
+            };
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Create Announcement',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { productId, message, buttonText } = result.value;
+            
+            // AJAX call to update announcement configuration
+            fetch('/admin/update-announcement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId,
+                    isEnabled: true,
+                    message,
+                    buttonText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Created!', 'Announcement configuration added.', 'success')
+                    .then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('Error', 'Failed to create announcement', 'error');
+            });
+        }
+    });
+}
+
+function removeAnnouncement(productId) {
+    Swal.fire({
+        title: 'Remove Announcement',
+        text: 'Are you sure you want to remove this announcement?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/admin/remove-announcement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Removed!', 'Announcement has been removed.', 'success')
+                    .then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('Error', 'Failed to remove announcement', 'error');
+            });
+        }
+    });
+}
+
 async function updateShippingStatus(orderId, status) {
     try {
         // Prevent changing status of a completed order
@@ -681,14 +801,33 @@ async function updateHomepageSection(productId, section) {
 
         const data = await response.json();
         if (data.success) {
-            alert('Homepage section updated successfully!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Homepage Section Updated',
+                text: `Product moved to ${section || 'None'} section`,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload the page to reflect changes
+                location.reload();
+            });
         } else {
-            alert('Failed to update section: ' + data.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: data.message || 'Failed to update homepage section',
+                confirmButtonText: 'OK'
+            });
         }
     } catch (error) {
         console.error('Error updating homepage section:', error);
-        alert('An error occurred. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred',
+            confirmButtonText: 'OK'
+        });
     }
 }
+
 
 

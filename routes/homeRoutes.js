@@ -13,11 +13,13 @@ router.get('/account', authenticateUser, async (req, res) => {
       const orders = await Order.find({
           user: req.user._id,
           status: 'confirmed',
-          paymentStatus: 'paid'
+          paymentStatus: 'paid',
+          isDeleted: false // Exclude deleted orders
       })
       .populate({
           path: 'items.product',
-          select: 'name imageH price'
+          select: 'name imageH price',
+          match: { isDeleted: false } // Exclude deleted products in populated items
       })
       .sort({ createdAt: -1 });
 
@@ -36,8 +38,8 @@ router.get('/cart', authenticateUser, (req, res) => {
 
 router.get('/artists', authenticateUser, async (req, res) => {
   try {
-      // Fetch unique artists from Products, sorted alphabetically
-      const artists = await Product.distinct('artist').sort();
+      // Fetch unique artists from Products, sorted alphabetically, excluding deleted ones
+      const artists = await Product.distinct('artist', { isDeleted: false }).sort();
       res.render('artists', { 
           user: req.user, 
           artists: artists 
@@ -56,15 +58,15 @@ router.get('/shop-artist', authenticateUser, async (req, res) => {
       return res.status(400).send('Artist parameter is required');
     }
 
-    // Fetch products for the specific artist
-    const products = await Product.find({ artist: artist });
+    // Fetch products for the specific artist excluding deleted ones
+    const products = await Product.find({ artist: artist, isDeleted: false });
 
-    // Fetch unique product types for this artist
-    const types = await Product.distinct('type', { artist: artist });
+    // Fetch unique product types for this artist excluding deleted ones
+    const types = await Product.distinct('type', { artist: artist, isDeleted: false });
 
-    // Count products by type and availability
+    // Count products by type and availability excluding deleted ones
     const typeCounts = await Product.aggregate([
-      { $match: { artist: artist } },
+      { $match: { artist: artist, isDeleted: false } },
       { 
         $group: { 
           _id: '$type', 
@@ -79,9 +81,9 @@ router.get('/shop-artist', authenticateUser, async (req, res) => {
       }
     ]);
 
-    // Calculate price range
+    // Calculate price range excluding deleted products
     const priceStats = await Product.aggregate([
-      { $match: { artist: artist } },
+      { $match: { artist: artist, isDeleted: false } },
       { 
         $group: { 
           _id: null,
@@ -108,15 +110,15 @@ router.get('/shop-artist', authenticateUser, async (req, res) => {
 
 router.get('/albums', authenticateUser, async (req, res) => {
   try {
-    // Fetch all products that are albums
-    const products = await Product.find({ type: { $regex: /album/i } });
+    // Fetch all products that are albums excluding deleted ones
+    const products = await Product.find({ type: { $regex: /album/i }, isDeleted: false });
 
-    // Fetch unique artists with albums
-    const artists = await Product.distinct('artist', { type: { $regex: /album/i } }).sort();
+    // Fetch unique artists with albums excluding deleted ones
+    const artists = await Product.distinct('artist', { type: { $regex: /album/i }, isDeleted: false }).sort();
 
-    // Count albums by artist and availability
+    // Count albums by artist and availability excluding deleted ones
     const artistCounts = await Product.aggregate([
-      { $match: { type: { $regex: /album/i } } },
+      { $match: { type: { $regex: /album/i }, isDeleted: false } },
       { 
         $group: { 
           _id: '$artist', 
@@ -131,9 +133,9 @@ router.get('/albums', authenticateUser, async (req, res) => {
       }
     ]);
 
-    // Calculate price range for albums
+    // Calculate price range for albums excluding deleted ones
     const priceStats = await Product.aggregate([
-      { $match: { type: { $regex: /album/i } } },
+      { $match: { type: { $regex: /album/i }, isDeleted: false } },
       { 
         $group: { 
           _id: null,
@@ -160,28 +162,28 @@ router.get('/albums', authenticateUser, async (req, res) => {
 
 router.get('/preorder', authenticateUser, async (req, res) => {
   try {
-    // Fetch all products that are pre-order
-    const products = await Product.find({ availability: 'pre-order' });
+    // Fetch all products that are pre-order excluding deleted ones
+    const products = await Product.find({ availability: 'pre-order', isDeleted: false });
 
-    // Fetch unique artists with pre-order items
-    const artists = await Product.distinct('artist', { availability: 'pre-order' }).sort();
+    // Fetch unique artists with pre-order items excluding deleted ones
+    const artists = await Product.distinct('artist', { availability: 'pre-order', isDeleted: false }).sort();
 
-    // Count pre-order items by artist
+    // Count pre-order items by artist excluding deleted ones
     const artistCounts = await Product.aggregate([
-      { $match: { availability: 'pre-order' } },
+      { $match: { availability: 'pre-order', isDeleted: false } },
       { 
         $group: { 
           _id: '$artist', 
           count: { $sum: 1 },
-          onHandCount: { $sum: 0 },  // Use $sum: 0 instead of a static number
+          onHandCount: { $sum: 0 },
           preorderCount: { $sum: 1 }
         } 
       }
     ]);
 
-    // Calculate price range for pre-order items
+    // Calculate price range for pre-order items excluding deleted ones
     const priceStats = await Product.aggregate([
-      { $match: { availability: 'pre-order' } },
+      { $match: { availability: 'pre-order', isDeleted: false } },
       { 
         $group: { 
           _id: null,
@@ -208,28 +210,28 @@ router.get('/preorder', authenticateUser, async (req, res) => {
 
 router.get('/onhand', authenticateUser, async (req, res) => {
   try {
-    // Fetch all products that are on-hand
-    const products = await Product.find({ availability: 'on-hand' });
+    // Fetch all products that are on-hand excluding deleted ones
+    const products = await Product.find({ availability: 'on-hand', isDeleted: false });
 
-    // Fetch unique artists with on-hand items
-    const artists = await Product.distinct('artist', { availability: 'on-hand' }).sort();
+    // Fetch unique artists with on-hand items excluding deleted ones
+    const artists = await Product.distinct('artist', { availability: 'on-hand', isDeleted: false }).sort();
 
-    // Count on-hand items by artist
+    // Count on-hand items by artist excluding deleted ones
     const artistCounts = await Product.aggregate([
-      { $match: { availability: 'on-hand' } },
+      { $match: { availability: 'on-hand', isDeleted: false } },
       { 
         $group: { 
           _id: '$artist', 
           count: { $sum: 1 },
           onHandCount: { $sum: 1 },
-          preorderCount: { $sum: 0 }  // Use $sum: 0 instead of a static number
+          preorderCount: { $sum: 0 }
         } 
       }
     ]);
 
-    // Calculate price range for on-hand items
+    // Calculate price range for on-hand items excluding deleted ones
     const priceStats = await Product.aggregate([
-      { $match: { availability: 'on-hand' } },
+      { $match: { availability: 'on-hand', isDeleted: false } },
       { 
         $group: { 
           _id: null,
@@ -257,10 +259,10 @@ router.get('/onhand', authenticateUser, async (req, res) => {
 router.get('/lightsticks', authenticateUser, async (req, res) => {
   try {
     // Fetch all products that are lightsticks
-    const products = await Product.find({ type: { $regex: /lightstick/i } });
+    const products = await Product.find({ type: { $regex: /lightstick/i }, isDeleted: false });
 
     // Fetch unique artists with lightsticks
-    const artists = await Product.distinct('artist', { type: { $regex: /lightstick/i } }).sort();
+    const artists = await Product.distinct('artist', { type: { $regex: /lightstick/i }, isDeleted: false }).sort();
 
     // Count lightsticks by artist and availability
     const artistCounts = await Product.aggregate([
@@ -309,10 +311,10 @@ router.get('/lightsticks', authenticateUser, async (req, res) => {
 router.get('/merchandise', authenticateUser, async (req, res) => {
   try {
     // Fetch all products that are merchandise
-    const products = await Product.find({ type: { $regex: /merchandise/i } });
+    const products = await Product.find({ type: { $regex: /merchandise/i }, isDeleted: false });
 
     // Fetch unique artists with merchandise
-    const artists = await Product.distinct('artist', { type: { $regex: /merchandise/i } }).sort();
+    const artists = await Product.distinct('artist', { type: { $regex: /merchandise/i }, isDeleted: false }).sort();
 
     // Count merchandise by artist and availability
     const artistCounts = await Product.aggregate([

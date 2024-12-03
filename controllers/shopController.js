@@ -1,14 +1,13 @@
-// controllers/shopController.js
 const Product = require('../models/Product');
 
 exports.getShopPage = async (req, res) => {
   try {
       // Get filter parameters from query string
-      const { availability, type, minPrice, maxPrice, artist } = req.query;  // Changed 'category' to 'type'
+      const { availability, type, minPrice, maxPrice, artist } = req.query; // Changed 'category' to 'type'
       const sort = req.query.sort || 'name_asc';
       
-      // Build filter object
-      let filters = {};
+      // Build base filter object (exclude deleted products)
+      let filters = { isDeleted: false };
       
       // Add availability filter
       if (availability) {
@@ -37,7 +36,7 @@ exports.getShopPage = async (req, res) => {
 
       // Build sort object
       let sortOption = {};
-      switch(sort) {
+      switch (sort) {
           case 'name_desc':
               sortOption = { name: -1 };
               break;
@@ -53,7 +52,7 @@ exports.getShopPage = async (req, res) => {
       
       // Get all unique types and their counts
       const typeCounts = await Product.aggregate([
-          { $match: filters }, // Apply existing filters except type
+          { $match: { ...filters } }, // Apply filters including isDeleted: false
           { $group: {
               _id: '$type',
               count: { $sum: 1 }
@@ -72,7 +71,7 @@ exports.getShopPage = async (req, res) => {
           },
           types: typeCounts, // Changed from category to types
           artists: await Product.aggregate([
-              { $match: filters },
+              { $match: { ...filters } }, // Apply filters including isDeleted: false
               { $group: {
                   _id: '$artist',
                   count: { $sum: 1 }
