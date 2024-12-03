@@ -115,7 +115,12 @@ class CheckoutHandler {
   }
 
   static async init() {
-    // Only run checkout initialization if we're on the checkout page
+
+    if (sessionStorage.getItem('orderCompleted') === 'true') {
+      window.location.href = '/cart'; // Redirect to cart or home page
+      return;
+    }
+    
     if (window.location.pathname === '/checkout') {
       try {
       
@@ -178,6 +183,7 @@ class CheckoutHandler {
       }
     }
   }
+
 
   static async handlePayment() {
     try {
@@ -292,6 +298,8 @@ class CheckoutHandler {
         icon: 'success',
         confirmButtonText: 'OK'
       });
+
+      sessionStorage.setItem('orderCompleted', 'true');
 
     } else {
       throw new Error('Payment confirmation failed');
