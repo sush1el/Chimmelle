@@ -286,6 +286,19 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       amount
     } = req.body;
 
+    // Check if an order with this payment intent already exists
+    const existingOrder = await Order.findOne({
+      'paymentDetails.paymentIntentId': paymentIntentId
+    });
+
+    if (existingOrder) {
+      return res.json({ 
+        success: true,
+        orderId: existingOrder._id,
+        message: 'Order already processed'
+      });
+    }
+
     // Find the user
     const user = await User.findById(req.user._id);
 
@@ -299,21 +312,7 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       throw new Error('Selected address not found');
     }
 
-    // Check if an order with this payment intent already exists
-    const existingOrder = await Order.findOne({
-      'paymentDetails.paymentIntentId': paymentIntentId
-    });
-
-    if (existingOrder) {
-      return res.json({ 
-        success: true,
-        orderId: existingOrder._id,
-        remainingItems: user.cart.items.length,
-        alreadyProcessed: true
-      });
-    }
-
-    // Create order with properly formatted items
+    // Create order
     const order = await Order.create({
       user: req.user._id,
       items: purchasedItems.map(item => ({
@@ -371,7 +370,7 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       'cart.items': remainingItems
     });
 
-    // Send order receipt email only if this is the first time processing the order
+    // Send order receipt email
     await sendOrderReceiptEmail(user, order);
 
     // Return the count of remaining items

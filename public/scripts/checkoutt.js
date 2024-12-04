@@ -231,14 +231,6 @@ class CheckoutHandler {
         throw new Error('No order ID provided');
       }
   
-      const processedPayments = sessionStorage.getItem('processedPayments') ? 
-        JSON.parse(sessionStorage.getItem('processedPayments')) : [];
-      
-      if (processedPayments.includes(orderId)) {
-        await Swal.close();
-        return;
-      }
-  
       const paymentData = JSON.parse(sessionStorage.getItem('paymentData'));
       const paymentIntentId = sessionStorage.getItem('currentSourceId');
       const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
@@ -266,17 +258,13 @@ class CheckoutHandler {
           gcashNumber: paymentData.gcashNumber,
           purchasedItems: purchasedItems,
           deliveryMethod: checkoutData.deliveryMethod,
-          amount: checkoutData.summary.subtotal // Pass the total amount
+          amount: checkoutData.summary.subtotal
         }),
         credentials: 'include'
       });
   
       const result = await response.json();
       if (result.success) {
-        
-        processedPayments.push(orderId);
-        sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
-  
         await Swal.close();
   
         // Clear only checkout-related data but keep cart data
@@ -290,8 +278,6 @@ class CheckoutHandler {
         
         if (loadingElement) loadingElement.style.display = 'none';
         if (successContent) successContent.style.display = 'block';
-  
-        // Removed the SweetAlert for success message
       } else {
         throw new Error('Payment confirmation failed');
       }
@@ -299,7 +285,6 @@ class CheckoutHandler {
     } catch (error) {
       console.error('Payment success handling error:', error);
       
-      // Existing error handling SweetAlert remains the same
       await Swal.fire({
         title: 'Error',
         text: error.message || 'Failed to complete order. Please contact support.',

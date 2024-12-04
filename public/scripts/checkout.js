@@ -676,14 +676,6 @@ class CheckoutHandler {
         throw new Error('No order ID provided');
       }
   
-      const processedPayments = sessionStorage.getItem('processedPayments') ? 
-        JSON.parse(sessionStorage.getItem('processedPayments')) : [];
-      
-      if (processedPayments.includes(orderId)) {
-        await Swal.close();
-        return;
-      }
-  
       const paymentData = JSON.parse(sessionStorage.getItem('paymentData'));
       const paymentIntentId = sessionStorage.getItem('currentSourceId');
       const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
@@ -692,6 +684,7 @@ class CheckoutHandler {
         throw new Error('Payment data not found');
       }
   
+      // Get both product IDs and their versions for purchased items
       const purchasedItems = checkoutData.items.map(item => ({
         productId: item.productId,
         version: item.version.version,
@@ -717,13 +710,9 @@ class CheckoutHandler {
   
       const result = await response.json();
       if (result.success) {
-        processedPayments.push(orderId);
-        sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
-  
         await Swal.close();
   
-        // Remove order completion flags that might trigger redirection
-        sessionStorage.removeItem('orderCompleted');
+        // Clear only checkout-related data but keep cart data
         sessionStorage.removeItem('paymentData');
         sessionStorage.removeItem('checkoutData');
         sessionStorage.removeItem('currentSourceId');

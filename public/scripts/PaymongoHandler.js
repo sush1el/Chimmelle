@@ -1,7 +1,7 @@
 // PaymongoHandler.js
 class PaymongoHandler {
-  static PAYMONGO_SECRET_KEY = 'sk_test_9f8wuPoVqwmFA1g6Kx4upSRX'; // Replace with your test secret key
-  static PAYMONGO_PUBLIC_KEY = 'pk_test_1vtaAUQW1xkrMtCtHiSQL5ry'; // Replace with your test public key
+  static PAYMONGO_SECRET_KEY = 'sk_test_kY6Ub87k3Rdx677xLSXUqUN3'; 
+  static PAYMONGO_PUBLIC_KEY = 'pk_test_L83wv5uBsWm8VKjGRG7aaSXC'; 
   
   static async createPaymentIntent(amount, description, orderId) {
     try {
