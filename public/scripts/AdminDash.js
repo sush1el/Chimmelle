@@ -329,6 +329,33 @@ if (createAdminBtn) {
                     <span>Page ${currentPage} of ${totalPages}</span>
                     <button id="${sectionId}NextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
                 </div>
+
+                <style>
+         .pagination-info button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #da9e9f !important; /* Theme color */
+    color: white !important; /* Ensure text color applies */
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.pagination-info button:hover {
+    background-color: #c87476 !important; /* Darker shade for better visibility */
+    opacity: 0.9; /* Slightly reduced opacity for emphasis */
+}
+
+.pagination-info button:disabled {
+    background-color: #f1d6d7 !important; /* Lightened version for disabled buttons */
+    color: #666666 !important;
+    cursor: not-allowed;
+}
+
+
+                </style>
             `;
 
             // Add event listeners for pagination
@@ -767,12 +794,26 @@ async function updateShippingStatus(orderId, status) {
             Swal.fire('Error!', 'Invalid shipping status', 'error');
             return;
         }
+        
+        const result = await Swal.fire({
+            title: 'Confirm Update',
+            text: `Are you sure you want to set this order to "${status}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!',
+            cancelButtonText: 'Cancel'
+        });
 
+        if (!result.isConfirmed) {
+            return; // Exit if admin cancels
+        }
+
+        // Proceed with status update if confirmed
         const response = await fetch(`/admin/update-order-status/${orderId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ shippingStatus: status })
         });
 
@@ -828,6 +869,5 @@ async function updateHomepageSection(productId, section) {
         });
     }
 }
-
 
 

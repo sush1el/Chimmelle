@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { requireAdmin } = require('../middleware/adminAuth');
 const { createAdmin } = require('../controllers/authController');
+const User = require('../models/User');
 const Product = require('../models/Product');
 const Admin = require('../models/Admin');
 const Order = require('../models/Order');
@@ -11,6 +12,16 @@ const path = require('path');
 const fs = require('fs').promises;
 const xlsx = require('xlsx');
 const moment = require('moment');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    host: process.env.MAILTRAP_HOST,
+    port: process.env.MAILTRAP_PORT,
+    auth: {
+      user: process.env.MAILTRAP_USER,
+      pass: process.env.MAILTRAP_PASS
+    }
+  });
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -91,10 +102,11 @@ router.get('/export-orders', requireAdmin, async (req, res) => {
         res.send(excelBuffer);
 
     } catch (error) {
-        console.error('Error exporting orders:', error);
+        console.error('Detailed error updating order status:', error.message, error.stack);
         res.status(500).json({ 
             success: false, 
-            message: 'Error exporting orders to Excel'
+            message: 'Server error updating order status',
+            errorDetails: error.message 
         });
     }
 });
@@ -180,16 +192,162 @@ router.put('/update-order-status/:id', requireAdmin, async (req, res) => {
             });
         }
 
-        const order = await Order.findByIdAndUpdate(
-            req.params.id, 
-            { shippingStatus }, 
-            { new: true }
-        );
+        const order = await Order.findById(req.params.id);
 
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
+        // Update shipping status
+        order.shippingStatus = shippingStatus;
+        await order.save();
+
+        // If status is shipped, send an email notification
+        if (shippingStatus === 'shipped') {
+            const user = await User.findById(order.user); // Get user details
+            if (user) {
+                const emailHtml = `
+                      <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <title>Order Receipt - Chimelle Shop</title>
+    <style>
+        body {
+            font-family: 'Montserrat';
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff0f5;
+        }
+        .receipt-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1, h2, h3 {
+            color: #da9e9f;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 22px;
+            border-bottom: 2px solid #da9e9f;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #da9e9f;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color:#da9e9f;
+            color: #ffffff;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 18px;
+            color: #da9e9f;
+            font-style: italic ;
+            margin-bottom: 40px;
+        
+        }
+        .thank-you {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-style: italic;
+            color:#da9e9f;
+        }
+
+     
+
+.social-links {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 20px; 
+}
+
+.social-links a {
+    color: #da9e9f;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.social-icon {
+    font-size: 24px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #da9e9f;
+    transform: scale(1.2); 
+}
+
+    </style>
+</head>
+<body>
+
+  
+    <div class="receipt-container">
+        
+       <h1>Dear ${user.firstName},</h1>
+            <p>Your order <strong>${order._id}</strong> has been shipped.</p>
+            <p>You can expect delivery soon. Thank you for shopping with us!</p>
+
+        <div class = "footer">
+
+
+        <p class="thank-you"> Thank you for shopping with Chimelle Shop!</p>
+
+        <div class="social-links">
+            <a href="https://www.facebook.com/chimelleshop" aria-label="Visit our Facebook page" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-facebook social-icon"></i>
+            </a>
+            <a href="https://x.com/chimelleshop" aria-label="Visit our Twitter page" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-twitter social-icon"></i>
+            </a>
+        </div>
+        </div>
+    </div>
+</body>
+      `;
+                await transporter.sendMail({
+                    from: '"Chimelle Shop" <noreply@chimelleshop.com>',
+                    to: user.email,
+                    subject: 'Your Order has been Shipped!',
+                    html: emailHtml,
+                });
+
+                console.log(`Shipping email sent to ${user.email}`);
+            }
+        }
         res.json({ success: true, order });
     } catch (error) {
         console.error('Error updating order status:', error);

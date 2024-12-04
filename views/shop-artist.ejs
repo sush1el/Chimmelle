@@ -16,11 +16,80 @@
     <link rel="stylesheet" href="/styles/Footer.css">
 </head>
 <body>
+
+    <div class="scrolling-banner">
+        <div class="banner-content">
+          <p>
+            <i class="fa-solid fa-hand-wave"></i> &nbsp;안녕 ~ WELCOME TO CHIMELLE SHOP, YOUR ONE-STOP K-POP SHOP! &nbsp; • WE SELL K-POP ALBUMS, LIGHTSTICKS, AND MERCHANDISES.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i class="fa-solid fa-truck"></i> Pre-order items ship within 30 days. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fas fa-dolly"></i> Metro Manila: 2-7 business days | Provincial: 3-12 business days | Same-Day Delivery within Metro Manila. &nbsp;
+          </p>
+        </div>
+        <div class="banner-content">
+          <p>
+            <i class="fa-solid fa-hand-wave"></i> &nbsp;안녕 ~ WELCOME TO CHIMELLE SHOP, YOUR ONE-STOP K-POP SHOP! &nbsp; • WE SELL K-POP ALBUMS, LIGHTSTICKS, AND MERCHANDISES.
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i class="fa-solid fa-truck"></i> Pre-order items ship within 30 days. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fas fa-dolly"></i> Metro Manila: 2-7 business days | Provincial: 3-12 business days | Same-Day Delivery within Metro Manila. &nbsp;
+          </p>
+        </div>
+    </div>
     <%- include('partials/navbar') %>
 
     <header class="artist-header">
         <h1><%= artist %></h1>
     </header>
+
+    <style>
+        .artist-header *{
+        padding: 5px;
+        font-size: 75px;
+        font-style: italic;
+        font-weight:950;
+        letter-spacing: 2px;
+
+    }
+
+    .scrolling-banner {
+        width: 100%; /* Full width of the page */
+        background-color: #da9e9f; /* Banner background color */
+        color: white; /* Text color */
+        overflow: hidden; /* Hide overflowing text */
+        white-space: nowrap; /* Prevent text from wrapping */
+        position: relative; /* For absolute positioning of content */
+        padding: 10px 0;
+        font-size: 16px;
+        font-weight: bold;
+        font-style: italic;
+      }
+      
+      .banner-content {
+        display: inline-block; /* Keep content inline */
+        padding-right: 50px; /* Add some space between repeated content */
+        animation: scroll-banner 15s linear infinite; /* Smooth continuous animation */
+      }
+      
+      @keyframes scroll-banner {
+        0% {
+          transform: translateX(0); /* Start at the beginning */
+        }
+        100% {
+          transform: translateX(-100%); /* Scroll out completely */
+        }
+      }
+      
+      /* Ensure content is aligned horizontally */
+      .scrolling-banner .banner-content:first-child {
+        margin-right: 0;
+      }
+
+      .scrolling-banner .banner-content p {
+        padding: 0; /* Removes all padding */
+        margin: 0;  /* Optional: Removes any margin for a tighter layout */
+      }
+
+      
+
+    
+    </style>
+
 
     <div class="main-content">
         <aside class="filters">

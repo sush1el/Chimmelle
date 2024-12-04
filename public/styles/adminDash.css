@@ -130,11 +130,18 @@ table {
 }
 
 td {
-    font-size:14px;
+    font-size:13.5px;
     font-weight: 500;
   
 
 }
+
+.btn-add-announcement, .btn-remove-announcement, .btn-configure-announcement {
+    border: none;
+    font-weight: 500;
+} 
+ 
+ 
 
 .emergency-cancel-btn {
     background-color: #dc3545 !important;
@@ -373,9 +380,11 @@ th {
 }
 .edit-btn {
 font-size: 15px;
+font-weight: 500px;
 color: white;
 text-decoration: none;
 background-color: #da9e9f;
+border: none;
 /* Corrected font-weight */
 padding: 0 20px;
 margin-left: 10px;

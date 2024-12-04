@@ -150,8 +150,7 @@ async function sendOrderReceiptEmail(user, order) {
 </head>
 <body>
 
-  
-    <div class="receipt-container">
+  <div class="receipt-container">
     
         <h1><i class='fas fa-receipt'></i> Order Receipt</h1>
         <p>Thank you for your purchase, ${user.firstName} ${user.lastName}!</p>
@@ -200,7 +199,7 @@ async function sendOrderReceiptEmail(user, order) {
             </a>
         </div>
     </div>
-    </div>
+  </div>
 </body>
     `;
 

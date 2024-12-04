@@ -71,9 +71,8 @@
                                 <% if (product.announcementConfig && product.announcementConfig.isAnnouncement) { %>
                                     <div class="announcement-actions">
                                         <button 
-                                            onclick="configureAnnouncement('<%= product._id %>', '<%= product.imageH %>', '<%= product.name %>', '<%= product.announcementConfig.message %>', '<%= product.announcementConfig.buttonText %>')" 
-                                            class="btn btn-configure-announcement"
-                                        >
+                                            onclick="configureAnnouncement('<%= product._id %>', '<%= product.imageH %>', '<%- product.name.replace(/'/g, "\\'") %>', '<%= product.announcementConfig && product.announcementConfig.message ? product.announcementConfig.message : '' %>', '<%= product.announcementConfig && product.announcementConfig.buttonText ? product.announcementConfig.buttonText : '' %>')" 
+                                            class="btn btn-configure-announcement">
                                             <i class="fas fa-cog"></i> Edit
                                         </button>
                                         <button 
@@ -86,8 +85,7 @@
                                 <% } else { %>
                                     <button 
                                         onclick="configureAnnouncement('<%= product._id %>', '<%= product.imageH %>', '<%- product.name.replace(/'/g, "\\'") %>', '<%= product.announcementConfig && product.announcementConfig.message ? product.announcementConfig.message : '' %>', '<%= product.announcementConfig && product.announcementConfig.buttonText ? product.announcementConfig.buttonText : '' %>')" 
-                                        class="btn btn-add-announcement"
-                                    >
+                                        class="btn btn-add-announcement">
                                         <i class="fas fa-plus"></i> Add Announcement
                                     </button>
                                 <% } %>
@@ -127,7 +125,7 @@
                                     <img src="<%= product.imageH %>" alt="<%= product.name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
                                 </td>
                                 <td><%= product.name %></td>
-                                <td>â‚± <%= product.price.toLocaleString() %></td>
+                                <td>₱ <%= product.price.toLocaleString() %></td>
                                 <td><%= product.type %></td>
                                 <td><%= product.artist %></td>
                                 <td><%= product.availability %></td>
@@ -213,7 +211,7 @@
                                 <tr data-status="<%= order.shippingStatus === 'received' ? 'completed' : order.shippingStatus %>">
                                     <td>#<%= order._id.toString().slice(-6) %></td>
                                     <td><%= order.customerName.firstName %> <%= order.customerName.lastName %></td>
-                                    <td>â‚± <%= order.totalAmount.toLocaleString() %></td>
+                                    <td>₱ <%= order.totalAmount.toLocaleString() %></td>
                                     <td><%= order.items.length %> items</td>
                                     <td>
                                         <span class="order-status-badge <%= order.shippingStatus %>" 
@@ -276,7 +274,7 @@
                             <img src="<%= product.imageH %>" alt="<%= product.name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
                         </td>
                         <td><%= product.name %></td>
-                        <td><%= product.price %></td>
+                        <td>₱ <%= product.price %></td>
                      
                         <td>
                           <button onclick="restoreProduct('<%= product._id %>')" class="edit-btn">Restore</button>
@@ -324,7 +322,7 @@
                         <div class="order-item-detail">
                             <p><strong><%= item.product ? item.product.name : 'Unknown Product' %></strong></p>
                             <p>Quantity: <%= item.quantity %></p>
-                            <p>Price: â‚± <%= item.price.toLocaleString() %></p>
+                            <p>Price: ₱ <%= item.price.toLocaleString() %></p>
                             <% if (item.version) { %>
                                 <p>Version: <%= item.version %></p>
                             <% } %>

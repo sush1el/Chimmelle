@@ -728,12 +728,6 @@ exports.adminLogin = async (req, res) => {
     let admin = await Admin.findOne({ email }).select('+password');
     
     if (admin) {
-      const isMatch = await bcrypt.compare(password, admin.password);
-      
-      if (!isMatch) {
-        return res.status(400).json({ msg: 'Invalid credentials' });
-      }
-
       // Create admin token with role
       const token = jwt.sign(
         { 
