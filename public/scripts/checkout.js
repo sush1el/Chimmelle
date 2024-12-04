@@ -561,11 +561,6 @@ class CheckoutHandler {
   }
 
   static async init() {
-
-    if (sessionStorage.getItem('orderCompleted') === 'true') {
-    window.location.href = '/cart'; // Redirect to cart or home page
-    return;
-  }
     // Only run checkout initialization if we're on the checkout page
     if (window.location.pathname === '/checkout') {
       try {
@@ -630,124 +625,119 @@ class CheckoutHandler {
     }
   }
 
-    static async handlePayment() {
-      try {
-        const totalAmountElement = document.getElementById('total-amount');
-        const totalAmount = parseFloat(totalAmountElement.textContent.replace('₱', '').trim());
-        
-        // Show loading alert
-        Swal.fire({
-          title: 'Processing Payment',
-          text: 'Please wait while we redirect you to the payment gateway...',
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          showConfirmButton: false,
-          willOpen: () => {
-            Swal.showLoading();
-          }
-        });
-  
-        // Get checkout data for order description
-        const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
-        const description = `Order payment for ${checkoutData.summary.totalItems} items`;
-  
-        // Process payment and get checkout URL
-        const checkoutUrl = await PaymongoHandler.processPayment(totalAmount, description);
-        
-        // Close loading alert
-        await Swal.close();
-  
-        // Redirect to PayMongo checkout page
-        window.location.href = checkoutUrl;
-  
-      } catch (error) {
-        console.error('Payment error:', error);
-        await Swal.fire({
-          title: 'Payment Error',
-          text: 'Failed to process payment. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+  static async handlePayment() {
+    try {
+      const totalAmountElement = document.getElementById('total-amount');
+      const totalAmount = parseFloat(totalAmountElement.textContent.replace('₱', '').trim());
+      
+      // Validate payment amount and checkout data
+      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+      if (!checkoutData || !checkoutData.items || checkoutData.items.length === 0) {
+        throw new Error('Invalid checkout data');
       }
+  
+      // Show loading alert
+      Swal.fire({
+        title: 'Processing Payment',
+        text: 'Please wait while we redirect you to the payment gateway...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      const description = `Order payment for ${checkoutData.summary.totalItems} items`;
+  
+      // Process payment and get checkout URL
+      const checkoutUrl = await PaymongoHandler.processPayment(totalAmount, description);
+      
+      // Close loading alert
+      await Swal.close();
+  
+      // Redirect to PayMongo checkout page
+      window.location.href = checkoutUrl;
+  
+    } catch (error) {
+      console.error('Payment error:', error);
+      await Swal.fire({
+        title: 'Payment Error',
+        text: 'Failed to process payment. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
-    static async handlePaymentSuccess(orderId) {
-      try {
-        if (!orderId) {
-          throw new Error('No order ID provided');
-        }
-    
-        const processedPayments = sessionStorage.getItem('processedPayments') ? 
-          JSON.parse(sessionStorage.getItem('processedPayments')) : [];
-        
-        if (processedPayments.includes(orderId)) {
-          await Swal.close();
-          return;
-        }
-    
-        const paymentData = JSON.parse(sessionStorage.getItem('paymentData'));
-        const paymentIntentId = sessionStorage.getItem('currentSourceId');
-        const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
-    
-        if (!paymentData || !paymentIntentId || !checkoutData) {
-          throw new Error('Payment data not found');
-        }
-    
-        // Get both product IDs and their versions for purchased items
-        const purchasedItems = checkoutData.items.map(item => ({
-          productId: item.productId,
-          version: item.version.version // Include version information
-        }));
-    
-        const response = await fetch(`/api/payment-success/${orderId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            paymentIntentId: paymentIntentId,
-            selectedAddressIndex: paymentData.selectedAddressIndex,
-            gcashNumber: paymentData.gcashNumber,
-            purchasedItems: purchasedItems,
-            deliveryMethod: checkoutData.deliveryMethod // Use deliveryMethod from checkoutData
-          }),
-          credentials: 'include'
-        });
-    
-        const result = await response.json();
+  }
 
+  static async handlePaymentSuccess(orderId) {
+    try {
+      if (!orderId) {
+        throw new Error('No order ID provided');
+      }
+  
+      const processedPayments = sessionStorage.getItem('processedPayments') ? 
+        JSON.parse(sessionStorage.getItem('processedPayments')) : [];
+      
+      if (processedPayments.includes(orderId)) {
+        await Swal.close();
+        return;
+      }
+  
+      const paymentData = JSON.parse(sessionStorage.getItem('paymentData'));
+      const paymentIntentId = sessionStorage.getItem('currentSourceId');
+      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+  
+      if (!paymentData || !paymentIntentId || !checkoutData) {
+        throw new Error('Payment data not found');
+      }
+  
+      const purchasedItems = checkoutData.items.map(item => ({
+        productId: item.productId,
+        version: item.version.version,
+        quantity: item.quantity,
+        price: item.price
+      }));
+  
+      const response = await fetch(`/api/payment-success/${orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          paymentIntentId: paymentIntentId,
+          selectedAddressIndex: paymentData.selectedAddressIndex,
+          gcashNumber: paymentData.gcashNumber,
+          purchasedItems: purchasedItems,
+          deliveryMethod: checkoutData.deliveryMethod,
+          amount: checkoutData.summary.subtotal
+        }),
+        credentials: 'include'
+      });
+  
+      const result = await response.json();
       if (result.success) {
         processedPayments.push(orderId);
         sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
-
+  
         await Swal.close();
-
-        // Clear only checkout-related data but keep cart data
+  
+        // Remove order completion flags that might trigger redirection
+        sessionStorage.removeItem('orderCompleted');
         sessionStorage.removeItem('paymentData');
         sessionStorage.removeItem('checkoutData');
         sessionStorage.removeItem('currentSourceId');
         sessionStorage.removeItem('currentOrderId');
-
+  
         const loadingElement = document.getElementById('loading');
         const successContent = document.getElementById('success-content');
         
         if (loadingElement) loadingElement.style.display = 'none';
         if (successContent) successContent.style.display = 'block';
-
-        // Optional: Show success message with remaining items notification
-        const remainingItemsMessage = result.remainingItems > 0 ? 
-          `\nYou still have ${result.remainingItems} item(s) in your cart.` : '';
-        
-        await Swal.fire({
-          title: 'Payment Successful!',
-          text: `Your order has been confirmed.${remainingItemsMessage}`,
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
-
       } else {
         throw new Error('Payment confirmation failed');
       }
-
+  
     } catch (error) {
       console.error('Payment success handling error:', error);
       
@@ -757,7 +747,7 @@ class CheckoutHandler {
         icon: 'error',
         confirmButtonText: 'OK'
       });
-
+  
       if (error.message === 'Payment data not found' || 
           error.message === 'Payment session expired') {
         window.location.href = '/cart';

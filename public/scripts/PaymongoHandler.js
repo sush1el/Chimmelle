@@ -160,89 +160,37 @@ class PaymongoHandler {
     }
   }
 
-  static async processPayment(amount, description) {
-    try {
-      // Validate input parameters
-      if (!amount || isNaN(amount) || amount <= 0) {
-        throw new Error('Invalid amount specified');
-      }
-
-      // Get checkout data and validate
-      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
-      if (!checkoutData || !checkoutData.items || checkoutData.items.length === 0) {
-        throw new Error('Invalid checkout data');
-      }
-
-      // Format items data for the API, properly handling version object
-      const items = checkoutData.items.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        version: item.version.version // Extract just the version string
-      }));
-
-      // Create order with retry logic
-      let orderResponse;
-      let retryCount = 0;
-      const maxRetries = 3;
-
-      while (retryCount < maxRetries) {
-        try {
-          orderResponse = await fetch('/api/create-payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              amount: amount,
-              items: items
-            })
-          });
-
-          if (orderResponse.ok) {
-            break;
-          }
-
-          retryCount++;
-          if (retryCount === maxRetries) {
-            const errorData = await orderResponse.json();
-            throw new Error(errorData.error || 'Failed to create order after multiple attempts');
-          }
-
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
-        } catch (retryError) {
-          console.error('Retry error:', retryError);
-          if (retryCount === maxRetries) {
-            throw retryError;
-          }
-        }
-      }
-
-      const orderData = await orderResponse.json();
-      
-      if (!orderData.success || !orderData.orderId) {
-        throw new Error('Invalid order response received');
-      }
-
-      // Create payment source for GCash
-      const source = await this.createSource(amount, orderData.orderId);
-
-      if (!source || !source.attributes || !source.attributes.redirect) {
-        throw new Error('Invalid payment source response');
-      }
-
-      // Store the source ID and checkout URL
-      sessionStorage.setItem('currentSourceId', source.id);
-      sessionStorage.setItem('currentOrderId', orderData.orderId);
-
-      // Return the checkout URL
-      return source.attributes.redirect.checkout_url;
-    } catch (error) {
-      console.error('Payment processing error:', error);
-      throw new Error(`Payment processing failed: ${error.message}`);
+  // In PaymongoHandler.js
+static async processPayment(amount, description) {
+  try {
+    // Validate input parameters
+    if (!amount || isNaN(amount) || amount <= 0) {
+      throw new Error('Invalid amount specified');
     }
+
+    // Get checkout data and validate
+    const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+    if (!checkoutData || !checkoutData.items || checkoutData.items.length === 0) {
+      throw new Error('Invalid checkout data');
+    }
+
+    // Create payment source for GCash
+    const source = await this.createSource(amount, 'temp-order-id'); // Use a temporary ID
+
+    if (!source || !source.attributes || !source.attributes.redirect) {
+      throw new Error('Invalid payment source response');
+    }
+
+    // Store the source ID 
+    sessionStorage.setItem('currentSourceId', source.id);
+
+    // Return the checkout URL
+    return source.attributes.redirect.checkout_url;
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    throw new Error(`Payment processing failed: ${error.message}`);
   }
+}
 }
 
 

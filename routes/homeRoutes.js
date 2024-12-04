@@ -14,12 +14,11 @@ router.get('/account', authenticateUser, async (req, res) => {
           user: req.user._id,
           status: 'confirmed',
           paymentStatus: 'paid',
-          isDeleted: false // Exclude deleted orders
+          
       })
       .populate({
           path: 'items.product',
           select: 'name imageH price',
-          match: { isDeleted: false } // Exclude deleted products in populated items
       })
       .sort({ createdAt: -1 });
 

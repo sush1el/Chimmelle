@@ -116,11 +116,6 @@ class CheckoutHandler {
 
   static async init() {
 
-    if (sessionStorage.getItem('orderCompleted') === 'true') {
-      window.location.href = '/cart'; // Redirect to cart or home page
-      return;
-    }
-    
     if (window.location.pathname === '/checkout') {
       try {
       
@@ -190,6 +185,12 @@ class CheckoutHandler {
       const totalAmountElement = document.getElementById('total-amount');
       const totalAmount = parseFloat(totalAmountElement.textContent.replace('₱', '').trim());
       
+      // Validate payment amount and checkout data
+      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+      if (!checkoutData || !checkoutData.items || checkoutData.items.length === 0) {
+        throw new Error('Invalid checkout data');
+      }
+  
       // Show loading alert
       Swal.fire({
         title: 'Processing Payment',
@@ -201,20 +202,18 @@ class CheckoutHandler {
           Swal.showLoading();
         }
       });
-
-      // Get checkout data for order description
-      const checkoutData = JSON.parse(sessionStorage.getItem('checkoutData'));
+  
       const description = `Order payment for ${checkoutData.summary.totalItems} items`;
-
+  
       // Process payment and get checkout URL
       const checkoutUrl = await PaymongoHandler.processPayment(totalAmount, description);
       
       // Close loading alert
       await Swal.close();
-
+  
       // Redirect to PayMongo checkout page
       window.location.href = checkoutUrl;
-
+  
     } catch (error) {
       console.error('Payment error:', error);
       await Swal.fire({
@@ -225,6 +224,7 @@ class CheckoutHandler {
       });
     }
   }
+
   static async handlePaymentSuccess(orderId) {
     try {
       if (!orderId) {
@@ -250,7 +250,9 @@ class CheckoutHandler {
       // Get both product IDs and their versions for purchased items
       const purchasedItems = checkoutData.items.map(item => ({
         productId: item.productId,
-        version: item.version.version // Include version information
+        version: item.version.version,
+        quantity: item.quantity,
+        price: item.price
       }));
   
       const response = await fetch(`/api/payment-success/${orderId}`, {
@@ -263,64 +265,54 @@ class CheckoutHandler {
           selectedAddressIndex: paymentData.selectedAddressIndex,
           gcashNumber: paymentData.gcashNumber,
           purchasedItems: purchasedItems,
-          deliveryMethod: checkoutData.deliveryMethod // Use deliveryMethod from checkoutData
+          deliveryMethod: checkoutData.deliveryMethod,
+          amount: checkoutData.summary.subtotal // Pass the total amount
         }),
         credentials: 'include'
       });
   
       const result = await response.json();
-
-    if (result.success) {
-      processedPayments.push(orderId);
-      sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
-
-      await Swal.close();
-
-      // Clear only checkout-related data but keep cart data
-      sessionStorage.removeItem('paymentData');
-      sessionStorage.removeItem('checkoutData');
-      sessionStorage.removeItem('currentSourceId');
-      sessionStorage.removeItem('currentOrderId');
-
-      const loadingElement = document.getElementById('loading');
-      const successContent = document.getElementById('success-content');
+      if (result.success) {
+        
+        processedPayments.push(orderId);
+        sessionStorage.setItem('processedPayments', JSON.stringify(processedPayments));
+  
+        await Swal.close();
+  
+        // Clear only checkout-related data but keep cart data
+        sessionStorage.removeItem('paymentData');
+        sessionStorage.removeItem('checkoutData');
+        sessionStorage.removeItem('currentSourceId');
+        sessionStorage.removeItem('currentOrderId');
+  
+        const loadingElement = document.getElementById('loading');
+        const successContent = document.getElementById('success-content');
+        
+        if (loadingElement) loadingElement.style.display = 'none';
+        if (successContent) successContent.style.display = 'block';
+  
+        // Removed the SweetAlert for success message
+      } else {
+        throw new Error('Payment confirmation failed');
+      }
+  
+    } catch (error) {
+      console.error('Payment success handling error:', error);
       
-      if (loadingElement) loadingElement.style.display = 'none';
-      if (successContent) successContent.style.display = 'block';
-
-      // Optional: Show success message with remaining items notification
-      const remainingItemsMessage = result.remainingItems > 0 ? 
-        `\nYou still have ${result.remainingItems} item(s) in your cart.` : '';
-      
+      // Existing error handling SweetAlert remains the same
       await Swal.fire({
-        title: 'Payment Successful!',
-        text: `Your order has been confirmed.${remainingItemsMessage}`,
-        icon: 'success',
+        title: 'Error',
+        text: error.message || 'Failed to complete order. Please contact support.',
+        icon: 'error',
         confirmButtonText: 'OK'
       });
-
-      sessionStorage.setItem('orderCompleted', 'true');
-
-    } else {
-      throw new Error('Payment confirmation failed');
-    }
-
-  } catch (error) {
-    console.error('Payment success handling error:', error);
-    
-    await Swal.fire({
-      title: 'Error',
-      text: error.message || 'Failed to complete order. Please contact support.',
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-
-    if (error.message === 'Payment data not found' || 
-        error.message === 'Payment session expired') {
-      window.location.href = '/cart';
+  
+      if (error.message === 'Payment data not found' || 
+          error.message === 'Payment session expired') {
+        window.location.href = '/cart';
+      }
     }
   }
-}
 }
 
 document.addEventListener('DOMContentLoaded', () => {

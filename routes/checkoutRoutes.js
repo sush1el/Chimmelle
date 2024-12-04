@@ -123,10 +123,10 @@ async function sendOrderReceiptEmail(user, order) {
      
 
 .social-links {
-    display: flex; /* Use Flexbox for centering */
-    justify-content: center; /* Horizontally center the icons */
-    align-items: center; /* Vertically center the icons */
-    gap: 20px; /* Space between the icons */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 20px; 
 }
 
 .social-links a {
@@ -143,7 +143,7 @@ async function sendOrderReceiptEmail(user, order) {
 
 .social-icon:hover {
     color: #da9e9f;
-    transform: scale(1.2); /* Enlarges the icon */
+    transform: scale(1.2); 
 }
 
     </style>
@@ -261,67 +261,37 @@ router.post('/api/create-payment', authenticateUser, async (req, res) => {
       });
     }
 
-    // Create order with properly formatted items
-    const order = await Order.create({
-      user: req.user._id,
-      items: items.map(item => ({
-        product: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        version: item.version // Now this is just the version string
-      })),
-      totalAmount: amount,
-      status: 'pending',
-      paymentStatus: 'pending',
-      createdAt: new Date()
-    });
-
-    if (!order) {
-      throw new Error('Failed to create order in database');
-    }
-
+    // Instead of creating an order, just return a success response
     res.json({ 
-      success: true, 
-      orderId: order._id
+      success: true
     });
   } catch (error) {
     console.error('Payment creation error:', error);
-    // Include mongoose validation errors in the response
-    const errorMessage = error.name === 'ValidationError' 
-      ? Object.values(error.errors).map(err => err.message).join(', ')
-      : error.message;
     
     res.status(500).json({ 
       success: false, 
-      error: errorMessage || 'Failed to create payment'
+      error: error.message || 'Failed to process payment request'
     });
   }
 });
 
-
-// In checkoutRoutes.js, update the payment-success route:
+// Update the payment-success route to create the order
 router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) => {
   try {
-    const { orderId } = req.params;
     const { 
       paymentIntentId, 
       selectedAddressIndex,
       gcashNumber,
       purchasedItems,
-      deliveryMethod // New parameter for delivery method
+      deliveryMethod,
+      amount
     } = req.body;
 
-    // Find the order and user, and populate the product details
-    const order = await Order.findById(orderId);
+    // Find the user
     const user = await User.findById(req.user._id);
 
-    if (!order || !user) {
-      throw new Error('Order or user not found');
-    }
-
-    // Check if order is already processed
-    if (order.status === 'confirmed' && order.paymentStatus === 'paid') {
-      return res.json({ success: true, message: 'Order already processed' });
+    if (!user) {
+      throw new Error('User not found');
     }
 
     // Get the selected address from user's addresses
@@ -330,38 +300,59 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       throw new Error('Selected address not found');
     }
 
-    // Update order details
-    order.customerName = {
-      firstName: user.firstName,
-      lastName: user.lastName
-    };
-    order.customerEmail = user.email; // Add user's email
-    order.shippingAddress = {
-      street: selectedAddress.street,
-      barangay: selectedAddress.barangay?.name || selectedAddress.barangay,
-      city: selectedAddress.city?.name || selectedAddress.city,
-      province: selectedAddress.province?.name || selectedAddress.province,
-      region: selectedAddress.region?.name || selectedAddress.region,
-      zipCode: selectedAddress.zipCode,
-      phone: selectedAddress.phone
-    };
-    order.gcashNumber = gcashNumber;
-    order.deliveryMethod = deliveryMethod; // Add delivery method
-    order.shippingStatus = 'preparing';
-    order.status = 'confirmed';
-    order.paymentStatus = 'paid';
-    order.paymentDetails = {
-      paymentIntentId: paymentIntentId,
-      paymentMethod: 'gcash',
-      paidAt: new Date()
-    };
+    // Check if an order with this payment intent already exists
+    const existingOrder = await Order.findOne({
+      'paymentDetails.paymentIntentId': paymentIntentId
+    });
 
-    await order.save();
-    await sendOrderReceiptEmail(user, order);
+    if (existingOrder) {
+      return res.json({ 
+        success: true,
+        orderId: existingOrder._id,
+        remainingItems: user.cart.items.length,
+        alreadyProcessed: true
+      });
+    }
+
+    // Create order with properly formatted items
+    const order = await Order.create({
+      user: req.user._id,
+      items: purchasedItems.map(item => ({
+        product: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        version: item.version
+      })),
+      totalAmount: amount,
+      status: 'confirmed',
+      paymentStatus: 'paid',
+      customerName: {
+        firstName: user.firstName,
+        lastName: user.lastName
+      },
+      customerEmail: user.email,
+      shippingAddress: {
+        street: selectedAddress.street,
+        barangay: selectedAddress.barangay?.name || selectedAddress.barangay,
+        city: selectedAddress.city?.name || selectedAddress.city,
+        province: selectedAddress.province?.name || selectedAddress.province,
+        region: selectedAddress.region?.name || selectedAddress.region,
+        zipCode: selectedAddress.zipCode,
+        phone: selectedAddress.phone
+      },
+      gcashNumber: gcashNumber,
+      deliveryMethod: deliveryMethod,
+      shippingStatus: 'preparing',
+      paymentDetails: {
+        paymentIntentId: paymentIntentId,
+        paymentMethod: 'gcash',
+        paidAt: new Date()
+      }
+    });
 
     // Update product stock
     try {
-      await checkoutController.updateProductStock(orderId);
+      await checkoutController.updateProductStock(order._id);
     } catch (stockError) {
       console.error('Stock update error:', stockError);
     }
@@ -370,7 +361,6 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
     const currentCart = user.cart.items || [];
     const remainingItems = currentCart.filter(cartItem => {
       // Check if this cart item matches any of the purchased items
-      // Only remove if both product ID AND version match
       return !purchasedItems.some(purchasedItem => 
         purchasedItem.productId === cartItem.product.toString() && 
         purchasedItem.version === cartItem.version
@@ -382,9 +372,13 @@ router.post('/api/payment-success/:orderId', authenticateUser, async (req, res) 
       'cart.items': remainingItems
     });
 
+    // Send order receipt email only if this is the first time processing the order
+    await sendOrderReceiptEmail(user, order);
+
     // Return the count of remaining items
     res.json({ 
       success: true,
+      orderId: order._id,
       remainingItems: remainingItems.length
     });
 
