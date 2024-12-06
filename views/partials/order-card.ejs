@@ -5,18 +5,31 @@
       <span class="toggle-icon">▼</span>
   </div>
   <div class="order-details" style="display: none;">
-      <div class="order-items">
-          <% order.items.forEach((item) => { %>
-              <div class="order-item">
-                  <img src="<%= item.product.imageH %>" alt="<%= item.product.name %>">
-                  <div class="item-details">
-                      <p class="item-name"><%= item.product.name %></p>
-                      <p class="item-quantity">Qty: <%= item.quantity %></p>
-                      <p class="item-price">₱ <%= (item.price * item.quantity).toLocaleString() %></p>
-                  </div>
-              </div>
-          <% }); %>
-      </div>
+    <div class="order-items">
+        <% order.items.forEach((item) => { %>
+            <div class="order-item">
+                <% 
+                // Check if product exists and has an image
+                const productImage = item.product && item.product.imageH 
+                    ? item.product.imageH 
+                    : '/path/to/placeholder-image.svg'; 
+                %>
+                <img 
+                    src="<%= productImage %>" 
+                    alt="<%= item.product ? item.product.name : 'Deleted Product' %>"
+                    onerror="this.onerror=null; this.src='/path/to/placeholder-image.svg'; this.alt='Product Unavailable';"
+                    class="<%= !item.product ? 'deleted-product-image' : '' %>"
+                >
+                <div class="item-details">
+                    <p class="item-name">
+                        <%= item.product ? item.product.name : 'Deleted Product' %>
+                    </p>
+                    <p class="item-quantity">Qty: <%= item.quantity %></p>
+                    <p class="item-price">₱ <%= (item.price * item.quantity).toLocaleString() %></p>
+                </div>
+            </div>
+        <% }); %>
+    </div>
       <div class="order-summary">
           <p class="total-amount">Total: ₱ <%= order.totalAmount.toLocaleString() %></p>
       </div>

@@ -420,3 +420,17 @@ h4 {
   color: white;
   cursor: not-allowed;
 }
+
+.deleted-product-image {
+  opacity: 0.5;
+  filter: grayscale(100%);
+  border: 2px dashed #ccc;
+  background-color: #f9f9f9;
+}
+
+.order-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+}

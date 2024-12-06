@@ -345,6 +345,44 @@ static async addToCart(productId, quantityOrOptions) {
     }
   }
 
+  static async cleanupInvalidCartItems(invalidItems) {
+    try {
+      if (!invalidItems || invalidItems.length === 0) return;
+  
+      // Filter for items that need to be removed (deleted products or items without a product)
+      const itemsToRemove = invalidItems.filter(item => 
+        !item.product || item.product.isDeleted
+      );
+  
+      // If no items to remove, return
+      if (itemsToRemove.length === 0) return;
+  
+      // Attempt to remove each invalid item
+      for (const item of itemsToRemove) {
+        console.warn(`Removing invalid cart item: ${item.cartItemId}`);
+        
+        try {
+          await fetch(`/api/cart/items/${item.cartItemId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          });
+        } catch (error) {
+          console.error(`Failed to remove invalid cart item ${item.cartItemId}:`, error);
+        }
+      }
+  
+      // Refresh cart display after cleanup
+      await this.updateCartDisplay();
+      await this.updateCartButtonCount();
+      
+    } catch (error) {
+      console.error('Error cleaning up invalid cart items:', error);
+    }
+  }
+
   static async updateCartDisplay() {
     try {
       const cart = await this.getCart();
@@ -353,13 +391,47 @@ static async addToCart(productId, quantityOrOptions) {
       
       if (!cartItems || !cartPage) return;
   
+      // Check for empty cart
       if (!cart || !cart.items || cart.items.length === 0) {
         this.displayEmptyCartMessage();
         return;
       }
   
+      // Filter and handle potentially invalid or deleted products
+      const validCartItems = cart.items.filter(item => {
+        // Check if product exists
+        if (!item.product) {
+          console.warn(`Cart item ${item.cartItemId} has no associated product`);
+          return false;
+        }
+  
+        // Check if product is deleted or blacklisted
+        if (item.product.isDeleted) {
+          console.warn(`Product ${item.product._id} is deleted`);
+          return false;
+        }
+        return true;
+      });
+  
+      // If invalid items exist, clean them up regardless of whether valid items remain
+      if (validCartItems.length !== cart.items.length) {
+        await this.cleanupInvalidCartItems(cart.items);
+        
+        // If no valid items remain after cleanup, show empty cart
+        if (validCartItems.length === 0) {
+          this.displayEmptyCartMessage();
+          return;
+        }
+      }
+  
+      // If no valid items remain, show empty cart
+      if (validCartItems.length === 0) {
+        this.displayEmptyCartMessage();
+        return;
+      }
+  
       cartItems.innerHTML = '';
-      cart.items.forEach(item => {
+      validCartItems.forEach(item => {
         const product = item.product;
         const isSelected = item.selected;
         
@@ -368,69 +440,77 @@ static async addToCart(productId, quantityOrOptions) {
         const currentStock = currentVersion ? currentVersion.quantity : 0;
         
         cartItems.innerHTML += `
-          <div class="cart-item ${isSelected ? '' : 'disabled'}" 
+          <div class="cart-item ${isSelected ? '' : 'disabled'} ${!product.isDeleted ? '' : 'deleted-product'}" 
             data-cart-item-id="${item.cartItemId}"
             data-product-id="${product._id}">
-          <label class="custom-checkbox">
-            <input type="checkbox" 
-                class="item-checkbox" 
-                ${isSelected ? 'checked' : ''} 
-                data-cart-item-id="${item.cartItemId}">
-                <span class="checkmark"></span>
-          </label>
-         <div class="product-image-container">
-          <a href="/product-page/${product._id}">
-            <img src="${product.imageH}" alt="${product.name}" class="product-image">
-          </a>
-          </div>
-            <div class="item-details">
-              <h3>${product.name}</h3>
-              <p> <span>Price: ₱ ${product.price.toFixed(2)}</span></p>
-              
-              <div class="version-container">
-                <select class="version-select" 
-                        data-cart-item-id="${item.cartItemId}"
-                        data-current-version="${item.version}"
-                        ${!isSelected ? 'disabled' : ''}>
-                  ${product.versions.map(v => `
-                    <option value="${v.version}" 
-                            data-stock="${v.quantity}"
-                            ${v.quantity === 0 && v.version !== item.version ? 'disabled' : ''}
-                            ${item.version === v.version ? 'selected' : ''}>
-                      ${v.version}${v.quantity === 0 ? ' (Out of stock)' : ''}
-                    </option>
-                  `).join('')}
-                </select>
+            ${!product.isDeleted ? '' : `
+              <div class="product-unavailable-overlay">
+                <p>This product is no longer available</p>
+                <button class="remove-unavailable-item" data-cart-item-id="${item.cartItemId}">
+                  Remove from Cart
+                </button>
               </div>
+            `}
+            <label class="custom-checkbox">
+              <input type="checkbox" 
+                  class="item-checkbox" 
+                  ${isSelected ? 'checked' : ''} 
+                  data-cart-item-id="${item.cartItemId}">
+                  <span class="checkmark"></span>
+            </label>
+           <div class="product-image-container">
+            <a href="/product-page/${product._id}">
+              <img src="${product.imageH}" alt="${product.name}" class="product-image">
+            </a>
             </div>
-  
-            <div class="quantity-control">
-              <button class="quantity-btn decrease" 
-                      data-cart-item-id="${item.cartItemId}" 
-                      ${!isSelected || item.quantity <= 1 ? 'disabled' : ''}>-</button>
-              <input type="number" 
-                     value="${item.quantity}" 
-                     min="1" 
-                     max="${currentStock}"
-                     class="quantity-input" 
-                     data-cart-item-id="${item.cartItemId}" 
-                     ${!isSelected || currentStock === 0 ? 'disabled' : ''}>
-              <button class="quantity-btn increase" 
-                      data-cart-item-id="${item.cartItemId}" 
-                      ${!isSelected || item.quantity >= currentStock ? 'disabled' : ''}>+</button>
+              <div class="item-details">
+                <h3>${product.name}</h3>
+                <p> <span>Price: ₱ ${product.price.toFixed(2)}</span></p>
+                
+                <div class="version-container">
+                  <select class="version-select" 
+                          data-cart-item-id="${item.cartItemId}"
+                          data-current-version="${item.version}"
+                          ${!isSelected ? 'disabled' : ''}>
+                    ${product.versions.map(v => `
+                      <option value="${v.version}" 
+                              data-stock="${v.quantity}"
+                              ${v.quantity === 0 && v.version !== item.version ? 'disabled' : ''}
+                              ${item.version === v.version ? 'selected' : ''}>
+                        ${v.version}${v.quantity === 0 ? ' (Out of stock)' : ''}
+                      </option>
+                    `).join('')}
+                  </select>
+                </div>
+              </div>
+    
+              <div class="quantity-control">
+                <button class="quantity-btn decrease" 
+                        data-cart-item-id="${item.cartItemId}" 
+                        ${!isSelected || item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                <input type="number" 
+                       value="${item.quantity}" 
+                       min="1" 
+                       max="${currentStock}"
+                       class="quantity-input" 
+                       data-cart-item-id="${item.cartItemId}" 
+                       ${!isSelected || currentStock === 0 ? 'disabled' : ''}>
+                <button class="quantity-btn increase" 
+                        data-cart-item-id="${item.cartItemId}" 
+                        ${!isSelected || item.quantity >= currentStock ? 'disabled' : ''}>+</button>
+              </div>
+                      
+              <span class="item-total">
+                ₱ ${(product.price * item.quantity).toFixed(2)}
+              </span>
+    
+              <button class="delete-btn" data-cart-item-id="${item.cartItemId}">
+                <i class="fa-solid fa-trash-can"> </i>
+              </button>
             </div>
-                    
-            <span class="item-total">
-              ₱ ${(product.price * item.quantity).toFixed(2)}
-            </span>
-  
-            <button class="delete-btn" data-cart-item-id="${item.cartItemId}">
-              <i class="fa-solid fa-trash-can"> </i>
-            </button>
-          </div>
-        `;
+          `;
       });
-
+  
       // Add version change event listener
       const versionSelects = document.querySelectorAll('.version-select');
       versionSelects.forEach(select => {
@@ -440,12 +520,24 @@ static async addToCart(productId, quantityOrOptions) {
           await CartManager.changeVersion(cartItemId, newVersion);
         });
       });
-
+  
+      // Add event listener to remove unavailable items
+      const removeButtons = document.querySelectorAll('.remove-unavailable-item');
+      removeButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+          const cartItemId = e.target.dataset.cartItemId;
+          await this.deleteFromCart(cartItemId);
+        });
+      });
+  
       this.setupDeleteButtons();
       await this.updateCartTotals();
       await this.updateCartButtonCount();
+  
     } catch (error) {
       console.error('Error updating cart display:', error);
+      // Fallback to empty cart display in case of critical error
+      this.displayEmptyCartMessage();
     }
   }
 
